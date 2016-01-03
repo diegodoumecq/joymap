@@ -38,14 +38,14 @@ export default class Gamepad {
             if (!this.isSignificant(currentValue)) {
                 newValues[name] = {
                     value: currentValue,
-                    state: suddenChange ? 'justReleased' : 'released'
+                    state: suddenChange && !!previous ? 'justReleased' : 'released'
+                };
+            } else {
+                newValues[name] = {
+                    value: currentValue,
+                    state: suddenChange ? 'justPressed' : 'pressed'
                 };
             }
-
-            newValues[name] = {
-                value: currentValue,
-                state: suddenChange ? 'justPressed' : 'pressed'
-            };
         });
 
         // Parse through input aliases
@@ -57,14 +57,14 @@ export default class Gamepad {
             if (!this.isSignificant(currentValue)) {
                 newValues[name] = {
                     value: currentValue,
-                    state: suddenChange ? 'justReleased' : 'released'
+                    state: suddenChange && !!previous ? 'justReleased' : 'released'
+                };
+            } else {
+                newValues[name] = {
+                    value: currentValue,
+                    state: suddenChange ? 'justPressed' : 'pressed'
                 };
             }
-
-            newValues[name] = {
-                value: currentValue,
-                state: suddenChange ? 'justPressed' : 'pressed'
-            };
         });
     }
 

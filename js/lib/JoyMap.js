@@ -35,7 +35,8 @@ export default class JoyMap {
                 X: function () { return this.rawGamepad.buttons[2].value; },
                 Y: function () { return this.rawGamepad.buttons[3].value; },
                 start: function () { return this.rawGamepad.buttons[9].value; },
-                select: function () { return this.rawGamepad.buttons[8].value; }
+                select: function () { return this.rawGamepad.buttons[8].value; },
+                home: function () { return false; }
             }
         };
 
@@ -108,29 +109,29 @@ export default class JoyMap {
         if (disconnected.length > 0) {
             this.gamepads.forEach((pad) => {
                 if (disconnected.indexOf(pad.index) !== -1) {
-                    gamepad.connected = false;
+                    pad.connected = false;
                     this.disconnectGamepad(pad);
                 }
             });
         }
 
-        rawGamepads.forEach((rawPad) => {
-            const gamepad = this.gamepads[rawPad.index];
+        rawGamepads.forEach((rawGamepad) => {
+            const gamepad = this.gamepads[rawGamepad.index];
 
             if (gamepad === undefined) {
-                const type = this.getGamepadType(rawPad);
+                const type = this.getGamepadType(rawGamepad);
                 const newPad = new Gamepad({
-                    gamepad: rawPad,
+                    rawGamepad: rawGamepad,
                     type,
                     threshold : this.threshold,
                     aliases: this.aliases,
                     inputMap: this.inputMaps[type]
                 });
 
-                this.gamepads[rawPad.index] = newPad;
+                this.gamepads[rawGamepad.index] = newPad;
                 this.connectGamepad(newPad);
             } else {
-                gamepad.update(rawPad);
+                gamepad.update(rawGamepad);
 
                 if (gamepad.connected === false) {
                     this.connectGamepad(gamepad);

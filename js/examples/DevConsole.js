@@ -1,4 +1,4 @@
-import JoyPad from 'joypad';
+import JoyMap from '../lib/JoyMap';
 
 // Example of usage:
 
@@ -37,22 +37,25 @@ joyMap.setAlias('CountFace', (mappedValues) => {
 
 joyMap.setAlias('CountAll', (mappedValues) => {
     let count = 0;
-    Object.keys(mappedValues).forEach((name) => {
-        count += (mappedValues[name].state !== 'released') ? 1 : 0;
+    // TODO Make the analog axes count as one for each stick
+    joyMap.getSupportedInputs(false).forEach((name) => {
+        const state = mappedValues[name].state;
+        count += (state !== 'released' && state !== 'justReleased') ? 1 : 0;
     });
+    
     return count;
 });
 
 const inputs = joyMap.getSupportedInputs(true);
 
-joyMap.init();
+let animationFrame = null;
 
 // On each frame log all the activated input
 function step() {
     const str = inputs.reduce((result, inputName) => {
             const input = joyMap.getState(inputName) || {};
 
-            if (input.state !== 'released') {
+            if (input.state && input.state !== 'released') {
                 return result + inputName + ': ' + input.state + ' ' + input.value + ', ';
             }
             
@@ -62,10 +65,21 @@ function step() {
     if (!!str) {
         console.log(str.slice(0, -2));
     } else {
-        console.log(joyMap.gamepads.length);
+        console.log('Gamepads connected: ' + joyMap.gamepads.length);
     }
-    
-    window.requestAnimationFrame(step);
+
+    animationFrame = window.requestAnimationFrame(step);
 }
 
-step();
+export function startConsole() {
+    if (animationFrame === null) {
+        joyMap.init();
+        step();
+    }
+}
+
+export function stopConsole() {
+    window.cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    joyMap.stop();
+}
