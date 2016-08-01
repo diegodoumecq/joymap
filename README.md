@@ -1,10 +1,22 @@
 # joymap
-========================
 
-A Javascript Gamepad API wrapper based on currently experimental technology
-Base API: https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
+A Javascript Gamepad API wrapper of the currently experimental API: https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
 
-TODO
+How to run:
+
+1) Install all the dependencies with:
+
+	npm install
+
+2) Run webpack-dev-server for local dev environment with:
+
+	npm start
+
+3) To deploy to /bin folder the minified and uglified files run:
+
+	npm run deploy
+
+TODO:
 
 1) User rebinding
  * Add support for player rebinding of buttons, called userMap
