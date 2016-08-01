@@ -73,7 +73,7 @@ function step() {
 
 export function startConsole() {
     if (animationFrame === null) {
-        joyMap.init();
+        joyMap.start();
         step();
     }
 }

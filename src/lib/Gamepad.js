@@ -1,12 +1,15 @@
+import { forEach } from 'lodash/fp';
+
 export default class Gamepad {
+
+    connected = true;
+    mappedValues = {};
 
     constructor({ rawGamepad, inputMap, aliases, type, threshold }) {
         this.inputMap = inputMap;
         this.aliases = aliases;
         this.type = type;
-        this.mappedValues = {};
         this.threshold = threshold;
-        this.connected = true;
 
         this.update(rawGamepad);
     }
@@ -16,7 +19,7 @@ export default class Gamepad {
             return this.mappedValues[type];
         }
 
-        return undefined;
+        return {};
     }
 
     isSignificant(number) {
@@ -24,13 +27,15 @@ export default class Gamepad {
     }
 
     update(rawGamepad) {
-        let newValues = {};
-        const oldValues = this.mappedValues;
-        this.mappedValues = newValues;
         this.rawGamepad = rawGamepad;
 
+        const newValues = {};
+        const oldValues = this.mappedValues;
+
+        this.mappedValues = newValues;
+
         // Parse through all inputs
-        Object.keys(this.inputMap).forEach((name) => {
+        forEach((name) => {
             const previous = oldValues[name];
             const currentValue = this.inputMap[name].call(this);
             const suddenChange = !previous || (this.isSignificant(currentValue) !== this.isSignificant(previous.value));
@@ -46,10 +51,10 @@ export default class Gamepad {
                     state: suddenChange ? 'justPressed' : 'pressed'
                 };
             }
-        });
+        }, Object.keys(this.inputMap));
 
         // Parse through input aliases
-        Object.keys(this.aliases).forEach((name) => {
+        forEach((name) => {
             const previous = oldValues[name];
             const currentValue = this.aliases[name].call(this);
             const suddenChange = !previous || (this.isSignificant(currentValue) !== this.isSignificant(previous.value));
@@ -65,10 +70,10 @@ export default class Gamepad {
                     state: suddenChange ? 'justPressed' : 'pressed'
                 };
             }
-        });
+        }, Object.keys(this.aliases));
     }
 
-    get index() {
-        return this.rawGamepad.index;
+    get id() {
+        return this.rawGamepad.id;
     }
 }

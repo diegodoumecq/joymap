@@ -1,6 +1,8 @@
 .DS_STORE
+bin
+bundle
 node_modules
-static
+public
 .module-cache
 *.log*
 

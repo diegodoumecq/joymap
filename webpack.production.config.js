@@ -3,36 +3,19 @@ var path = require('path');
 var autoprefixer = require('autoprefixer');
 
 var CopyWebpackPlugin = require('copy-webpack-plugin');
-var WriteFilePlugin = require('write-file-webpack-plugin');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 
-var port = 9000;
-var binPath = path.resolve(__dirname, 'bundle');
+var deployPath = path.resolve(__dirname, 'bin');
 var entryPath = path.resolve(__dirname, 'src');
 var publicPath = path.resolve(__dirname, 'public');
 
 module.exports = {
-    devServer: {
-        historyApiFallback: true,
-        hot: true,
-        inline: true,
-        progress: true,
-        colors: true,
-        port: port,
-        outputPath: binPath,
-        contentBase: entryPath
-    },
-
-    devtool: '#source-map',
-
     entry: [
-        'webpack/hot/dev-server',
-        'webpack-dev-server/client?http://localhost:' + port,
         path.resolve(entryPath, 'main.jsx')
     ],
 
     output: {
-        path: binPath,
+        path: deployPath,
         filename: 'bundle.js'
     },
 
@@ -96,26 +79,39 @@ module.exports = {
     },
 
     plugins: [
-        new WriteFilePlugin(),
+        new webpack.DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify('production')
+            }
+        }),
 
-        new CleanWebpackPlugin(['bundle'], {
+        new CleanWebpackPlugin(['bin'], {
             root: __dirname,
             verbose: true, 
             dry: false
         }),
 
-        new webpack.HotModuleReplacementPlugin(),
-
-        new webpack.LoaderOptionsPlugin({
-            minimize: false
-        }),
-
-        /*new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery'
+        /*new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            minChunks: Infinity,
+            filename: 'vendor.bundle.js'
         }),*/
 
+        new webpack.LoaderOptionsPlugin({
+            minimize: true,
+            debug: false
+        }),
+
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            },
+            output: {
+                comments: false
+            },
+            sourceMap: false
+        }),
+        
         new CopyWebpackPlugin([
             { from: publicPath }
         ])

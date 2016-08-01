@@ -4,35 +4,41 @@
   "description": "A Gamepad API wrapper and mapping tool to make interfacing with gamepads a bliss.",
   "main": "JoyMap.js",
   "scripts": {
-    "start": "webpack-dev-server --history-api-fallback --hot --inline --progress --colors --port 3000",
-    "build": "NODE_ENV=production webpack --progress --colors"
+    "start": "webpack-dev-server",
+    "deploy": "webpack --config webpack.production.config.js"
+  },
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "lodash": "^4.14.1",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
   },
   "license": "MIT",
   "devDependencies": {
-    "babel-core": "^6.3.26",
-    "babel-loader": "^6.2.0",
-    "babel-plugin-transform-runtime": "^6.3.13",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-react": "^6.3.13",
-    "babel-preset-stage-0": "^6.3.13",
+    "autoprefixer": "^6.3.7",
+    "babel-core": "6.x",
+    "babel-eslint": "6.x",
+    "babel-loader": "6.x",
+    "babel-plugin-transform-decorators-legacy": "1.x",
+    "babel-plugin-transform-runtime": "6.x",
+    "babel-polyfill": "^6.x",
+    "babel-preset-es2015": "6.x",
+    "babel-preset-es2015-native-modules": "^6.x",
+    "babel-preset-react": "6.x",
+    "babel-preset-stage-0": "6.x",
+    "clean-webpack-plugin": "^0.1.10",
+    "copy-webpack-plugin": "^3.0.1",
     "css-loader": "^0.23.1",
-    "file-loader": "^0.8.4",
-    "lodash": "^3.10.1",
-    "postcss-loader": "^0.8.0",
+    "file-loader": "^0.9.0",
+    "postcss-loader": "^0.9.1",
     "postcss-modules": "^0.1.3",
-    "react": "^0.14.0",
-    "react-dom": "^0.14.0",
-    "react-hot-loader": "^1.3.0",
-    "rucksack-css": "^0.8.5",
-    "style-loader": "^0.12.4",
-    "stylus-loader": "^1.4.2",
-    "webpack": "^1.12.2",
-    "webpack-dev-server": "^1.12.0",
-    "webpack-hot-middleware": "^2.2.0"
-  },
-  "dependencies": {
-    "babel-runtime": "^6.3.19",
-    "classnames": "^2.1.2",
-    "history": "^1.17.0"
+    "style-loader": "^0.13.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^2.1.2",
+    "url-loader": "^0.5.7",
+    "webpack": "^2.1.0-beta.20",
+    "webpack-dev-server": "^1.14.1",
+    "webpack-hot-middleware": "^2.12.2",
+    "write-file-webpack-plugin": "^3.1.8"
   }
 }

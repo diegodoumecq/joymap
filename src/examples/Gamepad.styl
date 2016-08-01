@@ -1,14 +1,3 @@
-html
-    box-sizing border-box
-
-*, *:before, *:after
-    box-sizing inherit
-    
-article
-    display flex
-    flex-direction column
-    align-items center
-
 button()
     background-color gray
     border-radius 30px
@@ -38,8 +27,12 @@ shoulder()
     width 100%
     height 100%
     margin-top -10px
+    
 
-.inputs
+.disconnected
+    filter unquote('brightness(40%)')
+
+.react-inputs
     position relative
     width 484px
     height 300px
@@ -54,7 +47,7 @@ shoulder()
         width 100%
         height 100%
         z-index 10
-        background-image url('../static/gamepad.png')
+        background-image url('../../public/gamepad.png')
     
     .leftAnalog
         stick()
@@ -66,21 +59,21 @@ shoulder()
         
     .L1
         shoulder()
-        background-image url('../static/L1.png')
+        background-image url('../../public/L1.png')
     
     .L2
         shoulder()
-        background-image url('../static/L2.png')
+        background-image url('../../public/L2.png')
         
     .R1
         shoulder()
         transform scaleX(-1)
-        background-image url('../static/L1.png')
+        background-image url('../../public/L1.png')
 
     .R2
         shoulder()
         transform scaleX(-1)
-        background-image url('../static/L2.png')
+        background-image url('../../public/L2.png')
 
     .A
         button()
@@ -144,6 +137,3 @@ shoulder()
 
     .pressed
         background-color red
-
-    .pulled
-        transform translateY(10px)
