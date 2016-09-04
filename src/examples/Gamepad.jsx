@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 
 import { map } from 'lodash/fp';
 import classnames from 'classnames';
@@ -20,6 +20,11 @@ const shoulderInputs = [
 ];
 
 export default class Gamepad extends React.Component {
+
+    static propTypes = {
+        backgroundColor: PropTypes.string.isRequired,
+        gamepad: PropTypes.object.isRequired
+    };
 
     renderAnalogStick(inputName) {
         const { gamepad } = this.props;
@@ -64,10 +69,12 @@ export default class Gamepad extends React.Component {
     }
 
     render() {
-        const { gamepad } = this.props;
+        const { gamepad, backgroundColor } = this.props;
 
         return (
-            <div className={classnames('gamepad', { disconnected: !gamepad.connected })}>
+            <div
+                className={classnames('gamepad', { disconnected: !gamepad.connected })}
+                style={{ backgroundColor }}>
                 <div className="react-inputs">
                     <div className="back" />
                     {map((input) => this.renderAnalogStick(input), analogInputs)}

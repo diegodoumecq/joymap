@@ -1,11 +1,12 @@
 import JoyMap from '../lib/JoyMap';
+import { noop } from 'lodash/fp';
 
 // Example of usage:
 
 // Threshold for analog inputs
 const threshold = 0.2;
 
-const joyMap = new JoyMap(threshold);
+const joyMap = new JoyMap({ threshold });
 
 joyMap.setAlias('Jump', 'B');
 joyMap.setAlias('LookUp', 'dpadUp');
@@ -48,38 +49,32 @@ joyMap.setAlias('CountAll', (mappedValues) => {
 
 const inputs = joyMap.getSupportedInputs(true);
 
-let animationFrame = null;
 
 // On each frame log all the activated input
 function step() {
     const str = inputs.reduce((result, inputName) => {
-            const input = joyMap.getState(inputName) || {};
+        const input = joyMap.getState(inputName) || {};
 
-            if (input.state && input.state !== 'released') {
-                return result + inputName + ': ' + input.state + ' ' + input.value + ', ';
-            }
-            
-            return result;
-        }, '');
+        if (input.state && input.state !== 'released') {
+            return result + inputName + ': ' + input.state + ' ' + input.value + ', ';
+        }
+        
+        return result;
+    }, '');
 
     if (!!str) {
         console.log(str.slice(0, -2));
     } else {
         console.log('Gamepads connected: ' + joyMap.gamepads.length);
     }
-
-    animationFrame = window.requestAnimationFrame(step);
 }
 
 export function startConsole() {
-    if (animationFrame === null) {
-        joyMap.start();
-        step();
-    }
+    joyMap.onPoll = step;
+    joyMap.start();
 }
 
 export function stopConsole() {
-    window.cancelAnimationFrame(animationFrame);
-    animationFrame = null;
+    joyMap.onPoll = noop;
     joyMap.stop();
 }

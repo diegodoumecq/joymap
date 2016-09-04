@@ -7,7 +7,8 @@ var WriteFilePlugin = require('write-file-webpack-plugin');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 
 var port = 9000;
-var binPath = path.resolve(__dirname, 'bundle');
+var bundleFolder = 'devBundle';
+var binPath = path.resolve(__dirname, bundleFolder);
 var entryPath = path.resolve(__dirname, 'src');
 var publicPath = path.resolve(__dirname, 'public');
 
@@ -28,7 +29,7 @@ module.exports = {
     entry: [
         'webpack/hot/dev-server',
         'webpack-dev-server/client?http://localhost:' + port,
-        path.resolve(entryPath, 'main.jsx')
+        path.resolve(entryPath, 'examples.jsx')
     ],
 
     output: {
@@ -46,7 +47,8 @@ module.exports = {
             include: entryPath,
             query: {
                 cacheDirectory: true,
-                presets: ['es2015-native-modules', 'stage-0', 'react']
+                presets: ['es2015', 'stage-0', 'react'],
+                plugins: ['lodash', 'transform-runtime']
             },
             exclude: /node_modules/,
             loader: 'babel'
@@ -98,26 +100,12 @@ module.exports = {
     plugins: [
         new WriteFilePlugin(),
 
-        new CleanWebpackPlugin(['bundle'], {
+        new CleanWebpackPlugin([bundleFolder], {
             root: __dirname,
             verbose: true, 
             dry: false
         }),
 
-        new webpack.HotModuleReplacementPlugin(),
-
-        new webpack.LoaderOptionsPlugin({
-            minimize: false
-        }),
-
-        /*new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery'
-        }),*/
-
-        new CopyWebpackPlugin([
-            { from: publicPath }
-        ])
+        new CopyWebpackPlugin([{ from: publicPath }])
     ]
 };

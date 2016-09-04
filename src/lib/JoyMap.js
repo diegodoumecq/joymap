@@ -1,5 +1,5 @@
 import {
-    isFunction, find, remove, map,
+    isFunction, find, remove, map, noop,
     filter, difference, forEach, includes
 } from 'lodash/fp';
 
@@ -10,39 +10,42 @@ export default class JoyMap {
     isSupported = isFunction(navigator.getGamepads);
     gamepads = [];
     aliases = {};
+    events = {};
     mainGamepad = null;
     animationFrameRequestId = null;
     connectCallbacks = [];
     disconnectCallbacks = [];
+    onPoll = noop;
 
     inputMaps = {
         xbox: {
-            leftAnalogX: function () { return this.rawGamepad.axes[0]; },
-            leftAnalogY: function () { return this.rawGamepad.axes[1]; },
-            rightAnalogX: function () { return this.rawGamepad.axes[2]; },
-            rightAnalogY: function () { return this.rawGamepad.axes[3]; },
-            dpadUp: function () { return this.rawGamepad.buttons[12].value; },
-            dpadDown: function () { return this.rawGamepad.buttons[13].value; },
-            dpadLeft: function () { return this.rawGamepad.buttons[14].value; },
-            dpadRight: function () { return this.rawGamepad.buttons[15].value; },
-            L1: function () { return this.rawGamepad.buttons[4].value; },
-            L2: function () { return this.rawGamepad.buttons[6].value; },
-            L3: function () { return this.rawGamepad.buttons[10].value; },
-            R1: function () { return this.rawGamepad.buttons[5].value; },
-            R2: function () { return this.rawGamepad.buttons[7].value; },
-            R3: function () { return this.rawGamepad.buttons[11].value; },
-            A: function () { return this.rawGamepad.buttons[0].value; },
-            B: function () { return this.rawGamepad.buttons[1].value; },
-            X: function () { return this.rawGamepad.buttons[2].value; },
-            Y: function () { return this.rawGamepad.buttons[3].value; },
-            start: function () { return this.rawGamepad.buttons[9].value; },
-            select: function () { return this.rawGamepad.buttons[8].value; },
-            home: function () { return false; }
+            leftAnalogX: (pad) => pad.axes[0],
+            leftAnalogY: (pad) => pad.axes[1],
+            rightAnalogX: (pad) => pad.axes[2],
+            rightAnalogY: (pad) => pad.axes[3],
+            dpadUp: (pad) => pad.buttons[12].value,
+            dpadDown: (pad) => pad.buttons[13].value,
+            dpadLeft: (pad) => pad.buttons[14].value,
+            dpadRight: (pad) => pad.buttons[15].value,
+            L1: (pad) => pad.buttons[4].value,
+            L2: (pad) => pad.buttons[6].value,
+            L3: (pad) => pad.buttons[10].value,
+            R1: (pad) => pad.buttons[5].value,
+            R2: (pad) => pad.buttons[7].value,
+            R3: (pad) => pad.buttons[11].value,
+            A: (pad) => pad.buttons[0].value,
+            B: (pad) => pad.buttons[1].value,
+            X: (pad) => pad.buttons[2].value,
+            Y: (pad) => pad.buttons[3].value,
+            start: (pad) => pad.buttons[9].value,
+            select: (pad) => pad.buttons[8].value,
+            home: () => false
         }
     };
 
-    constructor(threshold) {
-        this.threshold = (threshold !== undefined) ? threshold : 0.1;
+    constructor({ threshold, onGamepadUpdate }) {
+        this.threshold = threshold !== undefined ? threshold : 0.1;
+        this.onGamepadUpdate = onGamepadUpdate;
     }
 
     start() {
@@ -60,6 +63,8 @@ export default class JoyMap {
 
     step = () => {
         this.poll();
+        this.onPoll();
+
         this.animationFrameRequestId = window.requestAnimationFrame(this.step);
     };
 
@@ -122,9 +127,11 @@ export default class JoyMap {
                 const newPad = new Gamepad({
                     rawGamepad,
                     type,
+                    events: this.events,
                     threshold : this.threshold,
                     aliases: this.aliases,
-                    inputMap: this.inputMaps[type]
+                    inputMap: this.inputMaps[type],
+                    update: this.onGamepadUpdate
                 });
 
                 this.gamepads.push(newPad);
@@ -154,13 +161,13 @@ export default class JoyMap {
     }
 
     setAlias(alias, property) {
-        if (_.isFunction(property)) {
-            this.aliases[alias] = function () {
-                return property(this.mappedValues);
+        if (isFunction(property)) {
+            this.aliases[alias] = function (mappedValues) {
+                return property(mappedValues);
             };
         } else {
-            this.aliases[alias] = function () {
-                return this.mappedValues[property].value;
+            this.aliases[alias] = function (mappedValues) {
+                return mappedValues[property].value;
             };
         }
     }
@@ -185,5 +192,20 @@ export default class JoyMap {
         }
 
         return inputs;
+    }
+
+    // Possible values for update: 'simple', 'normal, 'event' or a custom function
+    setUpdate(update) {
+        forEach((pad) => pad.setUpdate(update), this.gamepads);
+    }
+
+    // TODO consider if events are actually useful and deserve the overhead when handling multiple gamepads
+    addEvent(inputName, handler) {
+        this.events[inputName] = this.events[inputName] || [];
+        this.events[inputName].push(handler);
+    }
+
+    removeEvent(inputName, handler) {
+        this.events[inputName] = reject(handler, this.events[inputName] || []);
     }
 }
