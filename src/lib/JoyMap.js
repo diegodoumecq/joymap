@@ -43,9 +43,10 @@ export default class JoyMap {
         }
     };
 
-    constructor({ threshold, onGamepadUpdate }) {
+    constructor({ threshold, onGamepadUpdate, clampThreshold }) {
         this.threshold = threshold !== undefined ? threshold : 0.1;
         this.onGamepadUpdate = onGamepadUpdate;
+        this.clampThreshold = clampThreshold !== undefined ? clampThreshold : true;
     }
 
     start() {
@@ -127,6 +128,7 @@ export default class JoyMap {
                 const newPad = new Gamepad({
                     rawGamepad,
                     type,
+                    clampThreshold: this.clampThreshold,
                     events: this.events,
                     threshold : this.threshold,
                     aliases: this.aliases,

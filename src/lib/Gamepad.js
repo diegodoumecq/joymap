@@ -5,7 +5,7 @@ export function simpleUpdate(newRawGamepad) {
 
     // Parse through all inputs
     forEach((name) => {
-        const currentValue = this.inputMap[name](newRawGamepad);
+        const currentValue = this._getValue(this.inputMap[name](newRawGamepad));
         newValues[name] = {
             value: currentValue,
             state: !this.isSignificant(currentValue) ? 'released' : 'pressed'
@@ -30,7 +30,7 @@ export function normalUpdate(newRawGamepad, prevMappedValues) {
     // Parse through all inputs
     forEach((name) => {
         const previous = prevMappedValues[name];
-        const currentValue = this.inputMap[name](newRawGamepad);
+        const currentValue = this._getValue(this.inputMap[name](newRawGamepad));
         const suddenChange = !previous || (this.isSignificant(currentValue) !== this.isSignificant(previous.value));
 
         newValues[name] = !this.isSignificant(currentValue) ? {
@@ -66,7 +66,7 @@ export function eventUpdate(newRawGamepad, prevMappedValues) {
     // Parse through all inputs
     forEach((name) => {
         const previous = prevMappedValues[name];
-        const currentValue = this.inputMap[name](newRawGamepad);
+        const currentValue = this._getValue(this.inputMap[name](newRawGamepad));
         const suddenChange = !previous || (this.isSignificant(currentValue) !== this.isSignificant(previous.value));
 
         const result = !this.isSignificant(currentValue) ? {
@@ -111,12 +111,13 @@ export default class Gamepad {
     connected = true;
     mappedValues = {};
 
-    constructor({ rawGamepad, inputMap,  aliases, events, type, threshold, update }) {
+    constructor({ rawGamepad, inputMap,  aliases, events, type, threshold, clampThreshold, update }) {
         this.events = events;
         this.inputMap = inputMap;
         this.aliases = aliases;
         this.type = type;
         this.threshold = threshold;
+        this.clampThreshold = clampThreshold;
 
         this.setUpdate(update);
         this.update(rawGamepad);
@@ -128,6 +129,14 @@ export default class Gamepad {
         }
 
         return {};
+    }
+
+    _getValue(value) {
+        if (!this.clampThreshold) {
+            return value;
+        } else {
+            return Math.abs(value) < this.threshold ? 0 : value;
+        }
     }
 
     isSignificant(number) {

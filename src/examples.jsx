@@ -38,7 +38,7 @@ class App extends React.Component {
                 return <Display />;
             }
             case PAGES.DevConsole: {
-                return <h2>Open the dev console to see the gamepad logs</h2>;
+                return <h2 className="console-example">Open the dev console to see the gamepad logs</h2>;
             }
             case PAGES.Movement: {
                 return <Movement />;

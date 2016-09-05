@@ -40,7 +40,7 @@ export default class Display extends React.Component {
 
     render() {
         return (
-            <section className="display-component">
+            <section className="html-example">
                 {map((gamepad) =>
                 <Gamepad
                     key={gamepad.id}
