@@ -5,56 +5,51 @@ import classnames from 'classnames';
 
 import './Gamepad.styl';
 
-const analogInputs = [
-    'leftAnalog', 'rightAnalog'
-];
-
+const analogInputs = ['L', 'R'];
+const shoulderInputs = ['L2', 'L1', 'R2', 'R1'];
 const digitalInputs = [
     'dpadUp', 'dpadDown', 'dpadLeft', 'dpadRight',
     'A', 'B', 'X', 'Y',
     'start', 'select', 'home'
 ];
 
-const shoulderInputs = [
-    'L2', 'L1', 'R2', 'R1'
-];
-
 export default class Gamepad extends React.Component {
 
     static propTypes = {
         backgroundColor: PropTypes.string.isRequired,
-        gamepad: PropTypes.object.isRequired
+        player: PropTypes.object.isRequired
     };
 
     renderAnalogStick(inputName) {
-        const { gamepad } = this.props;
-        const inputX = gamepad.getState(inputName + 'X').value;
-        const inputY = gamepad.getState(inputName + 'Y').value;
+        const { pressedColor } = this.props;
+        const { sticks, buttons } = this.props.player;
+        const { x, y } = sticks[inputName].value;
 
         return (
             <div
                 key={inputName}
-                className={classnames(inputName, {
-                    pressed: gamepad.getState((inputName === 'leftAnalog') ? 'L3' : 'R3').value
-                })}
+                className={inputName}
                 style={{
-                    transform: `translate(${inputX * 15}px, ${inputY * 15}px)`
+                    transform: `translate(${x * 15}px, ${y * 15}px)`,
+                    backgroundColor: buttons[inputName + '3'].pressed ? pressedColor : ''
                 }} />);
     }
 
     renderDigital(inputName) {
-        const { state } = this.props.gamepad.getState(inputName);
+        const { pressedColor } = this.props;
+        const { pressed } = this.props.player.buttons[inputName];
 
         return (
             <div
                 key={inputName}
-                className={classnames(inputName, {
-                    pressed: !!state && state !== 'released' && state !== 'justReleased'
-                })} />);
+                className={inputName}
+                style={{
+                    backgroundColor: pressed ? pressedColor : ''
+                }} />);
     }
 
     renderShoulder(inputName) {
-        const value = this.props.gamepad.getState(inputName).value || 0;
+        const { value } = this.props.player.buttons[inputName];
         
         return (
             <div
@@ -69,19 +64,20 @@ export default class Gamepad extends React.Component {
     }
 
     render() {
-        const { gamepad, backgroundColor } = this.props;
+        const { player, backgroundColor, pressedColor, children } = this.props;
 
         return (
             <div
-                className={classnames('gamepad', { disconnected: !gamepad.connected })}
+                className={classnames('gamepad', { disconnected: !player.connected })}
                 style={{ backgroundColor }}>
                 <div className="react-inputs">
+                    <span className="player-name" style={{ color: pressedColor }}>{player.name}</span>
                     <div className="back" />
-                    {map((input) => this.renderAnalogStick(input), analogInputs)}
-                    {map((input) => this.renderDigital(input), digitalInputs)}
-                    {map((input) => this.renderShoulder(input), shoulderInputs)}
+                    {map(inputName => this.renderAnalogStick(inputName), analogInputs)}
+                    {map(inputName => this.renderDigital(inputName), digitalInputs)}
+                    {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                 </div>
-                <div className="count">Buttons pressed in total: {gamepad.getState('CountAll').value}</div>
+                {children}
             </div>);
     }
 }

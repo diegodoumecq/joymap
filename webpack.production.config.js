@@ -25,7 +25,7 @@ module.exports = {
             query: {
                 cacheDirectory: true,
                 presets: ['es2015', 'stage-0', 'react'],
-                plugins: ['lodash']
+                plugins: ['lodash', 'transform-runtime']
             },
             exclude: /node_modules/,
             loader: 'babel'

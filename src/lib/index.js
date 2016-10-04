@@ -1,4 +1,4 @@
-import Gamepad from './Gamepad';
+import Player from './Player';
 import JoyMap from './JoyMap';
 
-export default { JoyMap, Gamepad };
+export default { JoyMap, Player };

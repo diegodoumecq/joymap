@@ -59,6 +59,14 @@ shoulder()
         
         > div
             position absolute
+        
+        .player-name
+            position absolute
+            top 70px
+            width 100%
+            text-align center
+            z-index 15
+            font-size 3rem
             
         .count
             bottom 0
@@ -69,11 +77,11 @@ shoulder()
             z-index 10
             background-image url('../../public/gamepad.png')
         
-        .leftAnalog
+        .L
             stick()
             left 150px
         
-        .rightAnalog
+        .R
             stick()
             right 150px
             
@@ -154,6 +162,3 @@ shoulder()
             width 40px
             height 40px
             left 223px
-
-        .pressed
-            background-color red

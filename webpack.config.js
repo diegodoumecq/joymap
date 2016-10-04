@@ -94,7 +94,7 @@ module.exports = {
 
     resolve: {
         extensions: ['', '.js', '.jsx'],
-        modules: ['node_modules', 'lib', 'vendor']
+        modules: ['node_modules']
     },
 
     plugins: [

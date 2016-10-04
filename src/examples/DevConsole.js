@@ -1,5 +1,5 @@
 import JoyMap from '../lib/JoyMap';
-import { noop } from 'lodash/fp';
+import { noop, flowRight, reduce, isEmpty } from 'lodash/fp';
 
 // Example of usage:
 
@@ -7,65 +7,108 @@ import { noop } from 'lodash/fp';
 const threshold = 0.2;
 
 const joyMap = new JoyMap({ threshold });
+const mainPlayer = joyMap.addPlayer('mainPlayer');
 
-joyMap.setAlias('Jump', 'B');
-joyMap.setAlias('LookUp', 'dpadUp');
-joyMap.setAlias('LookDown', 'dpadDown');
-joyMap.setAlias('LookLeft', 'dpadLeft');
-joyMap.setAlias('LookRight', 'dpadRight');
+mainPlayer.sticks.L.invertX = true;
+mainPlayer.sticks.L.invertY = true;
 
-joyMap.setAlias('Move', (mappedValues) => {
-    const x = mappedValues.leftAnalogX;
-    const y = mappedValues.leftAnalogY;
-    return (joyMap.isSignificant(x.value) || joyMap.isSignificant(y.value));
+mainPlayer.setAlias('Jump', 'A');
+mainPlayer.setAlias('Shoot', 'B');
+mainPlayer.setAlias('LookUp', 'dpadUp');
+mainPlayer.setAlias('LookDown', 'dpadDown');
+mainPlayer.setAlias('LookLeft', 'dpadLeft');
+mainPlayer.setAlias('LookRight', 'dpadRight');
+
+mainPlayer.setAggregator('Move', (player, prevValue, gamepad) => {
+    const { L } = player.sticks;
+    return !!player.isAxisSignificant(L.value);
 });
 
-joyMap.setAlias('Point', (mappedValues) => {
-    const x = mappedValues.rightAnalogX;
-    const y = mappedValues.rightAnalogY;
-    return (joyMap.isSignificant(x.value) || joyMap.isSignificant(y.value));
+mainPlayer.setAggregator('Point', (player, prevValue, gamepad) => {
+    const { R } = player.sticks;
+    return player.isAxisSignificant(R.value);
 });
 
-joyMap.setAlias('MovePoint', (mappedValues) => {
-    const move = mappedValues.Move;
-    const point = mappedValues.Point;
-    return move.value && point.value;
+mainPlayer.setAggregator('MovePoint', (player, prevValue, gamepad) => {
+    const { L, R } = player.sticks;
+    return player.isAxisSignificant(L.value) && player.isAxisSignificant(R.value);
 });
 
-joyMap.setAlias('CountFace', (mappedValues) => {
-    return mappedValues.A.value + mappedValues.B.value + mappedValues.X.value + mappedValues.Y.value;
+mainPlayer.setAggregator('CountFace', (player, prevValue, gamepad) => {
+    const { A, B, X, Y } = player.buttons;
+    return A.value + B.value + X.value + Y.value;
 });
 
-joyMap.setAlias('CountAll', (mappedValues) => {
-    let count = 0;
-    // TODO Make the analog axes count as one for each stick
-    joyMap.getSupportedInputs(false).forEach((name) => {
-        const state = mappedValues[name].state;
-        count += (state !== 'released' && state !== 'justReleased') ? 1 : 0;
-    });
-    
-    return count;
-});
+// Commented out due to noisier-than-desired output, but is still a nice example
+// mainPlayer.setAggregator('CountAll', (player, prevValue, gamepad) => {
+//     const buttonCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttons);
+//     const axisCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.sticks);
+//     const aliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.aliases);
 
-const inputs = joyMap.getSupportedInputs(true);
+//     return `${buttonCount + axisCount + aliasCount}(Btn:${buttonCount} Axes:${axisCount} Alias:${aliasCount})`;
+// });
 
+
+function printState(pressed) {
+    return pressed ? 'pressed' : 'released';
+}
+
+function buttonToString(buttonName, { pressed, value }) {
+    return `${buttonName}: ${printState(pressed)}(${value})`;
+}
+
+function axisToString(axisName, { pressed, value }) {
+    return `${axisName}: ${printState(pressed)}(x: ${value.x}, y: ${value.y})`;
+}
 
 // On each frame log all the activated input
 function step() {
-    const str = inputs.reduce((result, inputName) => {
-        const input = joyMap.getState(inputName) || {};
+    const buttons = reduce((result, buttonName) => {
+        const button = mainPlayer.buttons[buttonName];
 
-        if (input.state && input.state !== 'released') {
-            return result + inputName + ': ' + input.state + ' ' + input.value + ', ';
+        if (button.pressed || button.justChanged) {
+            return `${result} ${buttonToString(buttonName, button)},`;
         }
         
         return result;
-    }, '');
+    }, '', Object.keys(mainPlayer.buttons));
 
-    if (!!str) {
-        console.log(str.slice(0, -2));
-    } else {
-        console.log('Gamepads connected: ' + joyMap.gamepads.length);
+    const sticks = reduce((result, axisName) => {
+        const stick = mainPlayer.sticks[axisName];
+
+        if (stick.pressed || stick.justChanged) {
+            return `${result} ${axisToString(axisName, stick)},`;
+        }
+        
+        return result;
+    }, '', Object.keys(mainPlayer.sticks));
+
+    const aliases = reduce((result, aliasName) => {
+        const aliasInput = mainPlayer.aliases[aliasName];
+
+        if (aliasInput.pressed || aliasInput.justChanged) {
+            if (aliasInput.isButton) {
+                return `${result} ${buttonToString(aliasName, aliasInput)},`;
+            } else {
+                return `${result} ${axisToString(aliasName, aliasInput)},`;
+            }
+        }
+        
+        return result;
+    }, '', Object.keys(mainPlayer.aliases));
+
+    const aggregators = reduce((result, aggregatorName) => {
+        const stuff = mainPlayer.aggregators[aggregatorName];
+
+        if (!!stuff) {
+            return `${result} ${aggregatorName} ${stuff},`;
+        }
+        
+        return result;
+    }, '', Object.keys(mainPlayer.aggregators));
+
+    if (!!buttons || !!sticks || !!aliases || !!aggregators) {
+        console.log((buttons + sticks + aliases + aggregators).slice(0, -1));
     }
 }
 

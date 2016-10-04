@@ -1,7 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { findDOMNode } from 'react-dom';
 
-import { map, forEach } from 'lodash/fp';
+import { some } from 'lodash/fp';
 
 import JoyMap from '../lib/JoyMap';
 
@@ -20,15 +20,21 @@ export default class Movement extends React.Component {
         this.joyMap = new JoyMap({ threshold: 0.2 });
         this.joyMap.onPoll = this.step;
 
-        this.player = {
+        this.mainPlayer = this.joyMap.addPlayer('mainPlayer');
+        this.mainPlayer.setAggregator('AnyButton', ({ buttons }) => some('pressed', buttons));
+
+        this.mascot = {
             x: SIZE.centerX,
             y: SIZE.centerY,
             angle: 45
         };
+
+        this.img = new Image();
+        this.img.src = 'gamepad.png';
     }
 
     componentDidMount() {
-        const canvas = ReactDOM.findDOMNode(this.refs.canvas);
+        const canvas = findDOMNode(this.refs.canvas);
         const ctx = canvas.getContext('2d');
 
         this.setState({ canvas, ctx });
@@ -39,44 +45,48 @@ export default class Movement extends React.Component {
         this.joyMap.stop();
     }
 
-    step = () => {
-        const leftAnalog = {
-            x: this.joyMap.getState('leftAnalogX'),
-            y: this.joyMap.getState('leftAnalogY')
-        };
-        const rightAnalog = {
-            x: this.joyMap.getState('rightAnalogX'),
-            y: this.joyMap.getState('rightAnalogY')
-        };
+    updateMascot() {
+        const { L, R } = this.mainPlayer.sticks;
 
-        this.player.x += leftAnalog.x.value * 2;
-        this.player.y += leftAnalog.y.value * 2;
+        // Move the mascot itself
+        this.mascot.x += L.value.x * 3;
+        this.mascot.y += L.value.y * 3;
 
+        // Don't assign a new angle if the stick isn't being used
+        if (R.pressed) {
+            this.mascot.angle = Math.atan2(R.value.y, R.value.x) + Math.PI * 0.5;
+        }
+    }
 
-        this.player.angle = Math.atan2(rightAnalog.y.value, rightAnalog.x.value);
-
-
+    drawCanvas() {
+        const { x, y, angle } = this.mascot;
         const { ctx } = this.state;
 
-        ctx.clearRect(0, 0, SIZE.width, SIZE.height);
-        ctx.fillStyle = "rgb(200,0,0)";
+        // Draw background color, clearing previous image
+        ctx.fillStyle = !this.mainPlayer.aggregators.AnyButton ? '#EEE' : '#DEE';
+        ctx.fillRect(0, 0, SIZE.width, SIZE.height);
 
-        ctx.translate(this.player.x, this.player.y);
-        ctx.rotate(this.player.angle);
-        ctx.translate(-this.player.x, -this.player.y);
+        // Rotate whole canvas
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.translate(-x, -y);
 
-        //ctx.drawImage(image, -width / 2, -height / 2, width, height);
-        ctx.fillRect(this.player.x - 25, this.player.y - 25, 50, 50);
+        // Draw straight image on the rotated canvas
+        ctx.drawImage(this.img, x - 242, y - 150, 484, 300);
 
-        ctx.translate(this.player.x, this.player.y);
-        ctx.rotate(-this.player.angle);
-        ctx.translate(-this.player.x, -this.player.y);
+        // Unrotate canvas to straighten it
+        ctx.translate(x, y);
+        ctx.rotate(-angle);
+        ctx.translate(-x, -y);
+    }
+
+    step = () => {
+        this.updateMascot();
+        this.drawCanvas();
     };
 
-    render() {
-        return (
-            <div className="movement-example">
-                <canvas ref="canvas" width={SIZE.width} height={SIZE.height} />
-            </div>);
-    }
+    render = () => (
+        <div className="movement-example">
+            <canvas ref="canvas" width={SIZE.width} height={SIZE.height} />
+        </div>);
 }
