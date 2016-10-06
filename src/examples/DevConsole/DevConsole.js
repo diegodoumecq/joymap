@@ -1,4 +1,4 @@
-import JoyMap from '../lib/JoyMap';
+import JoyMap from '../../lib/JoyMap';
 import { noop, flowRight, reduce, isEmpty } from 'lodash/fp';
 
 // Example of usage:

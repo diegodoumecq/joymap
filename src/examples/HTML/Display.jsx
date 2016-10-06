@@ -4,7 +4,7 @@ import { map } from 'lodash/fp';
 import ColorHash from 'color-hash';
 import tinycolor from 'tinycolor2';
 
-import JoyMap from '../lib/JoyMap';
+import JoyMap from '../../lib/JoyMap';
 import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });

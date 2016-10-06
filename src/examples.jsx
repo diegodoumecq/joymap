@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 
-import { startConsole, stopConsole } from './examples/DevConsole';
-import Movement from './examples/Movement.jsx';
-import Display from './examples/Display.jsx';
+import { startConsole, stopConsole } from './examples/DevConsole/DevConsole';
+import Movement from './examples/Movement/Movement.jsx';
+import Display from './examples/HTML/Display.jsx';
 
 import './main.styl';
 

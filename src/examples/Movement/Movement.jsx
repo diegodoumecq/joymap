@@ -3,7 +3,7 @@ import { findDOMNode } from 'react-dom';
 
 import { some } from 'lodash/fp';
 
-import JoyMap from '../lib/JoyMap';
+import JoyMap from '../../lib/JoyMap';
 
 import './Movement.styl';
 
