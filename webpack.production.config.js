@@ -15,7 +15,9 @@ module.exports = {
 
     output: {
         path: deployPath,
-        filename: 'joymap.min.js'
+        filename: 'joymap.min.js',
+        library: 'joymap',
+        libraryTarget: 'umd'
     },
 
     module: {

@@ -9,9 +9,11 @@ export default class JoyMap {
 
     isSupported = isFunction(navigator.getGamepads);
 
-    unusedGamepadIds = [];
+    gamepads = [];
     players = {};
     animationFrameRequestId = null;
+
+    getUnusedGamepadIds = () => difference(map('id', this.gamepads), map('gamepadId', this.players));
 
     constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }) {
         this.threshold = threshold;
@@ -51,9 +53,11 @@ export default class JoyMap {
         const { threshold, clampThreshold } = this;
 
         this.players[name] = new Player({ name, threshold, clampThreshold });
-        if (this.unusedGamepadIds.length > 0) {
-            this.players[name].connect(this.unusedGamepadIds[0]);
-            this.unusedGamepadIds = tail(this.unusedGamepadIds);
+
+        const unusedId = find((gamepadId) => !find({ gamepadId }, this.players), map('id', this.gamepads))
+
+        if (unusedId) {
+            this.players[name].connect(unusedId);
         }
 
         return this.players[name];
@@ -62,9 +66,6 @@ export default class JoyMap {
     removePlayer(name) {
         const player = this.players[name];
         this.players = omit([name], this.players);
-
-        this.unusedGamepadIds = [...this.unusedGamepadIds, player.gamepadId];
-
         player.destroy();
     }
 
@@ -73,23 +74,22 @@ export default class JoyMap {
     }
 
     poll() {
-        const gamepads = filter((rawGamepad) =>
+        this.gamepads = filter((rawGamepad) =>
             rawGamepad
             && rawGamepad.connected
             && rawGamepad.buttons.length
             && rawGamepad.axes.length
             && (!!rawGamepad.id || rawGamepad.id === 0), navigator.getGamepads());
 
-        this.unusedGamepadIds = difference(map('id', gamepads), map('gamepadId', this.players));
-
         forEach((player) => {
+            const unusedGamepadIds = this.getUnusedGamepadIds();
+
             // Given unassigned players and unusued gamepads, automatically assign them
-            if (player.gamepadId === null && this.unusedGamepadIds.length > 0) {
-                player.connect(this.unusedGamepadIds[0]);
-                this.unusedGamepadIds = tail(this.unusedGamepadIds);
+            if (player.gamepadId === null && unusedGamepadIds.length > 0) {
+                player.connect(unusedGamepadIds[0]);
             }
 
-            const gamepad = find({ id: player.gamepadId }, gamepads);
+            const gamepad = find({ id: player.gamepadId }, this.gamepads);
 
             if (!player.connected) {
                 if (gamepad) {

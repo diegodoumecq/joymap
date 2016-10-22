@@ -19,19 +19,11 @@ mainPlayer.setAlias('LookDown', 'dpadDown');
 mainPlayer.setAlias('LookLeft', 'dpadLeft');
 mainPlayer.setAlias('LookRight', 'dpadRight');
 
-mainPlayer.setAggregator('Move', (player, prevValue, gamepad) => {
-    const { L } = player.sticks;
-    return !!player.isAxisSignificant(L.value);
-});
-
-mainPlayer.setAggregator('Point', (player, prevValue, gamepad) => {
-    const { R } = player.sticks;
-    return player.isAxisSignificant(R.value);
-});
-
+mainPlayer.setAggregator('Move', (player) => player.sticks.L.pressed);
+mainPlayer.setAggregator('Point', (player) => player.sticks.R.pressed);
 mainPlayer.setAggregator('MovePoint', (player, prevValue, gamepad) => {
     const { L, R } = player.sticks;
-    return player.isAxisSignificant(L.value) && player.isAxisSignificant(R.value);
+    return L.pressed && R.pressed;
 });
 
 mainPlayer.setAggregator('CountFace', (player, prevValue, gamepad) => {
@@ -101,7 +93,7 @@ function step() {
         const stuff = mainPlayer.aggregators[aggregatorName];
 
         if (!!stuff) {
-            return `${result} ${aggregatorName} ${stuff},`;
+            return `${result} ${aggregatorName}: ${stuff},`;
         }
         
         return result;

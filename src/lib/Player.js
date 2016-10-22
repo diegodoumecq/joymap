@@ -94,7 +94,6 @@ export default class Player {
     }
 
     cleanAggregators() {
-        console.log('ASDASDS');
         this.aggregatorCallbacks = {};
         this.aggregators = {};
     }

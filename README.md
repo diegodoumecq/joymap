@@ -2,7 +2,7 @@
 
 A Javascript Gamepad API wrapper of the much needed but seriously underpowered browser Gamepad API (https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
 
-#### Key features
+### Key features
 
  * Wraps the ever-changing gamepad standard into a flexible API
  * Based around player configuration, it organizes input by player rather than by gamepad
@@ -10,7 +10,7 @@ A Javascript Gamepad API wrapper of the much needed but seriously underpowered b
  * Supports assigning simple aliases that are aimed at button remapping by the user
  * Supports functional aggregators that let the programmer combine any input and return any result
 
-#### How to
+### How to
 
 * Install all the dependencies with: npm install
 * Run all the examples and webpack-dev-server on localhost:9000 with: npm run dev
@@ -33,13 +33,14 @@ JoyMap can be set with three optional parameters.
     const player1 = joyMap.addPlayer('player1');
     const player2 = joyMap.addPlayer('player2');
     const player3 = joyMap.addPlayer('player3');
+
+As you can see in the example above, you can create as many players as you'd like. Each of them will be automatically assigned a gamepad if available and each of them will stay assigned with the gamepad even when unplugged and again plugged in.
+
     joyMap.start();
     /...stuff/
     if (player1.buttons.A.pressed && player1.buttons.A.justChanged) { jump player1! jump! }
     /...more stuff/
     joyMap.stop();
-
-As you can see in the example above, you can create as many players as you'd like. Each of them will be automatically assigned a gamepad if available and each of them will stay assigned with the gamepad even when unplugged and again plugged in.
 
 Once joyMap.start is called, the library will start polling navigator.getGamepads on each window.requestAnimationFrame. You can even avoid the start function entirely and call JoyMap.poll yourself if you need to control exactly when the polling happens.
 
@@ -76,8 +77,13 @@ The idea behind aggregators is to provide a simple way to combine different inpu
         return A.pressed && B.pressed;
     });
 
-The callback will be given the player itself that is currently updating, the previous value returned by this aggregator and the raw gamepad object obtained from navigator.getGamepads.
+The callback will be given three arguments: the player itself that is currently updating, the previous value returned by the aggregator and the raw gamepad object obtained from navigator.getGamepads.
 The results are stored in player.aggregators as you've named them, just like with aliases, but this time the callback for each aggregator is the one that decides what is being stored exactly.
+
+/////////////////////////////////////
+TODO
+add threejs example!
+/////////////////////////////////////
 
 ### Coming soon/ish:
 
