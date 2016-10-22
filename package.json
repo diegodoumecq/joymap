@@ -5,7 +5,7 @@
   "main": "./bin/joymap.min.js",
   "scripts": {
     "dev": "webpack-dev-server --hot",
-    "build": "webpack --config webpack.production.config.js"
+    "build": "webpack --config webpack.build.config.babel.js"
   },
   "dependencies": {
     "babel-core": "^6.14.0",

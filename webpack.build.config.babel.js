@@ -1,17 +1,14 @@
-var webpack = require('webpack');
-var path = require('path');
+import { DefinePlugin, optimize } from 'webpack';
+import path from 'path';
+import CleanWebpackPlugin from 'clean-webpack-plugin';
 
-var CleanWebpackPlugin = require('clean-webpack-plugin');
+const deployFolder = 'bin';
+const deployPath = path.resolve(__dirname, deployFolder);
+const entryPath = path.resolve(__dirname, 'src');
+const publicPath = path.resolve(__dirname, 'public');
 
-var deployFolder = 'bin';
-var deployPath = path.resolve(__dirname, deployFolder);
-var entryPath = path.resolve(__dirname, 'src');
-var publicPath = path.resolve(__dirname, 'public');
-
-module.exports = {
-    entry: [
-        path.resolve(entryPath, 'lib/index.js')
-    ],
+export default {
+    entry: path.resolve(entryPath, 'lib/index.js'),
 
     output: {
         path: deployPath,
@@ -21,7 +18,7 @@ module.exports = {
     },
 
     module: {
-        loaders:[{
+        rules: [{
             test: /\.js?$/,
             include: entryPath,
             query: {
@@ -40,7 +37,7 @@ module.exports = {
     },
 
     plugins: [
-        new webpack.DefinePlugin({
+        new DefinePlugin({
             'process.env': {
                 'NODE_ENV': JSON.stringify('production')
             }
@@ -52,7 +49,7 @@ module.exports = {
             dry: false
         }),
 
-        new webpack.optimize.UglifyJsPlugin({
+        new optimize.UglifyJsPlugin({
             compress: {
                 warnings: false
             },

@@ -1,17 +1,16 @@
-var webpack = require('webpack');
-var path = require('path');
+import path from 'path';
 
-var CopyWebpackPlugin = require('copy-webpack-plugin');
-var WriteFilePlugin = require('write-file-webpack-plugin');
-var CleanWebpackPlugin = require('clean-webpack-plugin');
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import WriteFilePlugin from 'write-file-webpack-plugin';
+import CleanWebpackPlugin from 'clean-webpack-plugin';
 
-var port = 9000;
-var bundleFolder = 'devBundle';
-var binPath = path.resolve(__dirname, bundleFolder);
-var entryPath = path.resolve(__dirname, 'src');
-var publicPath = path.resolve(__dirname, 'public');
+const port = 9000;
+const bundleFolder = 'devBundle';
+const binPath = path.resolve(__dirname, bundleFolder);
+const entryPath = path.resolve(__dirname, 'src');
+const publicPath = path.resolve(__dirname, 'public');
 
-module.exports = {
+export default {
     devServer: {
         historyApiFallback: true,
         hot: true,
@@ -33,7 +32,7 @@ module.exports = {
     },
 
     module: {
-        rules:[{
+        rules: [{
             test: /\.js[x]?$/,
             include: entryPath,
             query: {
