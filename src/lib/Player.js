@@ -166,14 +166,11 @@ export default class Player {
     }
 
     getAxisValue(sticks = { x: 0, y: 0 }) {
-        if (!this.clampThreshold) {
-            return sticks;
-        } else {
-            return {
-                x: Math.abs(sticks.x) < this.threshold ? 0 : sticks.x,
-                y: Math.abs(sticks.y) < this.threshold ? 0 : sticks.y
-            };
+        if (this.clampThreshold
+        && Math.abs(sticks.x) < this.threshold && Math.abs(sticks.y) < this.threshold) {
+            return { x: 0, y: 0 };
         }
+        return sticks;
     }
 
     isAxisSignificant(sticks = { x: 0, y: 0 }) {
