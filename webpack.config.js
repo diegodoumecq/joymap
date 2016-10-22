@@ -1,6 +1,5 @@
 var webpack = require('webpack');
 var path = require('path');
-var autoprefixer = require('autoprefixer');
 
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var WriteFilePlugin = require('write-file-webpack-plugin');
@@ -26,23 +25,15 @@ module.exports = {
 
     devtool: '#source-map',
 
-    entry: [
-        'webpack/hot/dev-server',
-        'webpack-dev-server/client?http://localhost:' + port,
-        path.resolve(entryPath, 'examples.jsx')
-    ],
+    entry: path.resolve(entryPath, 'examples.jsx'),
 
     output: {
         path: binPath,
         filename: 'bundle.js'
     },
 
-    postcss: function () {
-        return [autoprefixer];
-    },
-
     module: {
-        loaders:[{
+        rules:[{
             test: /\.js[x]?$/,
             include: entryPath,
             query: {
@@ -93,7 +84,7 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['', '.js', '.jsx'],
+        extensions: ['.js', '.jsx'],
         modules: ['node_modules']
     },
 
