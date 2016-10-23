@@ -1,4 +1,6 @@
-import Player from './Player';
+import P from './Player';
 import JoyMap from './JoyMap';
 
-export default { JoyMap, Player };
+// TODO check why I can't just do export Player;
+export const Player = P;
+export default JoyMap;

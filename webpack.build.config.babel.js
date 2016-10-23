@@ -5,7 +5,6 @@ import CleanWebpackPlugin from 'clean-webpack-plugin';
 const deployFolder = 'bin';
 const deployPath = path.resolve(__dirname, deployFolder);
 const entryPath = path.resolve(__dirname, 'src');
-const publicPath = path.resolve(__dirname, 'public');
 
 export default {
     entry: path.resolve(entryPath, 'lib/index.js'),
@@ -14,7 +13,8 @@ export default {
         path: deployPath,
         filename: 'joymap.min.js',
         library: 'joymap',
-        libraryTarget: 'umd'
+        libraryTarget: 'umd',
+        umdNamedDefine: true
     },
 
     module: {

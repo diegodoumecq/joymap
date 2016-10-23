@@ -1,6 +1,4 @@
-import {
-    omit, includes
-} from 'lodash/fp';
+import { omit, includes } from 'lodash/fp';
 import { mapValues } from 'lodash';
 
 export const axisMap = {
@@ -42,7 +40,7 @@ export default class Player {
     aggregators = {};
     aggregatorCallbacks = {};
 
-    constructor({ name, threshold = 0.3, clampThreshold = true }) {
+    constructor({ name, threshold = 0.3, clampThreshold = true } = {}) {
         this.name = name;
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;
