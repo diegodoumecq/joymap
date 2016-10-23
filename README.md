@@ -91,34 +91,34 @@ The callback will be given three arguments: the player itself that is currently 
 
 1) Implement the listen function in Player for allowing the user to rebind a button to whatever is pressed next
 
-    * Add that to the examples
+  * Add that to the examples
 
 2) Include the ablity to add/remove players from the html example
 
 3) Gamepad rebinding
 
-    * Add a few basic functions to handle a player changing controllers
-    * Add a listen function to joymap for allowing the user to use the next gamepad to press anything (or a specified button)
+  * Add a few basic functions to handle a player changing controllers
+  * Add a listen function to joymap for allowing the user to use the next gamepad to press anything (or a specified button)
 
 4) Add a 3d example using threejs
 
 5) Add an event system
 
-    * The ability to handle inputs as events
-    * player.addEvent('A.justPressed', () => console.log('jump!'))
-    * player.addEvent('B', () => console.log('run!'))
-    * Also should handle connecting/disconnecting gamepads
+  * The ability to handle inputs as events
+  * player.addEvent('A.justPressed', () => console.log('jump!'))
+  * player.addEvent('B', () => console.log('run!'))
+  * Also should handle connecting/disconnecting gamepads
 
 6) Might want to find a better name than "Aggregators"
 
 7) Controller types
 
-    * Add support for identifying types of controllers (need to wait for standarization between browsers)
-    * Will be used for showing the right button prompts in-game
-    * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
+  * Add support for identifying types of controllers (need to wait for standarization between browsers)
+  * Will be used for showing the right button prompts in-game
+  * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
 
 8) Rumble support 
 
-    * Check later for real support. All we have right now is for mobile devices
-    * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
-    * https://www.w3.org/TR/vibration/
+  * Check later for real support. All we have right now is for mobile devices
+  * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
+  * https://www.w3.org/TR/vibration/
