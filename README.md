@@ -2,6 +2,10 @@
 
 A Javascript Gamepad API wrapper of the much needed but seriously underpowered browser Gamepad API (https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
 
+### How to install
+
+Run **npm install joymap** or **yarn add joymap**
+
 ### Key features
 
 * Wraps the ever-changing gamepad standard into a flexible and more useful API
@@ -11,7 +15,7 @@ A Javascript Gamepad API wrapper of the much needed but seriously underpowered b
 * Supports functional aggregators that let the programmer combine any input and return any result
 * Button mappings are based around the XInput standard, just because it is the only one that works without strange behaviors across all browsers
 
-### How to
+### How to run the examples
 
 * Install all the dependencies with **npm install** or **yarn**
 * Run all the examples on localhost:9000 with **npm run dev**
@@ -28,14 +32,16 @@ JoyMap is not a singleton and so, must be initialized. You can pass three option
 
 So, for example:
 
-    /...declares a stepFunction that does stuff on each step/
+    /... somewhere up here declared a stepFunction that does stuff on each step/
+
     const joyMap = new JoyMap({ threshold: 0.5, clampThreshold: true, onPoll: stepFunction });
     const player1 = joyMap.addPlayer('player1');
     const player2 = joyMap.addPlayer('player2');
     const player3 = joyMap.addPlayer('player3');
     joyMap.start();
     
-    /... later on in another file, probably a player-handling one/
+    /... later on in another file, probably a player-handling one: /
+
     if (player1.buttons.A.pressed && player1.buttons.A.justChanged) {
         this.jump();
     }
