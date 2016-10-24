@@ -1,8 +1,12 @@
+import { LoaderOptionsPlugin } from 'webpack';
 import path from 'path';
 
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import WriteFilePlugin from 'write-file-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
+
+import PostcssSmartImport from 'postcss-smart-import';
+import Autoprefixer from 'autoprefixer';
 
 const port = 9000;
 const bundleFolder = 'devBundle';
@@ -35,46 +39,45 @@ export default {
         rules: [{
             test: /\.js[x]?$/,
             include: entryPath,
+            use: ['babel'],
             query: {
                 cacheDirectory: true,
                 presets: ['es2015', 'stage-0', 'react'],
                 plugins: ['lodash', 'transform-runtime']
-            },
-            exclude: /node_modules/,
-            loader: 'babel'
+            }
         }, {
             test: /\.styl$/,
-            loader: 'style!css!postcss!stylus'
+            use: ['style', 'css', 'postcss', 'stylus']
         },  {
             test: /\.css$/,
-            loader: 'style!css!postcss'
+            use: ['style', 'css', 'postcss']
         }, {
             test: /\.png$/,
-            loader: 'url',
+            use: ['url'],
             query: {
                 limit: '10000',
                 mimetype: 'application/png'
             }
         }, {
-            test: /\.(woff|woff2)$/,
-            loader: 'url',
+            test: /\.woff[2]$/,
+            use: ['url'],
             query: {
                 limit: '10000',
                 mimetype: 'application/font-woff'
             }
         }, {
             test: /\.ttf$/,
-            loader: 'url',
+            use: ['url'],
             query: {
                 limit: '10000',
                 mimetype: 'application/octet-stream'
             }
         }, {
             test: /\.eot$/,
-            loader: 'file'
+            use: ['file']
         }, {
             test: /\.svg$/,
-            loader: 'url',
+            use: ['url'],
             query: {
                 limit: '10000',
                 mimetype: 'image/svg+xml'
@@ -96,6 +99,15 @@ export default {
             dry: false
         }),
 
-        new CopyWebpackPlugin([{ from: publicPath }])
+        new CopyWebpackPlugin([{ from: publicPath }]),
+
+        new LoaderOptionsPlugin({
+            options: {
+                postcss: [
+                    PostcssSmartImport({}),
+                    Autoprefixer({})
+                ]
+            }
+        })
     ]
 };
