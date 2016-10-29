@@ -49,12 +49,12 @@ export default class JoyMap {
         this.players = JSON.parse(players);
     }
 
-    addPlayer(name) {
+    addPlayer(name: string) {
         const { threshold, clampThreshold } = this;
 
         this.players[name] = new Player({ name, threshold, clampThreshold });
 
-        const unusedId = find((gamepadId) => !find({ gamepadId }, this.players), map('id', this.gamepads))
+        const unusedId = find(gamepadId => !find({ gamepadId }, this.players), map('id', this.gamepads));
 
         if (unusedId) {
             this.players[name].connect(unusedId);
@@ -63,7 +63,7 @@ export default class JoyMap {
         return this.players[name];
     }
 
-    removePlayer(name) {
+    removePlayer(name: string) {
         const player = this.players[name];
         this.players = omit([name], this.players);
         player.destroy();
@@ -74,14 +74,14 @@ export default class JoyMap {
     }
 
     poll() {
-        this.gamepads = filter((rawGamepad) =>
+        this.gamepads = filter(rawGamepad =>
             rawGamepad
             && rawGamepad.connected
             && rawGamepad.buttons.length
             && rawGamepad.axes.length
             && (!!rawGamepad.id || rawGamepad.id === 0), navigator.getGamepads());
 
-        forEach((player) => {
+        forEach(player => {
             const unusedGamepadIds = this.getUnusedGamepadIds();
 
             // Given unassigned players and unusued gamepads, automatically assign them

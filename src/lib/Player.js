@@ -40,7 +40,7 @@ export default class Player {
     aggregators = {};
     aggregatorCallbacks = {};
 
-    constructor({ name, threshold = 0.3, clampThreshold = true } = {}) {
+    constructor({ name, threshold = 0.3, clampThreshold = true } = {}): void {
         this.name = name;
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;
@@ -48,7 +48,7 @@ export default class Player {
         this.cleanInputs();
     }
 
-    cleanInputs() {
+    cleanInputs(): void {
         this.buttons = mapValues(buttonsMap, () => ({
             value: 0,
             pressed: false,
@@ -64,39 +64,39 @@ export default class Player {
         }));
     }
 
-    disconnect() {
+    disconnect(): void {
         this.connected = false;
     }
 
-    reconnect() {
+    reconnect(): void {
         this.connected = true;
     }
 
-    connect(gamepadId) {
+    connect(gamepadId): void {
         this.connected = true;
         this.gamepadId = gamepadId;
     }
 
-    listen(aliasName, finishedCallback, allowDuplication = true) {
+    listen(aliasName: string, finishedCallback, allowDuplication = true) {
         // TODO listen for the next input to be pressed && justChanged and set that as the buttonName of aliasName
     }
 
-    setAggregator(aggregatorName, callback) {
+    setAggregator(aggregatorName: string, callback): void {
         this.aggregatorCallbacks[aggregatorName] = callback;
-        this.aggregators[aggregatorName] = {};
+        this.aggregators[aggregatorName] = null;
     }
 
-    removeAggregator(aggregatorName) {
+    removeAggregator(aggregatorName: string): void {
         this.aggregatorCallbacks = omit([aggregatorName], this.aggregatorCallbacks);
         this.aggregators = omit([aggregatorName], this.aggregators);
     }
 
-    cleanAggregators() {
+    cleanAggregators(): void {
         this.aggregatorCallbacks = {};
         this.aggregators = {};
     }
 
-    setAlias(aliasName, buttonName) {
+    setAlias(aliasName: string, buttonName: string): void {
         const isButton = includes(buttonName, Object.keys(this.buttons));
         const isAxis = includes(buttonName, Object.keys(this.sticks));
 
@@ -113,29 +113,29 @@ export default class Player {
         }
     }
 
-    removeAlias(aliasName) {
+    removeAlias(aliasName: string): void {
         this.aliases = omit([aliasName], this.aliases);
     }
 
-    cleanAliases() {
+    cleanAliases(): void {
         this.aliases = {};
     }
 
-    destroy() {
+    destroy(): void {
         this.disconnect();
         this.cleanInputs();
         this.cleanAliases();
         this.cleanAggregators();
     }
 
-    update(gamepad) {
+    update(gamepad): void {
         this.updateButtons(gamepad);
         this.updateAxis(gamepad);
         this.updateAliases();
         this.updateAggregators(gamepad);
     }
 
-    getButtonValue(value = 0) {
+    getButtonValue(value = 0): number {
         if (!this.clampThreshold) {
             return value;
         } else {
@@ -143,7 +143,7 @@ export default class Player {
         }
     }
 
-    isButtonSignificant(value = 0) {
+    isButtonSignificant(value = 0): boolean {
         return !!value && Math.abs(value) > this.threshold;
     }
 
@@ -171,11 +171,11 @@ export default class Player {
         return sticks;
     }
 
-    isAxisSignificant(sticks = { x: 0, y: 0 }) {
+    isAxisSignificant(sticks = { x: 0, y: 0 }): boolean {
         return !!sticks && (!!sticks.x || !!sticks.y) && (Math.abs(sticks.x) > this.threshold || Math.abs(sticks.y) > this.threshold);
     }
 
-    updateAxis(gamepad) {
+    updateAxis(gamepad): void {
         const prevAxis = this.sticks;
 
         this.sticks = mapValues(axisMap, (mapper, inputName) => {
@@ -193,8 +193,8 @@ export default class Player {
         });
     }
 
-    updateAliases() {
-        this.aliases = mapValues(this.aliases, (alias) => {
+    updateAliases(): void {
+        this.aliases = mapValues(this.aliases, alias => {
             const { name, isButton } = alias;
 
             if (!isButton) {
@@ -211,7 +211,7 @@ export default class Player {
         });
     }
 
-    updateAggregators(gamepad) {
+    updateAggregators(gamepad): void {
         this.aggregators = mapValues(this.aggregators, (prevValue, aggregatorName) => {
             return this.aggregatorCallbacks[aggregatorName](this, prevValue, gamepad);
         });

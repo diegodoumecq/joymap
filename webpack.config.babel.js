@@ -38,13 +38,8 @@ export default {
     module: {
         rules: [{
             test: /\.js[x]?$/,
-            include: entryPath,
             use: ['babel'],
-            query: {
-                cacheDirectory: true,
-                presets: ['es2015', 'stage-0', 'react'],
-                plugins: ['lodash', 'transform-runtime']
-            }
+            include: entryPath
         }, {
             test: /\.styl$/,
             use: ['style', 'css', 'postcss', 'stylus']

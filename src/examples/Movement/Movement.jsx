@@ -18,7 +18,10 @@ export default class Movement extends React.Component {
 
     componentWillMount() {
         this.joyMap = new JoyMap({ threshold: 0.2 });
-        this.joyMap.onPoll = this.step;
+        this.joyMap.onPoll = () => {
+            this.updateMascot();
+            this.drawCanvas();
+        };
 
         this.mainPlayer = this.joyMap.addPlayer('mainPlayer');
         this.mainPlayer.setAggregator('AnyButton', ({ buttons }) => some('pressed', buttons));
@@ -79,11 +82,6 @@ export default class Movement extends React.Component {
         ctx.rotate(-angle);
         ctx.translate(-x, -y);
     }
-
-    step = () => {
-        this.updateMascot();
-        this.drawCanvas();
-    };
 
     render = () => (
         <div className="movement-example">

@@ -1,5 +1,5 @@
 import JoyMap from '../../lib/JoyMap';
-import { noop, flowRight, reduce, isEmpty } from 'lodash/fp';
+import { noop, reduce } from 'lodash/fp';
 
 // Example of usage:
 
@@ -19,8 +19,8 @@ mainPlayer.setAlias('LookDown', 'dpadDown');
 mainPlayer.setAlias('LookLeft', 'dpadLeft');
 mainPlayer.setAlias('LookRight', 'dpadRight');
 
-mainPlayer.setAggregator('Move', (player) => player.sticks.L.pressed);
-mainPlayer.setAggregator('Point', (player) => player.sticks.R.pressed);
+mainPlayer.setAggregator('Move', player => player.sticks.L.pressed);
+mainPlayer.setAggregator('Point', player => player.sticks.R.pressed);
 mainPlayer.setAggregator('MovePoint', (player, prevValue, gamepad) => {
     const { L, R } = player.sticks;
     return L.pressed && R.pressed;

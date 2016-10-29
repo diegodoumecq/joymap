@@ -1,4 +1,4 @@
-import { DefinePlugin, optimize } from 'webpack';
+import { optimize } from 'webpack';
 import path from 'path';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 
@@ -20,14 +20,9 @@ export default {
     module: {
         rules: [{
             test: /\.js?$/,
+            use: ['babel'],
             include: entryPath,
-            query: {
-                cacheDirectory: true,
-                presets: ['es2015', 'stage-0', 'react'],
-                plugins: ['lodash', 'transform-runtime']
-            },
-            exclude: /node_modules/,
-            loader: 'babel'
+            exclude: /node_modules/
         }]
     },
 
@@ -37,12 +32,6 @@ export default {
     },
 
     plugins: [
-        new DefinePlugin({
-            'process.env': {
-                'NODE_ENV': JSON.stringify('production')
-            }
-        }),
-
         new CleanWebpackPlugin([deployFolder], {
             root: __dirname,
             verbose: true, 

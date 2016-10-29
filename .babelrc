@@ -1,4 +1,9 @@
 {
-  "presets": ["es2015", "stage-0", "react"],
-  "plugins": ["transform-runtime", "lodash"]
+    "presets": ["es2015", "stage-0", "react"],
+    "plugins": ["lodash", "transform-runtime"],
+    "env": {
+        "development": {
+            "plugins": ["lodash", "transform-runtime", "tcomb"]
+        }
+    }
 }
