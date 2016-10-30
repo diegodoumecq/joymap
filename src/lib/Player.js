@@ -33,9 +33,14 @@ export const buttonsMap = {
 };
 
 export default class Player {
-    connected = false;
-    gamepadId = null;
+    name: string;
+    threshold: number;
+    clampThreshold: boolean;
+    buttons: Object;
+    sticks: Object;
+    gamepadId: ?string = null;
 
+    connected = false;
     aliases = {};
     aggregators = {};
     aggregatorCallbacks = {};
@@ -72,16 +77,16 @@ export default class Player {
         this.connected = true;
     }
 
-    connect(gamepadId): void {
+    connect(gamepadId: string): void {
         this.connected = true;
         this.gamepadId = gamepadId;
     }
 
-    listen(aliasName: string, finishedCallback, allowDuplication = true) {
+    listen(aliasName: string, finishedCallback: Function, allowDuplication = true): void {
         // TODO listen for the next input to be pressed && justChanged and set that as the buttonName of aliasName
     }
 
-    setAggregator(aggregatorName: string, callback): void {
+    setAggregator(aggregatorName: string, callback: Function): void {
         this.aggregatorCallbacks[aggregatorName] = callback;
         this.aggregators[aggregatorName] = null;
     }
@@ -128,14 +133,14 @@ export default class Player {
         this.cleanAggregators();
     }
 
-    update(gamepad): void {
+    update(gamepad: Object): void {
         this.updateButtons(gamepad);
         this.updateAxis(gamepad);
         this.updateAliases();
         this.updateAggregators(gamepad);
     }
 
-    getButtonValue(value = 0): number {
+    getButtonValue(value: number = 0): number {
         if (!this.clampThreshold) {
             return value;
         } else {
@@ -143,14 +148,14 @@ export default class Player {
         }
     }
 
-    isButtonSignificant(value = 0): boolean {
+    isButtonSignificant(value: number = 0): boolean {
         return !!value && Math.abs(value) > this.threshold;
     }
 
-    updateButtons(gamepad) {
+    updateButtons(gamepad: Object): void {
         const prevButtons = this.buttons;
 
-        this.buttons = mapValues(buttonsMap, (mapper, inputName) => {
+        this.buttons = mapValues(buttonsMap, (mapper: Function, inputName) => {
             const previous = prevButtons[inputName];
             const value = mapper(gamepad);
             const justChanged = this.isButtonSignificant(value) !== this.isButtonSignificant(previous.value);
@@ -163,7 +168,7 @@ export default class Player {
         });
     }
 
-    getAxisValue(sticks = { x: 0, y: 0 }) {
+    getAxisValue(sticks = { x: 0, y: 0 }): Object {
         if (this.clampThreshold
         && Math.abs(sticks.x) < this.threshold && Math.abs(sticks.y) < this.threshold) {
             return { x: 0, y: 0 };
@@ -175,10 +180,10 @@ export default class Player {
         return !!sticks && (!!sticks.x || !!sticks.y) && (Math.abs(sticks.x) > this.threshold || Math.abs(sticks.y) > this.threshold);
     }
 
-    updateAxis(gamepad): void {
+    updateAxis(gamepad: Object): void {
         const prevAxis = this.sticks;
 
-        this.sticks = mapValues(axisMap, (mapper, inputName) => {
+        this.sticks = mapValues(axisMap, (mapper: Function, inputName) => {
             const previous = prevAxis[inputName];
             const invertX = previous.invertX;
             const invertY = previous.invertY;
@@ -194,7 +199,7 @@ export default class Player {
     }
 
     updateAliases(): void {
-        this.aliases = mapValues(this.aliases, alias => {
+        this.aliases = mapValues(this.aliases, (alias: Object) => {
             const { name, isButton } = alias;
 
             if (!isButton) {
@@ -211,8 +216,8 @@ export default class Player {
         });
     }
 
-    updateAggregators(gamepad): void {
-        this.aggregators = mapValues(this.aggregators, (prevValue, aggregatorName) => {
+    updateAggregators(gamepad: Object): void {
+        this.aggregators = mapValues(this.aggregators, (prevValue: any, aggregatorName) => {
             return this.aggregatorCallbacks[aggregatorName](this, prevValue, gamepad);
         });
     }

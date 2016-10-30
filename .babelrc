@@ -3,7 +3,7 @@
     "plugins": ["lodash", "transform-runtime"],
     "env": {
         "development": {
-            "plugins": ["lodash", "transform-runtime", "tcomb"]
+            "plugins": ["lodash", "transform-runtime", "typecheck"]
         }
     }
 }

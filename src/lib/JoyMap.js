@@ -7,15 +7,16 @@ import Player from './Player';
 
 export default class JoyMap {
 
-    isSupported = isFunction(navigator.getGamepads);
+    threshold: number;
+    clampThreshold: boolean;
+    onPoll: Function;
+    animationFrameRequestId: ?number = null;
+    isSupported: boolean = isFunction(navigator.getGamepads);
 
     gamepads = [];
     players = {};
-    animationFrameRequestId = null;
-
-    getUnusedGamepadIds = () => difference(map('id', this.gamepads), map('gamepadId', this.players));
-
-    constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }) {
+    
+    constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }): void {
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;
         this.onPoll = onPoll;
@@ -23,13 +24,13 @@ export default class JoyMap {
         this.poll();
     }
 
-    start() {
+    start(): void {
         if (this.isSupported && this.animationFrameRequestId === null) {
             this.animationFrameRequestId = window.requestAnimationFrame(this.step);
         }
     }
 
-    stop() {
+    stop(): void {
         if (this.animationFrameRequestId !== null) {
             window.cancelAnimationFrame(this.animationFrameRequestId);
             this.animationFrameRequestId = null;
@@ -43,13 +44,16 @@ export default class JoyMap {
         this.animationFrameRequestId = window.requestAnimationFrame(this.step);
     };
 
-    //players arg: JSON.stringified string of players, used for saving most of the config of joyMap
-    setPlayers(players = '{}') {
+    getUnusedGamepadIds(): Array<string> {
+        return difference(map('id', this.gamepads), map('gamepadId', this.players));
+    }
+
+    setPlayers(players: string = '{}'): void {
         this.cleanPlayers();
         this.players = JSON.parse(players);
     }
 
-    addPlayer(name: string) {
+    addPlayer(name: string): Player {
         const { threshold, clampThreshold } = this;
 
         this.players[name] = new Player({ name, threshold, clampThreshold });
@@ -63,17 +67,17 @@ export default class JoyMap {
         return this.players[name];
     }
 
-    removePlayer(name: string) {
-        const player = this.players[name];
+    removePlayer(name: string): void {
+        const player: Player = this.players[name];
         this.players = omit([name], this.players);
         player.destroy();
     }
 
-    cleanPlayers() {
+    cleanPlayers(): void {
         forEach(({ name }) => this.removePlayer(name), this.players);
     }
 
-    poll() {
+    poll(): void {
         this.gamepads = filter(rawGamepad =>
             rawGamepad
             && rawGamepad.connected
@@ -82,7 +86,7 @@ export default class JoyMap {
             && (!!rawGamepad.id || rawGamepad.id === 0), navigator.getGamepads());
 
         forEach(player => {
-            const unusedGamepadIds = this.getUnusedGamepadIds();
+            const unusedGamepadIds: Array<string> = this.getUnusedGamepadIds();
 
             // Given unassigned players and unusued gamepads, automatically assign them
             if (player.gamepadId === null && unusedGamepadIds.length > 0) {

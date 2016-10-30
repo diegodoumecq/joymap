@@ -201,18 +201,6 @@ babel-core@^6.14.0, babel-core@^6.16.0:
     slash "^1.0.0"
     source-map "^0.5.0"
 
-babel-generator@^6.11.3:
-  version "6.18.0"
-  resolved "https://registry.yarnpkg.com/babel-generator/-/babel-generator-6.18.0.tgz#e4f104cb3063996d9850556a45aae4a022060a07"
-  dependencies:
-    babel-messages "^6.8.0"
-    babel-runtime "^6.9.0"
-    babel-types "^6.18.0"
-    detect-indent "^4.0.0"
-    jsesc "^1.3.0"
-    lodash "^4.2.0"
-    source-map "^0.5.0"
-
 babel-generator@^6.17.0:
   version "6.17.0"
   resolved "https://registry.yarnpkg.com/babel-generator/-/babel-generator-6.17.0.tgz#b894e3808beef7800f2550635bfe024b6226cf33"
@@ -221,6 +209,18 @@ babel-generator@^6.17.0:
     babel-runtime "^6.9.0"
     babel-types "^6.16.0"
     detect-indent "^3.0.1"
+    jsesc "^1.3.0"
+    lodash "^4.2.0"
+    source-map "^0.5.0"
+
+babel-generator@^6.7.7:
+  version "6.18.0"
+  resolved "https://registry.yarnpkg.com/babel-generator/-/babel-generator-6.18.0.tgz#e4f104cb3063996d9850556a45aae4a022060a07"
+  dependencies:
+    babel-messages "^6.8.0"
+    babel-runtime "^6.9.0"
+    babel-types "^6.18.0"
+    detect-indent "^4.0.0"
     jsesc "^1.3.0"
     lodash "^4.2.0"
     source-map "^0.5.0"
@@ -430,12 +430,6 @@ babel-plugin-syntax-object-rest-spread@^6.8.0:
 babel-plugin-syntax-trailing-function-commas@^6.3.13:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-trailing-function-commas/-/babel-plugin-syntax-trailing-function-commas-6.13.0.tgz#2b84b7d53dd744f94ff1fad7669406274b23f541"
-
-babel-plugin-tcomb:
-  version "0.3.21"
-  resolved "https://registry.yarnpkg.com/babel-plugin-tcomb/-/babel-plugin-tcomb-0.3.21.tgz#f6d826506b455072733635353f158905e5c278f8"
-  dependencies:
-    babel-generator "^6.11.3"
 
 babel-plugin-transform-async-generator-functions@^6.17.0:
   version "6.17.0"
@@ -740,6 +734,12 @@ babel-plugin-transform-strict-mode@^6.8.0:
   dependencies:
     babel-runtime "^6.0.0"
     babel-types "^6.8.0"
+
+babel-plugin-typecheck:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-typecheck/-/babel-plugin-typecheck-3.9.0.tgz#0edac7573ae24ee58c6f91319f574bc5124b0f0f"
+  dependencies:
+    babel-generator "^6.7.7"
 
 babel-preset-es2015@^6.14.0:
   version "6.16.0"
@@ -3662,10 +3662,6 @@ tar@~2.2.0, tar@~2.2.1:
     block-stream "*"
     fstream "^1.0.2"
     inherits "2"
-
-tcomb:
-  version "3.2.15"
-  resolved "https://registry.yarnpkg.com/tcomb/-/tcomb-3.2.15.tgz#09e40f447976d1d9c07ff465b8377342a8fe67e1"
 
 three:
   version "0.81.2"
