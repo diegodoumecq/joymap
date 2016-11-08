@@ -1,6 +1,6 @@
 import {
     isFunction, find, map, noop, omit,
-    filter, difference, forEach, tail
+    filter, difference, forEach, tail, flow
 } from 'lodash/fp';
 
 import Player from './Player';
@@ -13,8 +13,8 @@ export default class JoyMap {
     animationFrameRequestId: ?number = null;
     isSupported: boolean = isFunction(navigator.getGamepads);
 
-    gamepads = [];
-    players = {};
+    gamepads: Gamepad[] = [];
+    players: { [key: string]: Player } = {};
     
     constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }): void {
         this.threshold = threshold;
@@ -44,7 +44,7 @@ export default class JoyMap {
         this.animationFrameRequestId = window.requestAnimationFrame(this.step);
     };
 
-    getUnusedGamepadIds(): Array<string> {
+    getUnusedGamepadIds(): string[] {
         return difference(map('id', this.gamepads), map('gamepadId', this.players));
     }
 
@@ -56,15 +56,20 @@ export default class JoyMap {
     addPlayer(name: string): Player {
         const { threshold, clampThreshold } = this;
 
-        this.players[name] = new Player({ name, threshold, clampThreshold });
+        const player: Player = new Player({ name, threshold, clampThreshold });
 
-        const unusedId = find(gamepadId => !find({ gamepadId }, this.players), map('id', this.gamepads));
+        const unusedId: string = flow(
+            map('id'),
+            find((gamepadId: string) => !find({ gamepadId }, this.players))
+        )(this.gamepads);
 
         if (unusedId) {
-            this.players[name].connect(unusedId);
+            player.connect(unusedId);
         }
 
-        return this.players[name];
+        this.players[name] = player;
+
+        return player;
     }
 
     removePlayer(name: string): void {
@@ -78,22 +83,22 @@ export default class JoyMap {
     }
 
     poll(): void {
-        this.gamepads = filter(rawGamepad =>
+        this.gamepads = filter((rawGamepad: Gamepad) =>
             rawGamepad
             && rawGamepad.connected
             && rawGamepad.buttons.length
             && rawGamepad.axes.length
             && (!!rawGamepad.id || rawGamepad.id === 0), navigator.getGamepads());
 
-        forEach(player => {
-            const unusedGamepadIds: Array<string> = this.getUnusedGamepadIds();
+        forEach((player: Player) => {
+            const unusedGamepadIds: string[] = this.getUnusedGamepadIds();
 
             // Given unassigned players and unusued gamepads, automatically assign them
             if (player.gamepadId === null && unusedGamepadIds.length > 0) {
                 player.connect(unusedGamepadIds[0]);
             }
 
-            const gamepad = find({ id: player.gamepadId }, this.gamepads);
+            const gamepad: Gamepad = find({ id: player.gamepadId }, this.gamepads);
 
             if (!player.connected) {
                 if (gamepad) {

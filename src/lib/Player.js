@@ -1,34 +1,45 @@
 import { omit, includes } from 'lodash/fp';
 import { mapValues } from 'lodash';
 
+type IPoint = { x: number, y: number };
+type IAxis = {
+    value: IPoint,
+    pressed: boolean,
+    justChanged: boolean,
+    invertX: boolean,
+    invertY: boolean
+};
+type IButton = { value: number, pressed: boolean, justChanged: boolean };
+type IAlias = { name: string, isButton: boolean };
+
 export const axisMap = {
-    L: (pad, invertX = false, invertY = false) => ({
+    L: (pad: Gamepad, invertX: boolean = false, invertY: boolean = false) => ({
         x: !invertX ? pad.axes[0] : -1 * pad.axes[0],
         y: !invertY ? pad.axes[1] : -1 * pad.axes[1],
     }),
-    R: (pad, invertX = false, invertY = false) => ({
+    R: (pad: Gamepad, invertX: boolean = false, invertY: boolean = false) => ({
         x: !invertX ? pad.axes[2] : -1 * pad.axes[2],
         y: !invertY ? pad.axes[3] : -1 * pad.axes[3],
     })
 };
 
 export const buttonsMap = {
-    dpadUp: pad => pad.buttons[12].value,
-    dpadDown: pad => pad.buttons[13].value,
-    dpadLeft: pad => pad.buttons[14].value,
-    dpadRight: pad => pad.buttons[15].value,
-    L1: pad => pad.buttons[4].value,
-    L2: pad => pad.buttons[6].value,
-    L3: pad => pad.buttons[10].value,
-    R1: pad => pad.buttons[5].value,
-    R2: pad => pad.buttons[7].value,
-    R3: pad => pad.buttons[11].value,
-    A: pad => pad.buttons[0].value,
-    B: pad => pad.buttons[1].value,
-    X: pad => pad.buttons[2].value,
-    Y: pad => pad.buttons[3].value,
-    start: pad => pad.buttons[9].value,
-    select: pad => pad.buttons[8].value,
+    dpadUp: (pad: Gamepad) => pad.buttons[12].value,
+    dpadDown: (pad: Gamepad) => pad.buttons[13].value,
+    dpadLeft: (pad: Gamepad) => pad.buttons[14].value,
+    dpadRight: (pad: Gamepad) => pad.buttons[15].value,
+    L1: (pad: Gamepad) => pad.buttons[4].value,
+    L2: (pad: Gamepad) => pad.buttons[6].value,
+    L3: (pad: Gamepad) => pad.buttons[10].value,
+    R1: (pad: Gamepad) => pad.buttons[5].value,
+    R2: (pad: Gamepad) => pad.buttons[7].value,
+    R3: (pad: Gamepad) => pad.buttons[11].value,
+    A: (pad: Gamepad) => pad.buttons[0].value,
+    B: (pad: Gamepad) => pad.buttons[1].value,
+    X: (pad: Gamepad) => pad.buttons[2].value,
+    Y: (pad: Gamepad) => pad.buttons[3].value,
+    start: (pad: Gamepad) => pad.buttons[9].value,
+    select: (pad: Gamepad) => pad.buttons[8].value,
     home: () => 0
 };
 
@@ -36,16 +47,17 @@ export default class Player {
     name: string;
     threshold: number;
     clampThreshold: boolean;
-    buttons: Object;
-    sticks: Object;
+    sticks: { [key: string]: IAxis };
+    buttons: { [key: string]: IButton };
+
     gamepadId: ?string = null;
+    connected: boolean = false;
+    aliases: { [key: string]: IAlias } = {};
 
-    connected = false;
-    aliases = {};
-    aggregators = {};
-    aggregatorCallbacks = {};
+    aggregators: { [key: string]: any } = {};
+    aggregatorCallbacks: { [key: string]: Function } = {};
 
-    constructor({ name, threshold = 0.3, clampThreshold = true } = {}): void {
+    constructor({ name: string, threshold = 0.3, clampThreshold = true } = {}): void {
         this.name = name;
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;
@@ -107,9 +119,6 @@ export default class Player {
 
         if (isButton || isAxis) {
             this.aliases[aliasName] = {
-                value: 0,
-                pressed: false,
-                justChanged: false,
                 isButton,
                 name: buttonName
             };
@@ -133,7 +142,7 @@ export default class Player {
         this.cleanAggregators();
     }
 
-    update(gamepad: Object): void {
+    update(gamepad: Gamepad): void {
         this.updateButtons(gamepad);
         this.updateAxis(gamepad);
         this.updateAliases();
@@ -152,13 +161,13 @@ export default class Player {
         return !!value && Math.abs(value) > this.threshold;
     }
 
-    updateButtons(gamepad: Object): void {
+    updateButtons(gamepad: Gamepad): void {
         const prevButtons = this.buttons;
 
         this.buttons = mapValues(buttonsMap, (mapper: Function, inputName) => {
-            const previous = prevButtons[inputName];
-            const value = mapper(gamepad);
-            const justChanged = this.isButtonSignificant(value) !== this.isButtonSignificant(previous.value);
+            const previous: IButton = prevButtons[inputName];
+            const value: number = mapper(gamepad);
+            const justChanged: boolean = this.isButtonSignificant(value) !== this.isButtonSignificant(previous.value);
 
             return {
                 value: this.getButtonValue(value),
@@ -168,7 +177,7 @@ export default class Player {
         });
     }
 
-    getAxisValue(sticks = { x: 0, y: 0 }): Object {
+    getAxisValue(sticks: IPoint = { x: 0, y: 0 }): IPoint {
         if (this.clampThreshold
         && Math.abs(sticks.x) < this.threshold && Math.abs(sticks.y) < this.threshold) {
             return { x: 0, y: 0 };
@@ -176,19 +185,18 @@ export default class Player {
         return sticks;
     }
 
-    isAxisSignificant(sticks = { x: 0, y: 0 }): boolean {
+    isAxisSignificant(sticks: IPoint = { x: 0, y: 0 }): boolean {
         return !!sticks && (!!sticks.x || !!sticks.y) && (Math.abs(sticks.x) > this.threshold || Math.abs(sticks.y) > this.threshold);
     }
 
-    updateAxis(gamepad: Object): void {
+    updateAxis(gamepad: Gamepad): void {
         const prevAxis = this.sticks;
 
-        this.sticks = mapValues(axisMap, (mapper: Function, inputName) => {
-            const previous = prevAxis[inputName];
-            const invertX = previous.invertX;
-            const invertY = previous.invertY;
-            const value = mapper(gamepad, invertX, invertY);
-            const justChanged = this.isAxisSignificant(value) !== this.isAxisSignificant(previous.value);
+        this.sticks = mapValues(axisMap, (mapper: Function, inputName: string) => {
+            const previous: IAxis = prevAxis[inputName];
+            const { invertX, invertY } = previous;
+            const value: IPoint = mapper(gamepad, invertX, invertY);
+            const justChanged: boolean = this.isAxisSignificant(value) !== this.isAxisSignificant(previous.value);
 
             return {
                 value: this.getAxisValue(value),
@@ -198,8 +206,9 @@ export default class Player {
         });
     }
 
+    // REVIEW: change into buttonAliases and AxisAliases? removes the necessity of isButton
     updateAliases(): void {
-        this.aliases = mapValues(this.aliases, (alias: Object) => {
+        this.aliases = mapValues(this.aliases, (alias: IAlias) => {
             const { name, isButton } = alias;
 
             if (!isButton) {
@@ -216,8 +225,9 @@ export default class Player {
         });
     }
 
-    updateAggregators(gamepad: Object): void {
-        this.aggregators = mapValues(this.aggregators, (prevValue: any, aggregatorName) => {
+    // IDEA: Change aggregators and aggregatorCallbacks into a single object
+    updateAggregators(gamepad: Gamepad): void {
+        this.aggregators = mapValues(this.aggregators, (prevValue: any, aggregatorName: string) => {
             return this.aggregatorCallbacks[aggregatorName](this, prevValue, gamepad);
         });
     }
