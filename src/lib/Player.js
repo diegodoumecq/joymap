@@ -196,7 +196,7 @@ export default class Player {
             const previous: IAxis = prevAxis[inputName];
             const { invertX, invertY } = previous;
             const value: IPoint = mapper(gamepad, invertX, invertY);
-            const justChanged: boolean = this.isAxisSignificant(value) !== this.isAxisSignificant(previous.value);
+            const justChanged = this.isAxisSignificant(value) !== this.isAxisSignificant(previous.value);
 
             return {
                 value: this.getAxisValue(value),

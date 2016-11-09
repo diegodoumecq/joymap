@@ -37,7 +37,7 @@ export default class JoyMap {
         }
     }
 
-    step = () => {
+    step = (): void => {
         this.poll();
         this.onPoll();
 

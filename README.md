@@ -18,8 +18,8 @@ Run **npm install joymap** or **yarn add joymap**
 ### How to run the examples
 
 * Install all the dependencies with **npm install** or **yarn**
-* Run all the examples on localhost:9000 with **npm run dev**
-* Build only the minified library to /bin folder with **npm run build**
+* Run all the examples on localhost:9000 with **npm run dev** or **yarn dev**
+* Build only the minified library to /bin folder with **npm run build** or **yarn build**
 * Inside /src/examples there are ... examples. Might want to take a look there first
 * Inside /src/lib there's every single file of the library itself. All two of them
 
