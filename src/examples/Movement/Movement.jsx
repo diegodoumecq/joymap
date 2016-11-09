@@ -14,6 +14,8 @@ const SIZE = {
     centerY: 300
 };
 
+// IDEA: Add another example where a new player avatar is added to the game for each new gamepad
+
 export default class Movement extends React.Component {
 
     componentWillMount() {

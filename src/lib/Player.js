@@ -57,7 +57,7 @@ export default class Player {
     aggregators: { [key: string]: any } = {};
     aggregatorCallbacks: { [key: string]: Function } = {};
 
-    constructor({ name: string, threshold = 0.3, clampThreshold = true } = {}): void {
+    constructor({ name, threshold = 0.3, clampThreshold = true } = {}): void {
         this.name = name;
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;

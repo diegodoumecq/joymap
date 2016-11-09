@@ -58,7 +58,7 @@ export default class JoyMap {
 
         const player: Player = new Player({ name, threshold, clampThreshold });
 
-        const unusedId: string = flow(
+        const unusedId: ?string = flow(
             map('id'),
             find((gamepadId: string) => !find({ gamepadId }, this.players))
         )(this.gamepads);
@@ -83,7 +83,7 @@ export default class JoyMap {
     }
 
     poll(): void {
-        this.gamepads = filter((rawGamepad: Gamepad) =>
+        this.gamepads = filter((rawGamepad: ?Gamepad) =>
             rawGamepad
             && rawGamepad.connected
             && rawGamepad.buttons.length
@@ -98,7 +98,7 @@ export default class JoyMap {
                 player.connect(unusedGamepadIds[0]);
             }
 
-            const gamepad: Gamepad = find({ id: player.gamepadId }, this.gamepads);
+            const gamepad: ?Gamepad = find({ id: player.gamepadId }, this.gamepads);
 
             if (!player.connected) {
                 if (gamepad) {
