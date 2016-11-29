@@ -2,7 +2,7 @@ import { omit, includes } from 'lodash/fp';
 import { mapValues } from 'lodash';
 
 type IPoint = { x: number, y: number };
-type IAxis = {
+type IStick = {
     value: IPoint,
     pressed: boolean,
     justChanged: boolean,
@@ -10,9 +10,12 @@ type IAxis = {
     invertY: boolean
 };
 type IButton = { value: number, pressed: boolean, justChanged: boolean };
-type IAlias = { name: string, isButton: boolean };
+// TODO check why flow complains when I remove the "{ name: string } | ..."
+type IButtonAlias = { name: string } | { name: string, value: number, pressed: boolean, justChanged: boolean };
+type IStickAlias = { name: string } | { name: string, value: IPoint, pressed: boolean, justChanged: boolean, invertX: boolean, invertY: boolean };
+type IAggregator = { callback: Function, value: any };
 
-export const axisMap = {
+export const sticksMap = {
     L: (pad: Gamepad, invertX: boolean = false, invertY: boolean = false) => ({
         x: !invertX ? pad.axes[0] : -1 * pad.axes[0],
         y: !invertY ? pad.axes[1] : -1 * pad.axes[1],
@@ -47,15 +50,14 @@ export default class Player {
     name: string;
     threshold: number;
     clampThreshold: boolean;
-    sticks: { [key: string]: IAxis };
+    sticks: { [key: string]: IStick };
     buttons: { [key: string]: IButton };
 
     gamepadId: ?string = null;
     connected: boolean = false;
-    aliases: { [key: string]: IAlias } = {};
-
-    aggregators: { [key: string]: any } = {};
-    aggregatorCallbacks: { [key: string]: Function } = {};
+    buttonAliases: { [key: string]: IButtonAlias } = {};
+    stickAliases: { [key: string]: IStickAlias } = {};
+    aggregators: { [key: string]: IAggregator } = {};
 
     constructor({ name, threshold = 0.3, clampThreshold = true } = {}): void {
         this.name = name;
@@ -72,7 +74,7 @@ export default class Player {
             justChanged: false
         }));
 
-        this.sticks = mapValues(axisMap, () => ({
+        this.sticks = mapValues(sticksMap, () => ({
             value: { x: 0, y: 0 },
             pressed: false,
             justChanged: false,
@@ -99,40 +101,41 @@ export default class Player {
     }
 
     setAggregator(aggregatorName: string, callback: Function): void {
-        this.aggregatorCallbacks[aggregatorName] = callback;
-        this.aggregators[aggregatorName] = null;
+        this.aggregators[aggregatorName] = { callback, value: null };
     }
 
     removeAggregator(aggregatorName: string): void {
-        this.aggregatorCallbacks = omit([aggregatorName], this.aggregatorCallbacks);
         this.aggregators = omit([aggregatorName], this.aggregators);
     }
 
     cleanAggregators(): void {
-        this.aggregatorCallbacks = {};
         this.aggregators = {};
     }
 
+    // TODO Let one alias trigger by more than one input
     setAlias(aliasName: string, buttonName: string): void {
-        const isButton = includes(buttonName, Object.keys(this.buttons));
-        const isAxis = includes(buttonName, Object.keys(this.sticks));
-
-        if (isButton || isAxis) {
-            this.aliases[aliasName] = {
-                isButton,
-                name: buttonName
-            };
+        if (includes(buttonName, Object.keys(this.buttons))) {
+            this.buttonAliases[aliasName] = { name: buttonName };
+        } else if (includes(buttonName, Object.keys(this.sticks))) {
+            this.stickAliases[aliasName] = { name: buttonName };
         } else {
-            console.error(`joymap.players.${this.name}.setAlias didn't find '${buttonName}' in any of the availale inputs for alias ${aliasName}`);
+            console.error(`joymap.players.${this.name}.setAlias(${aliasName}, ${buttonName}) couldn't find '${buttonName}' in any of the available inputs`);
         }
     }
 
     removeAlias(aliasName: string): void {
-        this.aliases = omit([aliasName], this.aliases);
+        if (includes(aliasName, Object.keys(this.buttonAliases))) {
+            this.buttonAliases = omit([aliasName], this.buttonAliases);
+        } else if (includes(aliasName, Object.keys(this.stickAliases))) {
+            this.stickAliases = omit([aliasName], this.stickAliases);
+        } else {
+            console.error(`joymap.players.${this.name}.removeAlias(${aliasName}) couldn't find the alias '${aliasName}'`);
+        }
     }
 
     cleanAliases(): void {
-        this.aliases = {};
+        this.buttonAliases = {};
+        this.stickAliases = {};
     }
 
     destroy(): void {
@@ -144,7 +147,7 @@ export default class Player {
 
     update(gamepad: Gamepad): void {
         this.updateButtons(gamepad);
-        this.updateAxis(gamepad);
+        this.updateStick(gamepad);
         this.updateAliases();
         this.updateAggregators(gamepad);
     }
@@ -177,7 +180,7 @@ export default class Player {
         });
     }
 
-    getAxisValue(sticks: IPoint = { x: 0, y: 0 }): IPoint {
+    getStickValue(sticks: IPoint = { x: 0, y: 0 }): IPoint {
         if (this.clampThreshold
         && Math.abs(sticks.x) < this.threshold && Math.abs(sticks.y) < this.threshold) {
             return { x: 0, y: 0 };
@@ -185,50 +188,39 @@ export default class Player {
         return sticks;
     }
 
-    isAxisSignificant(sticks: IPoint = { x: 0, y: 0 }): boolean {
+    isStickSignificant(sticks: IPoint = { x: 0, y: 0 }): boolean {
         return !!sticks && (!!sticks.x || !!sticks.y) && (Math.abs(sticks.x) > this.threshold || Math.abs(sticks.y) > this.threshold);
     }
 
-    updateAxis(gamepad: Gamepad): void {
-        const prevAxis = this.sticks;
+    updateStick(gamepad: Gamepad): void {
+        const prevStick = this.sticks;
 
-        this.sticks = mapValues(axisMap, (mapper: Function, inputName: string) => {
-            const previous: IAxis = prevAxis[inputName];
+        this.sticks = mapValues(sticksMap, (mapper: Function, inputName: string) => {
+            const previous: IStick = prevStick[inputName];
             const { invertX, invertY } = previous;
             const value: IPoint = mapper(gamepad, invertX, invertY);
-            const justChanged = this.isAxisSignificant(value) !== this.isAxisSignificant(previous.value);
+            const justChanged = this.isStickSignificant(value) !== this.isStickSignificant(previous.value);
 
             return {
-                value: this.getAxisValue(value),
-                pressed: this.isAxisSignificant(value),
+                value: this.getStickValue(value),
+                pressed: this.isStickSignificant(value),
                 justChanged, invertX, invertY
             };
         });
     }
 
-    // REVIEW: change into buttonAliases and AxisAliases? removes the necessity of isButton
     updateAliases(): void {
-        this.aliases = mapValues(this.aliases, (alias: IAlias) => {
-            const { name, isButton } = alias;
-
-            if (!isButton) {
-                return {
-                    ...this.sticks[name],
-                    name, isButton
-                };
-            } else {
-                return {
-                    ...this.buttons[name],
-                    name, isButton
-                };
-            }
-        });
+        this.buttonAliases = mapValues(this.buttonAliases, (alias: IButtonAlias) => ({ ...alias, ...this.buttons[alias.name] }));
+        this.stickAliases = mapValues(this.stickAliases, (alias: IStickAlias) => ({ ...alias, ...this.sticks[alias.name] }));
     }
 
-    // IDEA: Change aggregators and aggregatorCallbacks into a single object
     updateAggregators(gamepad: Gamepad): void {
-        this.aggregators = mapValues(this.aggregators, (prevValue: any, aggregatorName: string) => {
-            return this.aggregatorCallbacks[aggregatorName](this, prevValue, gamepad);
+        this.aggregators = mapValues(this.aggregators, (aggregator: IAggregator) => {
+            const { callback, value } = aggregator;
+            return {
+                value: aggregator.callback(this, value, gamepad),
+                callback
+            };
         });
     }
 }

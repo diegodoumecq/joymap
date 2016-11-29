@@ -68,7 +68,7 @@ export default class Movement extends React.Component {
         const { ctx } = this.state;
 
         // Draw background color, clearing previous image
-        ctx.fillStyle = !this.mainPlayer.aggregators.AnyButton ? '#EEE' : '#DEE';
+        ctx.fillStyle = !this.mainPlayer.aggregators.AnyButton.value ? '#EEE' : '#DEE';
         ctx.fillRect(0, 0, SIZE.width, SIZE.height);
 
         // Rotate whole canvas

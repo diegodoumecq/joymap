@@ -1,7 +1,6 @@
 import JoyMap from '../../lib/JoyMap';
 import { noop, reduce } from 'lodash/fp';
-
-// Example of usage:
+import { join } from 'lodash';
 
 // Threshold for analog inputs
 const threshold = 0.2;
@@ -31,15 +30,18 @@ mainPlayer.setAggregator('CountFace', (player, prevValue, gamepad) => {
     return A.value + B.value + X.value + Y.value;
 });
 
-// Commented out due to noisier-than-desired output, but is still a nice example
-// mainPlayer.setAggregator('CountAll', (player, prevValue, gamepad) => {
-//     const buttonCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttons);
-//     const axisCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.sticks);
-//     const aliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.aliases);
+mainPlayer.setAggregator('CountAll', (player, prevValue, gamepad) => {
+    const buttonCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttons);
+    const stickCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.sticks);
+    const aliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttonAliases);
+    const total = buttonCount + stickCount + aliasCount;
 
-//     return `${buttonCount + axisCount + aliasCount}(Btn:${buttonCount} Axes:${axisCount} Alias:${aliasCount})`;
-// });
-
+    if (total > 0) {
+        return `${buttonCount + stickCount + aliasCount}(Btn:${buttonCount} Sticks:${stickCount} Alias:${aliasCount})`;
+    } else {
+        return null;
+    }
+});
 
 function printState(pressed) {
     return pressed ? 'pressed' : 'released';
@@ -49,58 +51,53 @@ function buttonToString(buttonName, { pressed, value }) {
     return `${buttonName}: ${printState(pressed)}(${value})`;
 }
 
-function axisToString(axisName, { pressed, value }) {
-    return `${axisName}: ${printState(pressed)}(x: ${value.x}, y: ${value.y})`;
+function stickToString(stickName, { pressed, value }) {
+    return `${stickName}: ${printState(pressed)}(x: ${value.x}, y: ${value.y})`;
 }
 
 // On each frame log all the activated input
 function step() {
-    const buttons = reduce((result, buttonName) => {
-        const button = mainPlayer.buttons[buttonName];
+    const result = join([
+        reduce((result, buttonName) => {
+            const button = mainPlayer.buttons[buttonName];
 
-        if (button.pressed || button.justChanged) {
-            return `${result} ${buttonToString(buttonName, button)},`;
-        }
-        
-        return result;
-    }, '', Object.keys(mainPlayer.buttons));
-
-    const sticks = reduce((result, axisName) => {
-        const stick = mainPlayer.sticks[axisName];
-
-        if (stick.pressed || stick.justChanged) {
-            return `${result} ${axisToString(axisName, stick)},`;
-        }
-        
-        return result;
-    }, '', Object.keys(mainPlayer.sticks));
-
-    const aliases = reduce((result, aliasName) => {
-        const aliasInput = mainPlayer.aliases[aliasName];
-
-        if (aliasInput.pressed || aliasInput.justChanged) {
-            if (aliasInput.isButton) {
-                return `${result} ${buttonToString(aliasName, aliasInput)},`;
-            } else {
-                return `${result} ${axisToString(aliasName, aliasInput)},`;
+            if (button.pressed || button.justChanged) {
+                return `${result} ${buttonToString(buttonName, button)},`;
             }
-        }
-        
-        return result;
-    }, '', Object.keys(mainPlayer.aliases));
+            
+            return result;
+        }, '', Object.keys(mainPlayer.buttons)),
+        reduce((result, stickName) => {
+            const stick = mainPlayer.sticks[stickName];
 
-    const aggregators = reduce((result, aggregatorName) => {
-        const stuff = mainPlayer.aggregators[aggregatorName];
+            if (stick.pressed || stick.justChanged) {
+                return `${result} ${stickToString(stickName, stick)},`;
+            }
+            
+            return result;
+        }, '', Object.keys(mainPlayer.sticks)),
+        reduce((result, aliasName) => {
+            const aliasInput = mainPlayer.buttonAliases[aliasName];
 
-        if (!!stuff) {
-            return `${result} ${aggregatorName}: ${stuff},`;
-        }
-        
-        return result;
-    }, '', Object.keys(mainPlayer.aggregators));
+            if (aliasInput.pressed || aliasInput.justChanged) {
+                return `${result} ${buttonToString(aliasName, aliasInput)},`;
+            }
+            
+            return result;
+        }, '', Object.keys(mainPlayer.buttonAliases)),
+        reduce((result, aggregatorName) => {
+            const stuff = mainPlayer.aggregators[aggregatorName];
 
-    if (!!buttons || !!sticks || !!aliases || !!aggregators) {
-        console.log((buttons + sticks + aliases + aggregators).slice(0, -1));
+            if (!!stuff && !!stuff.value) {
+                return `${result} ${aggregatorName}: ${stuff.value},`;
+            }
+            
+            return result;
+        }, '', Object.keys(mainPlayer.aggregators))
+    ], '');
+    
+    if (result) {
+        console.log(result.slice(0, -1));
     }
 }
 
