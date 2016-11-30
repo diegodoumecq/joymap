@@ -1,4 +1,7 @@
-import { omit, includes } from 'lodash/fp';
+import {
+    omit, includes, isArray,
+    assign, difference, forEach
+} from 'lodash/fp';
 import { mapValues } from 'lodash';
 
 type IPoint = { x: number, y: number };
@@ -10,9 +13,9 @@ type IStick = {
     invertY: boolean
 };
 type IButton = { value: number, pressed: boolean, justChanged: boolean };
-// TODO check why flow complains when I remove the "{ name: string } | ..."
-type IButtonAlias = { name: string } | { name: string, value: number, pressed: boolean, justChanged: boolean };
-type IStickAlias = { name: string } | { name: string, value: IPoint, pressed: boolean, justChanged: boolean, invertX: boolean, invertY: boolean };
+// TODO check why flow complains when I remove the "{ inputs: string } | ..."
+type IButtonAlias = { inputs: string[] } | { inputs: string[], value: number, pressed: boolean, justChanged: boolean };
+type IStickAlias = { inputs: string[] } | { inputs: string[], value: IPoint, pressed: boolean, justChanged: boolean };
 type IAggregator = { callback: Function, value: any };
 
 export const sticksMap = {
@@ -45,6 +48,10 @@ export const buttonsMap = {
     select: (pad: Gamepad) => pad.buttons[8].value,
     home: () => 0
 };
+
+function addAlias(alias = {}, inputs) {
+    return assign(alias, { inputs: [...(alias || []), ...inputs] });
+}
 
 export default class Player {
     name: string;
@@ -112,14 +119,17 @@ export default class Player {
         this.aggregators = {};
     }
 
-    // TODO Let one alias trigger by more than one input
-    setAlias(aliasName: string, buttonName: string): void {
-        if (includes(buttonName, Object.keys(this.buttons))) {
-            this.buttonAliases[aliasName] = { name: buttonName };
-        } else if (includes(buttonName, Object.keys(this.sticks))) {
-            this.stickAliases[aliasName] = { name: buttonName };
+    setAlias(aliasName: string, inputs: string | string[]): void {
+        if (!isArray(inputs)) {
+            inputs = [inputs];
+        }
+
+        if (difference(inputs, Object.keys(this.buttons)).length === 0) {
+            this.buttonAliases[aliasName] = addAlias(this.buttonAliases[aliasName], inputs);
+        } else if (difference(inputs, Object.keys(this.sticks)).length === 0) {
+            this.stickAliases[aliasName] = addAlias(this.stickAliases[aliasName], inputs);
         } else {
-            console.error(`joymap.players.${this.name}.setAlias(${aliasName}, ${buttonName}) couldn't find '${buttonName}' in any of the available inputs`);
+            console.error(`joymap.players.${this.name}.setAlias(${aliasName}, ${input}) couldn't find '${input}' in any of the available inputs`);
         }
     }
 
@@ -210,8 +220,51 @@ export default class Player {
     }
 
     updateAliases(): void {
-        this.buttonAliases = mapValues(this.buttonAliases, (alias: IButtonAlias) => ({ ...alias, ...this.buttons[alias.name] }));
-        this.stickAliases = mapValues(this.stickAliases, (alias: IStickAlias) => ({ ...alias, ...this.sticks[alias.name] }));
+        // When an alias has more than 1 button assigned to it, use for reference the one that's pressed the most
+        this.buttonAliases = mapValues(this.buttonAliases, (alias: IButtonAlias) => {
+            let value = 0;
+
+            forEach(name => {
+                if (this.buttons[name].value > value) {
+                    value = this.buttons[name].value;
+                }
+            }, alias.inputs);
+
+            return {
+                inputs: alias.inputs,
+                value,
+                pressed: this.isButtonSignificant(value),
+                justChanged: this.isButtonSignificant(value) !== this.isButtonSignificant(alias.value)
+            };
+        });
+
+        // When an alias has more than 1 stick assigned to it, do an average of the two
+        this.stickAliases = mapValues(this.stickAliases, (alias: IStickAlias) => {
+            let xCount = 0;
+            let yCount = 0;
+            let count = 0;
+
+            forEach(name => {
+                if (this.sticks[name].pressed) {
+                    const { x, y } = this.sticks[name].value;
+                    xCount += x;
+                    yCount += y;
+                    count += 1;
+                }
+            }, alias.inputs);
+
+            const value = {
+                x: count === 0 ? 0 : xCount / count,
+                y: count === 0 ? 0 : yCount / count
+            };
+
+            return {
+                inputs: alias.inputs,
+                value,
+                pressed: this.isStickSignificant(value),
+                justChanged: this.isStickSignificant(value) !== this.isStickSignificant(alias.value)
+            };
+        });
     }
 
     updateAggregators(gamepad: Gamepad): void {

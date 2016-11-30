@@ -8,17 +8,14 @@ const threshold = 0.2;
 const joyMap = new JoyMap({ threshold });
 const mainPlayer = joyMap.addPlayer('mainPlayer');
 
-mainPlayer.sticks.L.invertX = true;
-mainPlayer.sticks.L.invertY = true;
-
-mainPlayer.setAlias('Jump', 'A');
+mainPlayer.setAlias('Jump', ['A', 'X', 'Y', 'L2', 'R2']);
 mainPlayer.setAlias('Shoot', 'B');
 mainPlayer.setAlias('LookUp', 'dpadUp');
 mainPlayer.setAlias('LookDown', 'dpadDown');
 mainPlayer.setAlias('LookLeft', 'dpadLeft');
 mainPlayer.setAlias('LookRight', 'dpadRight');
+mainPlayer.setAlias('StickAverage', ['L', 'R']);
 
-mainPlayer.setAggregator('Move', player => player.sticks.L.pressed);
 mainPlayer.setAggregator('Point', player => player.sticks.R.pressed);
 mainPlayer.setAggregator('MovePoint', (player, prevValue, gamepad) => {
     const { L, R } = player.sticks;
@@ -33,11 +30,12 @@ mainPlayer.setAggregator('CountFace', (player, prevValue, gamepad) => {
 mainPlayer.setAggregator('CountAll', (player, prevValue, gamepad) => {
     const buttonCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttons);
     const stickCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.sticks);
-    const aliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttonAliases);
-    const total = buttonCount + stickCount + aliasCount;
+    const buttonAliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttonAliases);
+    const stickAliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.stickAliases);
+    const total = buttonCount + stickCount + buttonAliasCount + stickAliasCount;
 
     if (total > 0) {
-        return `${buttonCount + stickCount + aliasCount}(Btn:${buttonCount} Sticks:${stickCount} Alias:${aliasCount})`;
+        return `${total}(Btn:${buttonCount} Sticks:${stickCount} Aliases:${buttonAliasCount + stickAliasCount})`;
     } else {
         return null;
     }
@@ -55,10 +53,16 @@ function stickToString(stickName, { pressed, value }) {
     return `${stickName}: ${printState(pressed)}(x: ${value.x}, y: ${value.y})`;
 }
 
+let showButtons = true;
+let showSticks = true;
+let showButtonAliases = true;
+let showStickAliases = true;
+let showAggregators = true;
+
 // On each frame log all the activated input
 function step() {
     const result = join([
-        reduce((result, buttonName) => {
+        !showButtons ? '' : reduce((result, buttonName) => {
             const button = mainPlayer.buttons[buttonName];
 
             if (button.pressed || button.justChanged) {
@@ -67,7 +71,7 @@ function step() {
             
             return result;
         }, '', Object.keys(mainPlayer.buttons)),
-        reduce((result, stickName) => {
+        !showSticks ? '' : reduce((result, stickName) => {
             const stick = mainPlayer.sticks[stickName];
 
             if (stick.pressed || stick.justChanged) {
@@ -76,7 +80,7 @@ function step() {
             
             return result;
         }, '', Object.keys(mainPlayer.sticks)),
-        reduce((result, aliasName) => {
+        !showButtonAliases ? '' : reduce((result, aliasName) => {
             const aliasInput = mainPlayer.buttonAliases[aliasName];
 
             if (aliasInput.pressed || aliasInput.justChanged) {
@@ -85,7 +89,16 @@ function step() {
             
             return result;
         }, '', Object.keys(mainPlayer.buttonAliases)),
-        reduce((result, aggregatorName) => {
+        !showStickAliases ? '' : reduce((result, aliasName) => {
+            const aliasInput = mainPlayer.stickAliases[aliasName];
+
+            if (aliasInput.pressed || aliasInput.justChanged) {
+                return `${result} ${stickToString(aliasName, aliasInput)},`;
+            }
+            
+            return result;
+        }, '', Object.keys(mainPlayer.stickAliases)),
+        !showAggregators ? '' : reduce((result, aggregatorName) => {
             const stuff = mainPlayer.aggregators[aggregatorName];
 
             if (!!stuff && !!stuff.value) {
