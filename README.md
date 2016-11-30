@@ -79,10 +79,12 @@ Aliases are simple remappings of inputs.
     player2.setAlias('Shoot', ['B', 'X', 'Y']);
     player2.setAlias('Move', 'R');
 
-Their results are stored inside either **player.buttonAliases** or **player2.stickAliases**, depending on the type of input, as you've named them. 
+Their results are stored inside either **player2.buttonAliases** or **player2.stickAliases**, depending on the type of input, as you've named them. 
 
 **player2.buttonAliases.Jump** would contain all of the data found in **player2.buttons.A** but with one value added: **inputs**, a list of originating inputs.
+
 **player2.buttonAliases.Shoot** is either **player2.buttons.B**, **X** or **Y**, depending on which one is currently pressed.
+
 **player2.stickAliases.Move** is again the same thing as before except that we are dealing with the stick data of **player2.sticks.R**. Stick aliases however differ from buttons in the sense that not all data is copied over (if the stick is inverted for example) and if more than one stick name is given, then the resulting alias is the combination of sticks (Two opposing sticks result in an alias value of { x: 0, y: 0 }).
 
 ### Aggregators (name change pending)
