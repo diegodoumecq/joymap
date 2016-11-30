@@ -230,6 +230,8 @@ export default class Player {
                 }
             }, alias.inputs);
 
+            value = this.getButtonValue(value);
+
             return {
                 inputs: alias.inputs,
                 value,
@@ -253,10 +255,10 @@ export default class Player {
                 }
             }, alias.inputs);
 
-            const value = {
+            const value = this.getStickValue({
                 x: count === 0 ? 0 : xCount / count,
                 y: count === 0 ? 0 : yCount / count
-            };
+            });
 
             return {
                 inputs: alias.inputs,

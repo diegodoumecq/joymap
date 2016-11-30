@@ -53,13 +53,13 @@ function stickToString(stickName, { pressed, value }) {
     return `${stickName}: ${printState(pressed)}(x: ${value.x}, y: ${value.y})`;
 }
 
-let showButtons = true;
-let showSticks = true;
-let showButtonAliases = true;
-let showStickAliases = true;
-let showAggregators = true;
+const showButtons = true;
+const showSticks = true;
+const showButtonAliases = true;
+const showStickAliases = true;
+const showAggregators = true;
 
-// On each frame log all the activated input
+// On each frame log all the activated inputs, aliases and aggregators
 function step() {
     const result = join([
         !showButtons ? '' : reduce((result, buttonName) => {
