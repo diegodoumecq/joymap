@@ -76,11 +76,14 @@ To make this as painless as possible, JoyMap offers the methods **joyMap.start()
 Aliases are simple remappings of inputs.
 
     player2.setAlias('Jump', 'A');
-    player2.setAlias('Shoot', 'B');
+    player2.setAlias('Shoot', ['B', 'X', 'Y']);
+    player2.setAlias('Move', 'R');
 
 Their results are stored inside player.aliases as you've named them. 
 
-**player2.aliases.Jump** would contain all of the data found in **player2.buttons.A** but with two values added { name, isButton }; **name** being the name of the originating input and the boolean **isButton** specifying the type of said input.
+**player2.buttonAliases.Jump** would contain all of the data found in **player2.buttons.A** but with one value added: **inputs**, a list of originating inputs.
+**player2.buttonAliases.Shoot** is either **player2.buttons.B**, **X** or **Y**, depending on which one is currently pressed.
+**player2.stickAliases.Move** is again the same thing as before except that we are dealing with the stick data of **player2.sticks.R**.
 
 ### Aggregators (name change pending)
 
@@ -95,35 +98,39 @@ The callback will be given three arguments: the player itself that is currently 
 
 ### Coming soon(ish):
 
-1) Implement the listen function in Player for allowing the user to rebind a button to whatever is pressed next
+1) Make it easier for the user to change the default mappings for buttons and sticks
+  
+  * Right now it is assumed that the user will always use a controller with XInput, but the web standard allows for any kind of weird stuff as long as it consists of buttons and sticks (a flight simulator cockpit for example). It is up to the dev to support that strange stuff and this library needs to make it easier.
+
+2) Implement the listen function in Player for allowing the user to rebind a button to whatever is pressed next
 
   * Add that to the examples
 
-2) Include the ablity to add/remove players from the html example
+3) Include the ablity to add/remove players from the html example
 
-3) Gamepad rebinding
+4) Gamepad rebinding
 
   * Add a few basic functions to handle a player changing controllers
   * Add a listen function to joymap for allowing the user to use the next gamepad to press anything (or a specified button)
 
-4) Add a 3d example using threejs
+5) Add a 3d example using threejs
 
-5) Add an event system
+6) Might want to find a better name than "Aggregators"
+
+7) Add an event system? Maybe?
 
   * The ability to handle inputs as events
   * player.addEvent('A.justPressed', () => console.log('jump!'))
   * player.addEvent('B', () => console.log('run!'))
   * Also should handle connecting/disconnecting gamepads
 
-6) Might want to find a better name than "Aggregators"
-
-7) Controller types
+8) Controller types
 
   * Add support for identifying types of controllers (need to wait for standarization between browsers)
   * Will be used for showing the right button prompts in-game
   * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
 
-8) Rumble support 
+9) Rumble support 
 
   * Check later for real support. All we have right now is for mobile devices
   * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
