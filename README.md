@@ -20,8 +20,8 @@ Run **npm install joymap** or **yarn add joymap**
 * Install all the dependencies with **npm install** or **yarn**
 * Run all the examples on localhost:9000 with **npm run dev** or **yarn dev**
 * Build only the minified library to /bin folder with **npm run build** or **yarn build**
-* Inside /src/examples there are ... examples. Might want to take a look there first
-* Inside /src/lib there's every single file of the library itself. All two of them
+* Inside /examples there are ... examples. Might want to take a look there first
+* Inside /src there's every single file of the library itself. All two of them
 
 ### Initialization and usage
 
@@ -50,7 +50,7 @@ As you can see in the example above, you can create as many players as you'd lik
 
 Once **joyMap.start()** is called, the library will start polling navigator.getGamepads on each window.requestAnimationFrame. You can even avoid the start function entirely and call **joyMap.poll()** yourself if you need to control exactly when the polling happens.
 
-For more a in-depth view on what the library supports and how, do please look at the examples in src/examples.
+For more a in-depth view on what the library supports and how, do please look at the examples in /examples.
 
 ### What's the deal with that ... polling stuff?
 
@@ -128,7 +128,7 @@ The callback will be given three arguments: the player itself that is currently 
 
 8) Controller types
 
-  * Add support for identifying types of controllers (need to wait for standarization between browsers)
+  * Add support for identifying types of controllers (need to wait for standardization between browsers)
   * Will be used for showing the right button prompts in-game
   * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
 
