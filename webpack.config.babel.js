@@ -1,4 +1,4 @@
-import { LoaderOptionsPlugin } from 'webpack';
+import { DefinePlugin, LoaderOptionsPlugin } from 'webpack';
 import path from 'path';
 
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -11,18 +11,15 @@ import Autoprefixer from 'autoprefixer';
 const port = 9000;
 const bundleFolder = 'devBundle';
 const binPath = path.resolve(__dirname, bundleFolder);
-const entryPath = path.resolve(__dirname, 'src');
+const entryPath = path.resolve(__dirname, 'examples');
+const libPath = path.resolve(__dirname, 'src');
 const publicPath = path.resolve(__dirname, 'public');
 
 export default {
     devServer: {
         historyApiFallback: true,
         hot: true,
-        inline: true,
-        progress: true,
-        colors: true,
-        port: port,
-        outputPath: binPath,
+        port,
         contentBase: entryPath
     },
 
@@ -35,62 +32,68 @@ export default {
         filename: 'bundle.js'
     },
 
+    resolve: {
+        extensions: ['.js', '.jsx'],
+        modules: ['node_modules']
+    },
+
     module: {
         rules: [{
             test: /\.js[x]?$/,
-            use: ['babel'],
-            include: entryPath
+            loader: 'babel-loader',
+            include: [entryPath, libPath]
         }, {
             test: /\.styl$/,
-            use: ['style', 'css', 'postcss', 'stylus']
-        },  {
+            loaders: ['style-loader', 'css-loader', 'postcss-loader', 'stylus-loader']
+        }, {
             test: /\.css$/,
-            use: ['style', 'css', 'postcss']
+            loaders: ['style-loader', 'css-loader', 'postcss-loader']
         }, {
             test: /\.png$/,
-            use: ['url'],
-            query: {
+            loader: 'url-loader',
+            options: {
                 limit: '10000',
                 mimetype: 'application/png'
             }
         }, {
-            test: /\.woff[2]$/,
-            use: ['url'],
-            query: {
+            test: /\.woff[2]?$/,
+            loader: 'url-loader',
+            options: {
                 limit: '10000',
                 mimetype: 'application/font-woff'
             }
         }, {
             test: /\.ttf$/,
-            use: ['url'],
-            query: {
+            loader: 'url-loader',
+            options: {
                 limit: '10000',
                 mimetype: 'application/octet-stream'
             }
         }, {
             test: /\.eot$/,
-            use: ['file']
+            loader: 'file-loader'
         }, {
             test: /\.svg$/,
-            use: ['url'],
-            query: {
+            loader: 'url-loader',
+            options: {
                 limit: '10000',
                 mimetype: 'image/svg+xml'
             }
         }]
     },
 
-    resolve: {
-        extensions: ['.js', '.jsx'],
-        modules: ['node_modules']
-    },
-
     plugins: [
+        new DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+            }
+        }),
+
         new WriteFilePlugin(),
 
         new CleanWebpackPlugin([bundleFolder], {
             root: __dirname,
-            verbose: true, 
+            verbose: true,
             dry: false
         }),
 

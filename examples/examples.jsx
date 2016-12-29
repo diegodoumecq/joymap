@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 
-import { startConsole, stopConsole } from './examples/DevConsole/DevConsole';
-import Movement from './examples/Movement/Movement.jsx';
-import Display from './examples/HTML/Display.jsx';
+import { startConsole, stopConsole } from './DevConsole/DevConsole';
+import Movement from './Movement/Movement.jsx';
+import Display from './HTML/Display.jsx';
 
 import './main.styl';
 
@@ -15,12 +15,12 @@ const PAGES = {
 };
 
 class App extends React.Component {
-    
+
     state = {
         option: PAGES.None
     };
 
-    handleChange = (event) => {
+    handleChange = event => {
         if (event.target.value !== this.state.option) {
             if (event.target.value === PAGES.DevConsole) {
                 startConsole();
@@ -33,20 +33,12 @@ class App extends React.Component {
     };
 
     renderComponent() {
-        switch(this.state.option) {
-            case PAGES.Display: {
-                return <Display />;
-            }
-            case PAGES.DevConsole: {
-                return <h2 className="console-example">Open the dev console to see the gamepad logs</h2>;
-            }
-            case PAGES.Movement: {
-                return <Movement />;
-            }
-            default:
-            case PAGES.None: {
-                return null;
-            }
+        switch (this.state.option) {
+        case PAGES.Display: return <Display />;
+        case PAGES.DevConsole: return <h2 className="console-example">Open the dev console to see the gamepad logs</h2>;
+        case PAGES.Movement: return <Movement />;
+        default:
+        case PAGES.None: return null;
         }
     }
 

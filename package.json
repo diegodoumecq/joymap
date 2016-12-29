@@ -1,46 +1,76 @@
 {
   "name": "joymap",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A Gamepad API wrapper and mapping tool to make interfacing with gamepads a bliss.",
   "main": "./bin/joymap.min.js",
   "scripts": {
     "dev": "webpack-dev-server --hot",
-    "build": "set NODE_ENV=production&& webpack --config webpack.build.config.babel.js"
+    "build": "cross-env NODE_ENV=production webpack --config webpack.build.config.babel.js",
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "babel-register",
+      "./test/setup-browser-env.js"
+    ],
+    "babel": "inherit",
+    "files": [
+      "src/**/*.test.js",
+      "test/**/*.test.js"
+    ],
+    "source": [
+      "**/*.{js,jsx}",
+      "!node_modules/**/*"
+    ],
+    "concurrency": 5,
+    "failFast": true
   },
   "license": "MIT",
   "dependencies": {
+    "autoprefixer": "^6.3.7",
+    "ava": "^0.17.0",
+    "babel-polyfill": "^6.20.0",
+    "browser-env": "^2.0.19",
     "classnames": "^2.2.5",
+    "clean-webpack-plugin": "^0.1.10",
     "color-hash": "^1.0.3",
-    "lodash": "^4.16.4",
-    "react": "^15.3.1",
-    "react-dom": "^15.3.1",
+    "copy-webpack-plugin": "^3.0.1",
+    "lodash": "^4.17.3",
+    "postcss-smart-import": "^0.4.3",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
     "three": "^0.81.2",
-    "tinycolor2": "^1.4.1"
+    "tinycolor2": "^1.4.1",
+    "webpack": "2.2.0-rc.3",
+    "write-file-webpack-plugin": "^3.1.8"
   },
   "devDependencies": {
-    "autoprefixer": "^6.3.7",
-    "babel-core": "^6.14.0",
-    "babel-loader": "^6.2.5",
-    "babel-plugin-lodash": "^3.2.8",
+    "babel-core": "^6.21.0",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-lodash": "^3.2.11",
     "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-plugin-typecheck": "^3.9.0",
     "babel-preset-latest": "^6.16.0",
-    "babel-preset-react": "^6.11.1",
-    "babel-preset-stage-0": "^6.5.0",
-    "clean-webpack-plugin": "^0.1.10",
-    "copy-webpack-plugin": "^3.0.1",
-    "css-loader": "^0.23.1",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-register": "^6.18.0",
+    "cross-env": "^3.1.3",
+    "css-loader": "^0.26.1",
+    "empty": "^0.10.1",
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-flowtype": "^2.29.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-react": "^6.8.0",
     "file-loader": "^0.9.0",
-    "postcss-loader": "^0.9.1",
-    "postcss-modules": "^0.1.3",
-    "postcss-smart-import": "^0.4.3",
+    "flow-bin": "^0.37.4",
+    "postcss-loader": "^1.2.1",
+    "postcss-modules": "^0.5.2",
     "style-loader": "^0.13.1",
     "stylus": "^0.54.5",
-    "stylus-loader": "^2.3.1",
+    "stylus-loader": "^2.4.0",
     "url-loader": "^0.5.7",
-    "webpack": "2.1.0-beta.25",
-    "webpack-dev-server": "^1.16.2",
-    "webpack-hot-middleware": "^2.12.2",
-    "write-file-webpack-plugin": "^3.1.8"
+    "webpack-dev-server": "^2.2.0-rc.0",
+    "webpack-hot-middleware": "^2.14.0"
   }
 }

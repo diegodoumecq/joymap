@@ -3,7 +3,7 @@ import { findDOMNode } from 'react-dom';
 
 import { some } from 'lodash/fp';
 
-import JoyMap from '../../lib/JoyMap';
+import JoyMap from '../../src/JoyMap';
 
 import './Movement.styl';
 
@@ -59,7 +59,7 @@ export default class Movement extends React.Component {
 
         // Don't assign a new angle if the stick isn't being used
         if (R.pressed) {
-            this.mascot.angle = Math.atan2(R.value.y, R.value.x) + Math.PI * 0.5;
+            this.mascot.angle = Math.atan2(R.value.y, R.value.x) + (Math.PI * 0.5);
         }
     }
 

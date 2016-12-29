@@ -1,0 +1,23 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "airbnb-base",
+    "plugin:flowtype/recommended",
+    "plugin:react/recommended"
+  ],
+  "plugins": [
+    "flowtype",
+    "react"
+  ],
+  "rules": {
+    "linebreak-style": 0,
+    "no-param-reassign": 0,
+    "indent": ["error", 4],
+    "comma-dangle": ["error", "never"],
+    "arrow-parens": ["error", "as-needed"],
+    "max-len": ["error", 120]
+  },
+  "env": {
+    "browser": true
+  }
+}

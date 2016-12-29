@@ -17,7 +17,9 @@ export default class Gamepad extends React.Component {
 
     static propTypes = {
         backgroundColor: PropTypes.string.isRequired,
-        player: PropTypes.object.isRequired
+        player: PropTypes.object.isRequired,
+        pressedColor: PropTypes.string.isRequired,
+        children: React.PropTypes.node
     };
 
     renderAnalogStick(inputName) {
@@ -31,7 +33,7 @@ export default class Gamepad extends React.Component {
                 className={inputName}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
-                    backgroundColor: buttons[inputName + '3'].pressed ? pressedColor : ''
+                    backgroundColor: buttons[`${inputName}3`].pressed ? pressedColor : ''
                 }} />);
     }
 
@@ -50,7 +52,7 @@ export default class Gamepad extends React.Component {
 
     renderShoulder(inputName) {
         const { value } = this.props.player.buttons[inputName];
-        
+
         return (
             <div
                 key={inputName}
