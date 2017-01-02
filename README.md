@@ -4,7 +4,7 @@ A Javascript Gamepad API wrapper of the much needed but seriously underpowered b
 
 ### How to install
 
-Run **npm install joymap** or **yarn add joymap**
+Run **yarn add joymap**
 
 ### Key features
 
@@ -15,13 +15,14 @@ Run **npm install joymap** or **yarn add joymap**
 * Supports functional aggregators that let the programmer combine any input and return any result
 * Button mappings are based around the XInput standard, just because it is the only one that works without strange behaviors across all browsers
 
-### How to run the examples
+### How to run all the things
 
-* Install all the dependencies with **npm install** or **yarn**
-* Run all the examples on localhost:9000 with **npm run dev** or **yarn dev**
-* Build only the minified library to /bin folder with **npm run build** or **yarn build**
-* Inside /examples there are ... examples. Might want to take a look there first
-* Inside /src there's every single file of the library itself. All two of them
+* Install all the dependencies with **yarn**
+* Run a single example at a time on localhost:9000
+  * For the React example, run **yarn react**
+  * For the canvas example, run **yarn canvas**
+  * For the dev console example, run **yarn console**
+* Build only the minified library to /bin folder with **yarn build**
 
 ### Initialization and usage
 
@@ -32,7 +33,7 @@ JoyMap is not a singleton and so, must be initialized. You can pass three option
 
 So, for example:
 
-    /... somewhere up here declared a stepFunction that does stuff on each step/
+    /... somewhere up here there's a declared stepFunction that does stuff on each step/
 
     const joyMap = new JoyMap({ threshold: 0.5, clampThreshold: true, onPoll: stepFunction });
     const player1 = joyMap.addPlayer('player1');
@@ -47,8 +48,6 @@ So, for example:
     }
 
 As you can see in the example above, you can create as many players as you'd like. Each of them will be automatically assigned a gamepad if available and each of them will stay assigned with that same gamepad even when plugged and unplugged multiple times.
-
-Once **joyMap.start()** is called, the library will start polling navigator.getGamepads on each window.requestAnimationFrame. You can even avoid the start function entirely and call **joyMap.poll()** yourself if you need to control exactly when the polling happens.
 
 For more a in-depth view on what the library supports and how, do please look at the examples in /examples.
 
@@ -66,7 +65,7 @@ To make this as painless as possible, JoyMap offers the methods **joyMap.start()
   * **pressed** indicates if the value passes the threshold
   * **justChanged** indicates if pressed has changed since the last time we polled the gamepad (useful for those actions that need to be triggered only when a button is pressed for the first time, like a mario jump)
   * **player.buttons** has these inputs: { dpadUp, dpadDown, dpadLeft, dpadRight, L1, L2, L3, R1, R2, R3, A, B, X, Y, start, select }
-* **player.sticks** is an object that consists of the left and right sticks, **L** and **R** respectively
+* **player.sticks** is an object that normally consists of the left and right sticks, **L** and **R** respectively
   * For each stick you have { value, pressed, justChanged, invertX, invertY }. They behave similarly to the buttons but the value itself is not a number but an object { x, y }
   * **x** and **y** are both numbers between -1 and 1
   * **invertX** and **invertY** do what it says on the tin and invert the individual axis of each stick independently
@@ -87,7 +86,7 @@ Their results are stored inside either **player2.buttonAliases** or **player2.st
 
 **player2.stickAliases.Move** is again the same thing as before except that we are dealing with the stick data of **player2.sticks.R**. Stick aliases however differ from buttons in the sense that not all data is copied over (if the stick is inverted for example) and if more than one stick name is given, then the resulting alias is the combination of said sticks (Two opposing sticks result in an alias value of { x: 0, y: 0 }).
 
-### Aggregators (name change pending)
+### Aggregators (name change pending? maybe?)
 
 The idea behind aggregators is to provide a simple way to combine different inputs into a single unrestricted output. To add one, all we need is a name and a callback.
 
@@ -108,7 +107,7 @@ The callback will be given three arguments: the player itself that is currently 
 
   * Add that to the examples
 
-3) Include the ablity to add/remove players from the html example
+3) Include the ability to add/remove players from the react example
 
 4) Gamepad rebinding
 

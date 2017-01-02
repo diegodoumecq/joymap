@@ -15,7 +15,22 @@
     "indent": ["error", 4],
     "comma-dangle": ["error", "never"],
     "arrow-parens": ["error", "as-needed"],
-    "max-len": ["error", 120]
+    "max-len": ["error", 120],
+    "class-methods-use-this": [
+        "error", {
+            "exceptMethods": [
+              "componentDidMount",
+              "componentDidUpdate",
+              "componentWillMount",
+              "componentWillReceiveProps",
+              "componentWillUnmount",
+              "componentWillUpdate",
+              "render",
+              "shouldComponentUpdate",
+            ]
+        }
+    ]
+
   },
   "env": {
     "browser": true

@@ -1,9 +1,10 @@
 import React, { PropTypes } from 'react';
+import CSSModules from 'react-css-modules';
 
 import { map } from 'lodash/fp';
 import classnames from 'classnames';
 
-import './Gamepad.styl';
+import styles from './Gamepad.mstyl';
 
 const analogInputs = ['L', 'R'];
 const shoulderInputs = ['L2', 'L1', 'R2', 'R1'];
@@ -13,16 +14,16 @@ const digitalInputs = [
     'start', 'select', 'home'
 ];
 
-export default class Gamepad extends React.Component {
+class Gamepad extends React.Component {
 
     static propTypes = {
         backgroundColor: PropTypes.string.isRequired,
-        player: PropTypes.object.isRequired,
         pressedColor: PropTypes.string.isRequired,
+        player: PropTypes.object.isRequired,
         children: React.PropTypes.node
     };
 
-    renderAnalogStick(inputName) {
+    renderStick(inputName) {
         const { pressedColor } = this.props;
         const { sticks, buttons } = this.props.player;
         const { x, y } = sticks[inputName].value;
@@ -30,7 +31,7 @@ export default class Gamepad extends React.Component {
         return (
             <div
                 key={inputName}
-                className={inputName}
+                styleName={inputName}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
                     backgroundColor: buttons[`${inputName}3`].pressed ? pressedColor : ''
@@ -44,7 +45,7 @@ export default class Gamepad extends React.Component {
         return (
             <div
                 key={inputName}
-                className={inputName}
+                styleName={inputName}
                 style={{
                     backgroundColor: pressed ? pressedColor : ''
                 }} />);
@@ -61,7 +62,7 @@ export default class Gamepad extends React.Component {
                     width: '100%',
                     height: '100%'
                 }}>
-                <div className={inputName} />
+                <div styleName={inputName} />
             </div>);
     }
 
@@ -70,12 +71,12 @@ export default class Gamepad extends React.Component {
 
         return (
             <div
-                className={classnames('gamepad', { disconnected: !player.connected })}
+                styleName={classnames('gamepad', { disconnected: !player.connected })}
                 style={{ backgroundColor }}>
-                <div className="react-inputs">
-                    <span className="player-name" style={{ color: pressedColor }}>{player.name}</span>
-                    <div className="back" />
-                    {map(inputName => this.renderAnalogStick(inputName), analogInputs)}
+                <div styleName="react-inputs">
+                    <span styleName="player-name" style={{ color: pressedColor }}>{player.name}</span>
+                    <div styleName="back" />
+                    {map(inputName => this.renderStick(inputName), analogInputs)}
                     {map(inputName => this.renderDigital(inputName), digitalInputs)}
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                 </div>
@@ -83,3 +84,5 @@ export default class Gamepad extends React.Component {
             </div>);
     }
 }
+
+export default CSSModules(Gamepad, styles, { allowMultiple: true });

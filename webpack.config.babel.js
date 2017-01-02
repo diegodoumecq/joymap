@@ -11,101 +11,143 @@ import Autoprefixer from 'autoprefixer';
 const port = 9000;
 const bundleFolder = 'devBundle';
 const binPath = path.resolve(__dirname, bundleFolder);
-const entryPath = path.resolve(__dirname, 'examples');
+
+const entries = {
+    console: {
+        path: path.resolve(__dirname, 'examples/DevConsole'),
+        file: 'DevConsole.js'
+    },
+    react: {
+        path: path.resolve(__dirname, 'examples/React'),
+        file: 'React.jsx'
+    },
+    canvas: {
+        path: path.resolve(__dirname, 'examples/Canvas'),
+        file: 'Canvas.js'
+    }
+};
+
 const libPath = path.resolve(__dirname, 'src');
 const publicPath = path.resolve(__dirname, 'public');
 
-export default {
-    devServer: {
-        historyApiFallback: true,
-        hot: true,
-        port,
-        contentBase: entryPath
-    },
+export default function (env = {}) {
+    const entry = entries[env.example];
 
-    devtool: '#source-map',
+    return {
+        devServer: {
+            historyApiFallback: true,
+            hot: true,
+            port,
+            contentBase: entry.path
+        },
 
-    entry: path.resolve(entryPath, 'examples.jsx'),
+        devtool: '#source-map',
 
-    output: {
-        path: binPath,
-        filename: 'bundle.js'
-    },
+        entry: path.resolve(entry.path, entry.file),
 
-    resolve: {
-        extensions: ['.js', '.jsx'],
-        modules: ['node_modules']
-    },
+        output: {
+            path: binPath,
+            filename: 'bundle.js'
+        },
 
-    module: {
-        rules: [{
-            test: /\.js[x]?$/,
-            loader: 'babel-loader',
-            include: [entryPath, libPath]
-        }, {
-            test: /\.styl$/,
-            loaders: ['style-loader', 'css-loader', 'postcss-loader', 'stylus-loader']
-        }, {
-            test: /\.css$/,
-            loaders: ['style-loader', 'css-loader', 'postcss-loader']
-        }, {
-            test: /\.png$/,
-            loader: 'url-loader',
-            options: {
-                limit: '10000',
-                mimetype: 'application/png'
-            }
-        }, {
-            test: /\.woff[2]?$/,
-            loader: 'url-loader',
-            options: {
-                limit: '10000',
-                mimetype: 'application/font-woff'
-            }
-        }, {
-            test: /\.ttf$/,
-            loader: 'url-loader',
-            options: {
-                limit: '10000',
-                mimetype: 'application/octet-stream'
-            }
-        }, {
-            test: /\.eot$/,
-            loader: 'file-loader'
-        }, {
-            test: /\.svg$/,
-            loader: 'url-loader',
-            options: {
-                limit: '10000',
-                mimetype: 'image/svg+xml'
-            }
-        }]
-    },
+        resolve: {
+            extensions: ['.js', '.jsx'],
+            modules: ['node_modules']
+        },
 
-    plugins: [
-        new DefinePlugin({
-            'process.env': {
-                NODE_ENV: JSON.stringify(process.env.NODE_ENV)
-            }
-        }),
+        module: {
+            rules: [{
+                test: /\.js[x]?$/,
+                loader: 'babel-loader',
+                include: [entry.path, libPath]
+            }, {
+                test: /\.mstyl$/,
+                loaders: [{
+                    loader: 'style-loader',
+                    query: { sourceMap: true }
+                }, {
+                    loader: 'css-loader',
+                    query: {
+                        modules: true,
+                        importLoaders: 1,
+                        localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
+                    }
+                }, {
+                    loader: 'postcss-loader'
+                }, {
+                    loader: 'stylus-loader'
+                }]
+            }, {
+                test: /\.styl$/,
+                loaders: [{
+                    loader: 'style-loader',
+                    query: { sourceMap: true }
+                }, {
+                    loader: 'css-loader'
+                }, {
+                    loader: 'postcss-loader'
+                }, {
+                    loader: 'stylus-loader'
+                }]
+            }, {
+                test: /\.png$/,
+                loader: 'url-loader',
+                options: {
+                    limit: '10000',
+                    mimetype: 'application/png'
+                }
+            }, {
+                test: /\.woff[2]?$/,
+                loader: 'url-loader',
+                options: {
+                    limit: '10000',
+                    mimetype: 'application/font-woff'
+                }
+            }, {
+                test: /\.ttf$/,
+                loader: 'url-loader',
+                options: {
+                    limit: '10000',
+                    mimetype: 'application/octet-stream'
+                }
+            }, {
+                test: /\.eot$/,
+                loader: 'file-loader'
+            }, {
+                test: /\.svg$/,
+                loader: 'url-loader',
+                options: {
+                    limit: '10000',
+                    mimetype: 'image/svg+xml'
+                }
+            }]
+        },
 
-        new WriteFilePlugin(),
+        plugins: [
+            new DefinePlugin({
+                'process.env': {
+                    NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+                }
+            }),
 
-        new CleanWebpackPlugin([bundleFolder], {
-            root: __dirname,
-            verbose: true,
-            dry: false
-        }),
+            new WriteFilePlugin(),
 
-        new CopyWebpackPlugin([{ from: publicPath }]),
+            new CleanWebpackPlugin([bundleFolder], {
+                root: __dirname,
+                verbose: true,
+                dry: false
+            }),
 
-        new LoaderOptionsPlugin({
-            options: {
-                postcss: [
-                    PostcssSmartImport({}),
-                    Autoprefixer({})
-                ]
-            }
-        })
-    ]
-};
+            new CopyWebpackPlugin([{ from: publicPath }]),
+
+            new LoaderOptionsPlugin({
+                options: {
+                    postcss: [
+                        PostcssSmartImport({}),
+                        Autoprefixer({})
+                    ]
+                }
+            })
+        ]
+    };
+}

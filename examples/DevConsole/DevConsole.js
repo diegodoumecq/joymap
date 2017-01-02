@@ -1,14 +1,19 @@
-import { noop, reduce } from 'lodash/fp';
-import { join } from 'lodash';
+import { join, compact } from 'lodash/fp';
+import {
+    stringifyInputs, stringifyAggregators,
+    countPressed, renderRows
+} from './utils';
+
+import '../main.styl';
+import './DevConsole.styl';
 
 import JoyMap from '../../src/JoyMap';
 
-// Threshold for analog inputs
-const threshold = 0.2;
-
-const joyMap = new JoyMap({ threshold });
+// Initial joyMap setup
+const joyMap = new JoyMap({ threshold: 0.2 });
 const mainPlayer = joyMap.addPlayer('mainPlayer');
 
+// Set aliases
 mainPlayer.setAlias('Jump', ['A', 'X', 'Y', 'L2', 'R2']);
 mainPlayer.setAlias('Shoot', 'B');
 mainPlayer.setAlias('LookUp', 'dpadUp');
@@ -17,22 +22,20 @@ mainPlayer.setAlias('LookLeft', 'dpadLeft');
 mainPlayer.setAlias('LookRight', 'dpadRight');
 mainPlayer.setAlias('StickAverage', ['L', 'R']);
 
+// Set aggregators
 mainPlayer.setAggregator('Point', player => player.sticks.R.pressed);
-mainPlayer.setAggregator('MovePoint', (player, prevValue, rawGamepad) => { // eslint-disable-line
-    const { L, R } = player.sticks;
-    return L.pressed && R.pressed;
+mainPlayer.setAggregator('MovePoint', (player, previousValue, rawGamepad) => { // eslint-disable-line
+    return countPressed(player.sticks);
 });
-
-mainPlayer.setAggregator('CountFace', (player, prevValue, rawGamepad) => { // eslint-disable-line
+mainPlayer.setAggregator('CountFace', (player, previousValue, rawGamepad) => { // eslint-disable-line
     const { A, B, X, Y } = player.buttons;
-    return A.value + B.value + X.value + Y.value;
+    return countPressed([A, B, X, Y]);
 });
-
-mainPlayer.setAggregator('CountAll', (player, prevValue, rawGamepad) => { // eslint-disable-line
-    const buttonCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttons);
-    const stickCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.sticks);
-    const buttonAliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.buttonAliases);
-    const stickAliasCount = reduce((result, { pressed }) => result + (pressed ? 1 : 0), 0, player.stickAliases);
+mainPlayer.setAggregator('CountAll', (player, previousValue, rawGamepad) => { // eslint-disable-line
+    const buttonCount = countPressed(player.buttons);
+    const buttonAliasCount = countPressed(player.buttonAliases);
+    const stickCount = countPressed(player.sticks);
+    const stickAliasCount = countPressed(player.stickAliases);
     const total = buttonCount + stickCount + buttonAliasCount + stickAliasCount;
 
     if (total > 0) {
@@ -42,85 +45,69 @@ mainPlayer.setAggregator('CountAll', (player, prevValue, rawGamepad) => { // esl
     return null;
 });
 
-function printState(pressed) {
-    return pressed ? 'pressed' : 'released';
-}
+// Populate the app div with some basic html
+document.getElementById('app').innerHTML = `
+    <article class="examples-container">
+        <header>
+            <h1 className="title">JoyMap Dev console example</h1>
+        </header>
+        <div class="console-example">
+            <p>(Psssst, hey, connect a gamepad and use it to see stuff)</p>
+            <p>(Oh, and open the dev console to see the full log of said stuff)</p>
+            <div id="logs"></div>
+        </div>
+    </article>`;
 
-function buttonToString(buttonName, { pressed, value }) {
-    return `${buttonName}: ${printState(pressed)}(${value})`;
-}
-
-function stickToString(stickName, { pressed, value }) {
-    return `${stickName}: ${printState(pressed)}(x: ${value.x}, y: ${value.y})`;
-}
-
+// Flags used to show/hide output separated by input type
 const showButtons = true;
-const showSticks = true;
 const showButtonAliases = true;
+const showSticks = true;
 const showStickAliases = true;
 const showAggregators = true;
 
-// On each frame log all the activated inputs, aliases and aggregators
-function step() {
-    const compilation = join([
-        !showButtons ? '' : reduce((result, buttonName) => {
-            const button = mainPlayer.buttons[buttonName];
+// On each frame render to HTML and console.log the state of buttons, sticks, aliases and aggregators
+joyMap.onPoll = () => {
+    const compilation = [
+        !showButtons ? '' : stringifyInputs(mainPlayer, 'buttons'),
+        !showButtonAliases ? '' : stringifyInputs(mainPlayer, 'buttonAliases'),
+        !showSticks ? '' : stringifyInputs(mainPlayer, 'sticks'),
+        !showStickAliases ? '' : stringifyInputs(mainPlayer, 'stickAliases'),
+        !showAggregators ? '' : stringifyAggregators(mainPlayer)
+    ];
 
-            if (button.pressed || button.justChanged) {
-                return `${result} ${buttonToString(buttonName, button)},`;
+    const stringOutput = join(', ', compact(compilation));
+
+    if (stringOutput) {
+        console.log(stringOutput); // eslint-disable-line
+
+        document.getElementById('logs').innerHTML = renderRows({
+            buttons: {
+                value: compilation[0],
+                show: showButtons,
+                displayName: 'Buttons'
+            },
+            'button-aliases': {
+                value: compilation[1],
+                show: showButtonAliases,
+                displayName: 'ButtonAliases'
+            },
+            sticks: {
+                value: compilation[2],
+                show: showSticks,
+                displayName: 'Sticks'
+            },
+            'stick-aliases': {
+                value: compilation[3],
+                show: showStickAliases,
+                displayName: 'StickAliases'
+            },
+            aggregators: {
+                value: compilation[4],
+                show: showAggregators,
+                displayName: 'Aggregators'
             }
-
-            return result;
-        }, '', Object.keys(mainPlayer.buttons)),
-        !showSticks ? '' : reduce((result, stickName) => {
-            const stick = mainPlayer.sticks[stickName];
-
-            if (stick.pressed || stick.justChanged) {
-                return `${result} ${stickToString(stickName, stick)},`;
-            }
-
-            return result;
-        }, '', Object.keys(mainPlayer.sticks)),
-        !showButtonAliases ? '' : reduce((result, aliasName) => {
-            const aliasInput = mainPlayer.buttonAliases[aliasName];
-
-            if (aliasInput.pressed || aliasInput.justChanged) {
-                return `${result} ${buttonToString(aliasName, aliasInput)},`;
-            }
-
-            return result;
-        }, '', Object.keys(mainPlayer.buttonAliases)),
-        !showStickAliases ? '' : reduce((result, aliasName) => {
-            const aliasInput = mainPlayer.stickAliases[aliasName];
-
-            if (aliasInput.pressed || aliasInput.justChanged) {
-                return `${result} ${stickToString(aliasName, aliasInput)},`;
-            }
-
-            return result;
-        }, '', Object.keys(mainPlayer.stickAliases)),
-        !showAggregators ? '' : reduce((result, aggregatorName) => {
-            const stuff = mainPlayer.aggregators[aggregatorName];
-
-            if (!!stuff && !!stuff.value) {
-                return `${result} ${aggregatorName}: ${stuff.value},`;
-            }
-
-            return result;
-        }, '', Object.keys(mainPlayer.aggregators))
-    ], '');
-
-    if (compilation) {
-        console.log(compilation.slice(0, -1)); // eslint-disable-line
+        });
     }
-}
+};
 
-export function startConsole() {
-    joyMap.onPoll = step;
-    joyMap.start();
-}
-
-export function stopConsole() {
-    joyMap.onPoll = noop;
-    joyMap.stop();
-}
+joyMap.start();

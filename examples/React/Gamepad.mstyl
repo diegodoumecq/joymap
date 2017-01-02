@@ -1,0 +1,156 @@
+button()
+    background-color gray
+    border-radius 30px
+    top 100px
+    right 45px
+    width 30px
+    height 30px
+
+stick()
+    bottom 53px
+    z-index 15
+    width 50px
+    height 50px
+    background-color gray
+    border solid 3px black
+    border-radius 40px
+
+dpad()
+    background-color gray
+    border-radius 10px
+    top 100px
+    left 45px
+    width 30px
+    height 30px
+
+shoulder()
+    width 100%
+    height 100%
+    margin-top -10px
+
+.disconnected
+    filter unquote('brightness(40%)')
+
+.gamepad
+    flex 1
+    display flex
+    justify-content center
+    align-items center
+    flex-direction column
+    padding 1rem
+    margin 1rem
+    max-width 50%
+
+    border dashed 1rem rgba(0,0,0,0.5)
+
+.react-inputs
+    position relative
+    width 484px
+    height 300px
+    overflow hidden
+
+    > div
+        position absolute
+
+    .player-name
+        position absolute
+        top 70px
+        width 100%
+        text-align center
+        z-index 15
+        font-size 3rem
+
+    .count
+        bottom 0
+
+    .back
+        width 100%
+        height 100%
+        z-index 10
+        background-image url('../../public/gamepad.png')
+
+    .L
+        stick()
+        left 150px
+
+    .R
+        stick()
+        right 150px
+
+    .L1
+        shoulder()
+        background-image url('../../public/L1.png')
+
+    .L2
+        shoulder()
+        background-image url('../../public/L2.png')
+
+    .R1
+        shoulder()
+        transform scaleX(-1)
+        background-image url('../../public/L1.png')
+
+    .R2
+        shoulder()
+        transform scaleX(-1)
+        background-image url('../../public/L2.png')
+
+    .A
+        button()
+        transform translate(-25px, 49px)
+
+    .B
+        button()
+        transform translateY(25px)
+
+    .X
+        button()
+        transform translate(-50px, 25px)
+
+    .Y
+        button()
+        transform translateX(-25px)
+
+    .dpadLeft
+        dpad()
+        transform translateY(30px)
+        width 40px
+
+    .dpadRight
+        dpad()
+        transform translate(55px, 30px)
+        width 40px
+
+    .dpadDown
+        dpad()
+        transform translate(32px, 50px)
+        height 40px
+
+    .dpadUp
+        dpad()
+        transform translateX(30px)
+        height 40px
+
+    .start
+        background-color gray
+        border-radius 10px
+        top 106px
+        width 30px
+        height 30px
+        right 170px
+
+    .select
+        background-color gray
+        border-radius 10px
+        top 106px
+        width 30px
+        height 30px
+        left 170px
+
+    .home
+        background-color gray
+        border-radius 10px
+        top 144px
+        width 40px
+        height 40px
+        left 223px
