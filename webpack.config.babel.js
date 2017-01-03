@@ -40,6 +40,8 @@ export default function (env = {}) {
             contentBase: entry.path
         },
 
+        performance: { hints: false },
+
         devtool: '#source-map',
 
         entry: path.resolve(entry.path, entry.file),

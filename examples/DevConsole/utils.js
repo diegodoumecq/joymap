@@ -10,26 +10,19 @@ export function countPressed(inputs) {
 
 // Utility function to render to HTML all inputs divided by type
 export function renderRows(params) {
-    return reduce((result, inputType) => {
-        if (!params[inputType].show) {
-            return result;
-        }
-
-        const value = flow(
-            split(', '),
-            compact,
-            map(str => `<span class="${inputType}">${str}</span>`),
-            join('')
-        )(params[inputType].value);
-
-        return `${result}
-            <div class="row">
-                <span class="input-type">${params[inputType].displayName}:</span> ${value}
-            </div>`;
-    }, '', Object.keys(params));
+    return reduce((result, { displayName, inputType, compilation }) => `${result}
+        <div class="row">
+            <span class="input-type">${displayName}:</span>
+            ${flow(
+                split(', '),
+                compact,
+                map(value => `<span class="${inputType}">${value}</span>`),
+                join('')
+            )(compilation)}
+        </div>`, '', params);
 }
 
-// Utility function to print the state of all inputs of a type
+// Utility function to print the state of all activated inputs of a type
 export function stringifyInputs(player, inputType) {
     return reduce((result, inputName) => {
         const input = player[inputType][inputName];

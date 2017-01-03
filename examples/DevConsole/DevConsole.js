@@ -52,9 +52,10 @@ document.getElementById('app').innerHTML = `
             <h1 className="title">JoyMap Dev console example</h1>
         </header>
         <div class="console-example">
-            <p>(Psssst, hey, connect a gamepad and use it to see stuff)</p>
-            <p>(Oh, and open the dev console to see the full log of said stuff)</p>
-            <div id="logs"></div>
+            <p>Open the dev console to see the full log of stuff</p>
+            <div id="logs">
+                <span class="row">Psssst, hey, connect a gamepad and use it to log said stuff</span>
+            </div>
         </div>
     </article>`;
 
@@ -78,36 +79,43 @@ joyMap.onPoll = () => {
     const stringOutput = join(', ', compact(compilation));
 
     if (stringOutput) {
+        // Log string output to dev console
         console.log(stringOutput); // eslint-disable-line
 
-        document.getElementById('logs').innerHTML = renderRows({
-            buttons: {
-                value: compilation[0],
-                show: showButtons,
+        // Re-render this last output into HTML
+        document.getElementById('logs').innerHTML = renderRows(compact([
+            !showButtons ? null : {
+                inputType: 'buttons',
+                compilation: compilation[0],
                 displayName: 'Buttons'
             },
-            'button-aliases': {
-                value: compilation[1],
-                show: showButtonAliases,
+            !showButtonAliases ? null : {
+                inputType: 'button-aliases',
+                compilation: compilation[1],
                 displayName: 'ButtonAliases'
             },
-            sticks: {
-                value: compilation[2],
-                show: showSticks,
+            !showSticks ? null : {
+                inputType: 'sticks',
+                compilation: compilation[2],
                 displayName: 'Sticks'
             },
-            'stick-aliases': {
-                value: compilation[3],
-                show: showStickAliases,
+            !showStickAliases ? null : {
+                inputType: 'stick-aliases',
+                compilation: compilation[3],
                 displayName: 'StickAliases'
             },
-            aggregators: {
-                value: compilation[4],
-                show: showAggregators,
+            !showAggregators ? null : {
+                inputType: 'aggregators',
+                compilation: compilation[4],
                 displayName: 'Aggregators'
             }
-        });
+        ]));
     }
 };
+
+console.log( // eslint-disable-line
+    '%c Welcome to the console, here we\'ll be logging all of your gamepad input',
+    'color: red; font-weight: bold'
+);
 
 joyMap.start();
