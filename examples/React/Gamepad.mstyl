@@ -49,7 +49,7 @@ shoulder()
     height 300px
     overflow hidden
 
-    > div
+    > div, > img
         position absolute
 
     .player-name
@@ -67,7 +67,6 @@ shoulder()
         width 100%
         height 100%
         z-index 10
-        background-image url('../../public/gamepad.png')
 
     .L
         stick()
@@ -77,23 +76,12 @@ shoulder()
         stick()
         right 150px
 
-    .L1
+    .L1, .L2
         shoulder()
-        background-image url('../../public/L1.png')
 
-    .L2
-        shoulder()
-        background-image url('../../public/L2.png')
-
-    .R1
+    .R1, .R2
         shoulder()
         transform scaleX(-1)
-        background-image url('../../public/L1.png')
-
-    .R2
-        shoulder()
-        transform scaleX(-1)
-        background-image url('../../public/L2.png')
 
     .A
         button()
