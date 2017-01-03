@@ -11,6 +11,8 @@ import Autoprefixer from 'autoprefixer';
 const port = 9000;
 const bundleFolder = 'devBundle';
 const binPath = path.resolve(__dirname, bundleFolder);
+const libPath = path.resolve(__dirname, 'src');
+const publicPath = path.resolve(__dirname, 'public');
 
 const entries = {
     console: {
@@ -26,9 +28,6 @@ const entries = {
         file: 'Canvas.js'
     }
 };
-
-const libPath = path.resolve(__dirname, 'src');
-const publicPath = path.resolve(__dirname, 'public');
 
 export default function (env = {}) {
     const entry = entries[env.example];
@@ -58,13 +57,12 @@ export default function (env = {}) {
         module: {
             rules: [{
                 test: /\.js[x]?$/,
-                loader: 'babel-loader',
+                rules: [{ loader: 'babel-loader' }],
                 include: [entry.path, libPath]
             }, {
                 test: /\.mstyl$/,
-                loaders: [{
-                    loader: 'style-loader',
-                    query: { sourceMap: true }
+                rules: [{
+                    loader: 'style-loader'
                 }, {
                     loader: 'css-loader',
                     query: {
@@ -75,51 +73,60 @@ export default function (env = {}) {
                 }, {
                     loader: 'postcss-loader'
                 }, {
-                    loader: 'stylus-loader'
+                    loader: 'stylus-loader',
+                    query: { sourceMap: true }
                 }]
             }, {
                 test: /\.styl$/,
-                loaders: [{
-                    loader: 'style-loader',
-                    query: { sourceMap: true }
+                rules: [{
+                    loader: 'style-loader'
                 }, {
                     loader: 'css-loader'
                 }, {
                     loader: 'postcss-loader'
                 }, {
-                    loader: 'stylus-loader'
+                    loader: 'stylus-loader',
+                    query: { sourceMap: true }
                 }]
             }, {
                 test: /\.png$/,
-                loader: 'url-loader',
-                options: {
-                    limit: '10000',
-                    mimetype: 'application/png'
-                }
+                rules: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: '10000',
+                        mimetype: 'application/png'
+                    }
+                }]
             }, {
                 test: /\.woff[2]?$/,
-                loader: 'url-loader',
-                options: {
-                    limit: '10000',
-                    mimetype: 'application/font-woff'
-                }
+                rules: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: '10000',
+                        mimetype: 'application/font-woff'
+                    }
+                }]
             }, {
                 test: /\.ttf$/,
-                loader: 'url-loader',
-                options: {
-                    limit: '10000',
-                    mimetype: 'application/octet-stream'
-                }
+                rules: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: '10000',
+                        mimetype: 'application/octet-stream'
+                    }
+                }]
             }, {
                 test: /\.eot$/,
-                loader: 'file-loader'
+                rules: [{ loader: 'file-loader' }]
             }, {
                 test: /\.svg$/,
-                loader: 'url-loader',
-                options: {
-                    limit: '10000',
-                    mimetype: 'image/svg+xml'
-                }
+                rules: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: '10000',
+                        mimetype: 'image/svg+xml'
+                    }
+                }]
             }]
         },
 
