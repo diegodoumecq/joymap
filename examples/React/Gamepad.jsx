@@ -5,9 +5,6 @@ import { map } from 'lodash/fp';
 import classnames from 'classnames';
 
 import styles from './Gamepad.mstyl';
-import gamepadImg from '../../public/gamepad.png';
-import l1Img from '../../public/L1.png';
-import l2Img from '../../public/L2.png';
 
 const analogInputs = ['L', 'R'];
 const shoulderInputs = ['L2', 'L1', 'R2', 'R1'];
@@ -65,7 +62,7 @@ class Gamepad extends React.Component {
                     width: '100%',
                     height: '100%'
                 }}>
-                <img styleName={inputName} src={inputName[1] === '1' ? l1Img : l2Img} />
+                <div styleName={inputName} />
             </div>);
     }
 
@@ -78,7 +75,7 @@ class Gamepad extends React.Component {
                 style={{ backgroundColor }}>
                 <div styleName="react-inputs">
                     <span styleName="player-name" style={{ color: pressedColor }}>{player.name}</span>
-                    <img styleName="back" src={gamepadImg} />
+                    <div styleName="back" />
                     {map(inputName => this.renderStick(inputName), analogInputs)}
                     {map(inputName => this.renderDigital(inputName), digitalInputs)}
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
