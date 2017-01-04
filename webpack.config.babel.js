@@ -97,14 +97,22 @@ export default function (env = {}) {
                     }
                 }]
             }, {
-                test: /\.png$/,
+                test: /.*\.(gif|png|jpe?g|svg)$/i,
                 rules: [{
                     loader: 'url-loader',
                     options: {
                         limit: '10000',
                         mimetype: 'application/png'
                     }
-                }]
+                }/* , {
+                    loader: 'image-webpack-loader',
+                    options: {
+                        progressive: true,
+                        optimizationLevel: 7,
+                        interlaced: false
+                    }
+                }*/
+                ]
             }, {
                 test: /\.woff[2]?$/,
                 rules: [{
@@ -126,7 +134,7 @@ export default function (env = {}) {
             }, {
                 test: /\.eot$/,
                 rules: [{ loader: 'file-loader' }]
-            }, {
+            }/* , {
                 test: /\.svg$/,
                 rules: [{
                     loader: 'url-loader',
@@ -135,7 +143,7 @@ export default function (env = {}) {
                         mimetype: 'image/svg+xml'
                     }
                 }]
-            }]
+            } */]
         },
 
         plugins: [

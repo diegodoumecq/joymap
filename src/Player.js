@@ -1,85 +1,21 @@
 /* @flow */
 import {
-    omit, includes, assign, difference, forEach
+    omit, includes, difference, forEach, findIndex
 } from 'lodash/fp';
 import { mapValues } from 'lodash';
 
-type IPoint = { x: number, y: number };
-type IStick = {
-    value: IPoint,
-    pressed: boolean,
-    justChanged: boolean,
-    invertX: boolean,
-    invertY: boolean
-};
-type IButton = { value: number, pressed: boolean, justChanged: boolean };
+import {
+    buttonsMap, sticksMap,
+    makeButtonMapper, addButtonAlias,
+    addStickAlias
+} from './utils';
 
-type IButtonAlias = { inputs: string[], value: number, pressed: boolean, justChanged: boolean };
-type IStickAlias = { inputs: string[], value: IPoint, pressed: boolean, justChanged: boolean };
-type IAggregator = { callback: Function, value: any };
-
-type IStickMapper = (pad: Gamepad, invertX: boolean, invertY: boolean) => IPoint;
-export const sticksMap: { [key: string]: IStickMapper } = {
-    L: (pad, invertX = false, invertY = false) => ({
-        x: !invertX ? pad.axes[0] : -1 * pad.axes[0],
-        y: !invertY ? pad.axes[1] : -1 * pad.axes[1]
-    }),
-    R: (pad, invertX = false, invertY = false) => ({
-        x: !invertX ? pad.axes[2] : -1 * pad.axes[2],
-        y: !invertY ? pad.axes[3] : -1 * pad.axes[3]
-    })
-};
-
-type IButtonMapper = (pad: Gamepad) => number;
-export const buttonsMap: { [key: string]: IButtonMapper } = {
-    dpadUp: pad => pad.buttons[12].value,
-    dpadDown: pad => pad.buttons[13].value,
-    dpadLeft: pad => pad.buttons[14].value,
-    dpadRight: pad => pad.buttons[15].value,
-    L1: pad => pad.buttons[4].value,
-    L2: pad => pad.buttons[6].value,
-    L3: pad => pad.buttons[10].value,
-    R1: pad => pad.buttons[5].value,
-    R2: pad => pad.buttons[7].value,
-    R3: pad => pad.buttons[11].value,
-    A: pad => pad.buttons[0].value,
-    B: pad => pad.buttons[1].value,
-    X: pad => pad.buttons[2].value,
-    Y: pad => pad.buttons[3].value,
-    start: pad => pad.buttons[9].value,
-    select: pad => pad.buttons[8].value,
-    home: () => 0
-};
-
-function addButtonAlias(alias: IButtonAlias | void, inputs: string[]) {
-    if (!alias) {
-        return {
-            inputs,
-            value: 0,
-            pressed: false,
-            justChanged: false
-        };
-    }
-
-    return assign(alias, {
-        inputs: [...alias.inputs, ...inputs]
-    });
-}
-
-function addStickAlias(alias: IStickAlias | void, inputs: string[]) {
-    if (!alias) {
-        return {
-            inputs,
-            value: { x: 0, y: 0 },
-            pressed: false,
-            justChanged: false
-        };
-    }
-
-    return assign(alias, {
-        inputs: [...alias.inputs, ...inputs]
-    });
-}
+import type {
+    IPoint, IStick, IButton, IStickAlias,
+    IButtonAlias, IAggregator,
+    IStickMapper, IButtonMapper,
+    IStickBinding, IButtonBinding
+} from './types';
 
 type IParams = { name: string, threshold: number, clampThreshold: boolean };
 
@@ -89,8 +25,10 @@ export default class Player {
     clampThreshold: boolean;
     sticks: { [key: string]: IStick };
     buttons: { [key: string]: IButton };
-    buttonBindings: { [key: string]: IButtonMapper };
-    stickBindings: { [key: string]: IStickMapper };
+    buttonBindings: ({ [key: string]: IButtonBinding });
+    stickBindings: ({ [key: string]: IStickBinding });
+
+    listenOnPress: ?(index: number) => void = null;
 
     gamepadId: ?string = null;
     connected: boolean = false;
@@ -146,10 +84,28 @@ export default class Player {
         this.stickBindings[inputName] = mapper;
     }
 
-    buttonRebindOnPress(inputName: string/* , allowDuplication = false*/) {
-        return Promise((resolve, reject) => {
+    buttonRebindOnPress(inputName: string, callback: Function, allowDuplication: false = false) {
+        this.listenOnPress = index => {
+            const bindingIndex = findIndex({ index }, this.buttonBindings);
 
-        });
+            callback(bindingIndex);
+
+            // TODO clean up this.buttons so that it corresponds to these bindings?
+
+            if (bindingIndex !== -1) {
+                if (inputName !== bindingIndex) {
+                    if (allowDuplication) {
+                        this.buttonBindings[inputName] = makeButtonMapper(index);
+                    } else {
+                        const binding = this.buttonBindings[bindingIndex];
+                        this.buttonBindings[bindingIndex] = this.buttonBindings[inputName];
+                        this.buttonBindings[inputName] = binding;
+                    }
+                }
+            } else {
+                this.buttonBindings[inputName] = makeButtonMapper(index);
+            }
+        };
     }
 
     setAggregator(aggregatorName: string, callback: Function) {
@@ -214,6 +170,17 @@ export default class Player {
         this.updateStick(gamepad);
         this.updateAliases();
         this.updateAggregators(gamepad);
+
+        // TODO: parse through the whole gamepad to store flags of pressed, value and justChanged
+
+        if (this.listenOnPress !== null) {
+            const index = findIndex(button => this.getButtonValue(button.value), gamepad.buttons);
+
+            if (index !== -1) {
+                this.listenOnPress(index);
+                this.listenOnPress = null;
+            }
+        }
     }
 
     getButtonValue(value: number = 0): number {
@@ -231,9 +198,9 @@ export default class Player {
     updateButtons(gamepad: Gamepad) {
         const prevButtons = this.buttons;
 
-        this.buttons = mapValues(this.buttonBindings, (mapper: Function, inputName) => {
+        this.buttons = mapValues(this.buttonBindings, (binding: IButtonBinding, inputName) => {
             const previous: IButton = prevButtons[inputName];
-            const value: number = mapper(gamepad);
+            const value: number = binding.mapper(gamepad);
             const pressed = this.isButtonSignificant(value);
 
             return {
@@ -262,10 +229,10 @@ export default class Player {
     updateStick(gamepad: Gamepad) {
         const prevStick = this.sticks;
 
-        this.sticks = mapValues(this.stickBindings, (mapper: Function, inputName: string) => {
+        this.sticks = mapValues(this.stickBindings, (binding: IStickBinding, inputName: string) => {
             const previous: IStick = prevStick[inputName];
             const { invertX, invertY } = previous;
-            const value: IPoint = mapper(gamepad, invertX, invertY);
+            const value: IPoint = binding.mapper(gamepad, invertX, invertY);
             const pressed = this.isStickSignificant(value);
 
             return {
