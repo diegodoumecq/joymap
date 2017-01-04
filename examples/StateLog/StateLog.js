@@ -52,9 +52,9 @@ document.getElementById('app').innerHTML = `
             <h1 className="title">JoyMap Dev console example</h1>
         </header>
         <div class="log-example">
-            <p>Open the dev console to see the full log of stuff</p>
+            <p>Suggestion: Open the dev console</p>
             <div id="logs">
-                <span class="row">Psssst, hey, connect a gamepad and use it to log said stuff</span>
+                <span class="row">Psssst, hey, connect a gamepad and use it. You'll see.</span>
             </div>
         </div>
     </article>`;
@@ -114,7 +114,11 @@ joyMap.onPoll = () => {
 };
 
 console.log( // eslint-disable-line
-    '%c Welcome to the console, here we\'ll be printing all of your gamepad input',
+    '%c Welcome to the console, we got fun and games.',
+    'color: green; font-weight: bold; font-size: 1.5em;'
+);
+console.log( // eslint-disable-line
+    '%c We got everything you want honey, as long as it\'s printing all of your gamepad input',
     'color: green; font-weight: bold; font-size: 1.5em;'
 );
 

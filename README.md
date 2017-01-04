@@ -21,7 +21,7 @@ Run **yarn add joymap**
 * Run a single example at a time on localhost:9000
   * For the React example, run **yarn react**
   * For the canvas example, run **yarn canvas**
-  * For the HTML display state example, run **yarn log**
+  * For the HTML state log example, run **yarn log**
 * Build only the minified library to /bin folder with **yarn build**
 
 ### Initialization and usage

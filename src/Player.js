@@ -89,6 +89,8 @@ export default class Player {
     clampThreshold: boolean;
     sticks: { [key: string]: IStick };
     buttons: { [key: string]: IButton };
+    buttonBindings: { [key: string]: IButtonMapper };
+    stickBindings: { [key: string]: IStickMapper };
 
     gamepadId: ?string = null;
     connected: boolean = false;
@@ -105,13 +107,16 @@ export default class Player {
     }
 
     cleanInputs() {
-        this.buttons = mapValues(buttonsMap, () => ({
+        this.buttonBindings = buttonsMap;
+        this.stickBindings = sticksMap;
+
+        this.buttons = mapValues(this.buttonBindings, () => ({
             value: 0,
             pressed: false,
             justChanged: false
         }));
 
-        this.sticks = mapValues(sticksMap, () => ({
+        this.sticks = mapValues(this.stickBindings, () => ({
             value: { x: 0, y: 0 },
             pressed: false,
             justChanged: false,
@@ -133,9 +138,19 @@ export default class Player {
         this.gamepadId = gamepadId;
     }
 
-    /* listen(aliasName: string, finishedCallback: Function, allowDuplication = true) {
-        // TODO listen for the next input to be pressed && justChanged and set that as the buttonName of aliasName
-    }*/
+    buttonRebind(inputName: string, mapper: IButtonMapper) {
+        this.buttonBindings[inputName] = mapper;
+    }
+
+    stickRebind(inputName: string, mapper: IStickMapper) {
+        this.stickBindings[inputName] = mapper;
+    }
+
+    buttonRebindOnPress(inputName: string/* , allowDuplication = false*/) {
+        return Promise((resolve, reject) => {
+
+        });
+    }
 
     setAggregator(aggregatorName: string, callback: Function) {
         this.aggregators[aggregatorName] = { callback, value: null };
@@ -216,7 +231,7 @@ export default class Player {
     updateButtons(gamepad: Gamepad) {
         const prevButtons = this.buttons;
 
-        this.buttons = mapValues(buttonsMap, (mapper: Function, inputName) => {
+        this.buttons = mapValues(this.buttonBindings, (mapper: Function, inputName) => {
             const previous: IButton = prevButtons[inputName];
             const value: number = mapper(gamepad);
             const pressed = this.isButtonSignificant(value);
@@ -247,7 +262,7 @@ export default class Player {
     updateStick(gamepad: Gamepad) {
         const prevStick = this.sticks;
 
-        this.sticks = mapValues(sticksMap, (mapper: Function, inputName: string) => {
+        this.sticks = mapValues(this.stickBindings, (mapper: Function, inputName: string) => {
             const previous: IStick = prevStick[inputName];
             const { invertX, invertY } = previous;
             const value: IPoint = mapper(gamepad, invertX, invertY);
