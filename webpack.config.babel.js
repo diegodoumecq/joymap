@@ -15,9 +15,9 @@ const libPath = path.resolve(__dirname, 'src');
 const publicPath = path.resolve(__dirname, 'public');
 
 const entries = {
-    console: {
-        path: path.resolve(__dirname, 'examples/DevConsole'),
-        file: 'DevConsole.js'
+    log: {
+        path: path.resolve(__dirname, 'examples/StateLog'),
+        file: 'StateLog.js'
     },
     react: {
         path: path.resolve(__dirname, 'examples/React'),
@@ -76,7 +76,10 @@ export default function (env = {}) {
                     loader: 'postcss-loader'
                 }, {
                     loader: 'stylus-loader',
-                    query: { sourceMap: true }
+                    query: {
+                        'resolve url': true,
+                        sourceMap: true
+                    }
                 }]
             }, {
                 test: /\.styl$/,
@@ -88,7 +91,10 @@ export default function (env = {}) {
                     loader: 'postcss-loader'
                 }, {
                     loader: 'stylus-loader',
-                    query: { sourceMap: true }
+                    query: {
+                        'resolve url': true,
+                        sourceMap: true
+                    }
                 }]
             }, {
                 test: /\.png$/,

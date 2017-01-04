@@ -5,7 +5,7 @@
   "main": "./bin/joymap.min.js",
   "scripts": {
     "react": "webpack-dev-server --hot --env.example=react",
-    "console": "webpack-dev-server --hot --env.example=console",
+    "log": "webpack-dev-server --hot --env.example=log",
     "canvas": "webpack-dev-server --hot --env.example=canvas",
 
     "build": "cross-env NODE_ENV=production webpack --config webpack.build.config.babel.js",

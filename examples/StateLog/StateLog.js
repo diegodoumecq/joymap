@@ -5,7 +5,7 @@ import {
 } from './utils';
 
 import '../main.styl';
-import './DevConsole.styl';
+import './StateLog.styl';
 
 import JoyMap from '../../src/JoyMap';
 
@@ -51,7 +51,7 @@ document.getElementById('app').innerHTML = `
         <header>
             <h1 className="title">JoyMap Dev console example</h1>
         </header>
-        <div class="console-example">
+        <div class="log-example">
             <p>Open the dev console to see the full log of stuff</p>
             <div id="logs">
                 <span class="row">Psssst, hey, connect a gamepad and use it to log said stuff</span>
@@ -114,8 +114,8 @@ joyMap.onPoll = () => {
 };
 
 console.log( // eslint-disable-line
-    '%c Welcome to the console, here we\'ll be logging all of your gamepad input',
-    'color: red; font-weight: bold'
+    '%c Welcome to the console, here we\'ll be printing all of your gamepad input',
+    'color: green; font-weight: bold; font-size: 1.5em;'
 );
 
 joyMap.start();
