@@ -56,6 +56,7 @@ For more a in-depth view on what the library supports and how, do please look at
 * **Joymap** default export, the library itself and main point of usage
 * **Player** the Player class itself
 * **makeButtonMapper** function to create a button mapper function
+* **makeStickMapper** function to create a stick mapper function
 
 ### What's the deal with that ... polling stuff?
 
@@ -135,17 +136,13 @@ The callback will be given three arguments: the player itself that is currently 
 
 ### Coming soon(ish):
 
-1) Implement rebinding of sticks
-  
-  * Right now it is assumed that the user will always use a controller with XInput, but the web standard allows for any kind of weird stuff as long as it consists of buttons and sticks (a flight simulator cockpit for example). It is up to the dev to support that strange stuff and this library needs to make it easier.
+1) Implement stickRebindOnPress
 
-2) Implement the listen function in Player for allowing the user to rebind a button to whatever is pressed next
+2) Include the ability to add/remove players from the canvas example
 
-  * Add that to the examples
+3) Add a 3d example using threejs
 
-3) Include the ability to add/remove players from the react example
-
-4) Add a 3d example using threejs
+4) Add a gamepad config menu example
 
 5) Might want to find a better name than "Aggregators"
 
