@@ -10,13 +10,18 @@ export type IStick = {
 };
 export type IButton = { value: number, pressed: boolean, justChanged: boolean };
 
+export type IParsedGamepad = {
+    buttons: IButton[],
+    axes: number[]
+};
+
 export type IStickAlias = { inputs: string[], value: IPoint, pressed: boolean, justChanged: boolean };
 export type IButtonAlias = { inputs: string[], value: number, pressed: boolean, justChanged: boolean };
 
 export type IAggregator = { callback: Function, value: any };
 
-export type IStickMapper = (pad: Gamepad, invertX: boolean, invertY: boolean) => IPoint;
-export type IButtonMapper = (pad: Gamepad) => number;
+export type IStickMapper = (pad: IParsedGamepad, invertX: boolean, invertY: boolean) => IPoint;
+export type IButtonMapper = (pad: IParsedGamepad) => IButton;
 
 export type IStickBinding = { index: number, mapper: IStickMapper };
 export type IButtonBinding = { index: number, mapper: IButtonMapper };

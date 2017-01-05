@@ -1,8 +1,8 @@
 /* @flow */
 import {
-    omit, includes, difference, forEach, findIndex
+    omit, includes, difference, forEach, find, findIndex, noop
 } from 'lodash/fp';
-import { mapValues } from 'lodash';
+import { mapValues, map } from 'lodash';
 
 import {
     buttonsMap, sticksMap,
@@ -11,9 +11,8 @@ import {
 } from './utils';
 
 import type {
-    IPoint, IStick, IButton, IStickAlias,
-    IButtonAlias, IAggregator,
-    IStickMapper, IButtonMapper,
+    IPoint, IParsedGamepad, IStick, IButton,
+    IStickAlias, IButtonAlias, IAggregator,
     IStickBinding, IButtonBinding
 } from './types';
 
@@ -23,12 +22,18 @@ export default class Player {
     name: string;
     threshold: number;
     clampThreshold: boolean;
+
+    parsedGamepad: IParsedGamepad = {
+        buttons: [],
+        axes: []
+    };
+
     sticks: { [key: string]: IStick };
     buttons: { [key: string]: IButton };
-    buttonBindings: ({ [key: string]: IButtonBinding });
-    stickBindings: ({ [key: string]: IStickBinding });
+    buttonBindings: { [key: string]: IButtonBinding } = buttonsMap;
+    stickBindings: { [key: string]: IStickBinding } = sticksMap;
 
-    listenOnPress: ?(index: number) => void = null;
+    listenOnPress: null | Function = null;
 
     gamepadId: ?string = null;
     connected: boolean = false;
@@ -76,23 +81,22 @@ export default class Player {
         this.gamepadId = gamepadId;
     }
 
-    buttonRebind(inputName: string, mapper: IButtonMapper) {
-        this.buttonBindings[inputName] = mapper;
+    buttonRebind(inputName: string, binding: IButtonBinding) {
+        this.buttonBindings[inputName] = binding;
     }
 
-    stickRebind(inputName: string, mapper: IStickMapper) {
-        this.stickBindings[inputName] = mapper;
+    stickRebind(inputName: string, binding: IStickBinding) {
+        this.stickBindings[inputName] = binding;
     }
 
-    buttonRebindOnPress(inputName: string, callback: Function, allowDuplication: false = false) {
+    buttonRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
         this.listenOnPress = index => {
-            const bindingIndex = findIndex({ index }, this.buttonBindings);
+            const bindingIndex = find(
+                value => this.buttonBindings[value].index === index,
+                Object.keys(this.buttonBindings)
+            );
 
-            callback(bindingIndex);
-
-            // TODO clean up this.buttons so that it corresponds to these bindings?
-
-            if (bindingIndex !== -1) {
+            if (bindingIndex) {
                 if (inputName !== bindingIndex) {
                     if (allowDuplication) {
                         this.buttonBindings[inputName] = makeButtonMapper(index);
@@ -105,6 +109,8 @@ export default class Player {
             } else {
                 this.buttonBindings[inputName] = makeButtonMapper(index);
             }
+
+            callback(bindingIndex);
         };
     }
 
@@ -165,19 +171,37 @@ export default class Player {
         this.cleanAggregators();
     }
 
+    parseGamepad(gamepad: Gamepad): IParsedGamepad {
+        const prevGamepad = this.parsedGamepad;
+
+        return {
+            buttons: map(gamepad.buttons, ({ value }: { value: number }, index: number) => {
+                const previous: IButton = prevGamepad.buttons[index];
+                const pressed = this.isButtonSignificant(value);
+
+                return {
+                    pressed,
+                    justChanged: pressed !== (previous ? this.isButtonSignificant(previous.value) : false),
+                    value
+                };
+            }),
+            axes: gamepad.axes
+        };
+    }
+
     update(gamepad: Gamepad) {
-        this.updateButtons(gamepad);
-        this.updateStick(gamepad);
+        this.parsedGamepad = this.parseGamepad(gamepad);
+        this.updateButtons(this.parsedGamepad);
+        this.updateStick(this.parsedGamepad);
         this.updateAliases();
         this.updateAggregators(gamepad);
 
-        // TODO: parse through the whole gamepad to store flags of pressed, value and justChanged
-
-        if (this.listenOnPress !== null) {
-            const index = findIndex(button => this.getButtonValue(button.value), gamepad.buttons);
+        const callback = this.listenOnPress;
+        if (callback) {
+            const index = findIndex(({ pressed, justChanged }) => pressed && justChanged, this.parsedGamepad.buttons);
 
             if (index !== -1) {
-                this.listenOnPress(index);
+                callback(index);
                 this.listenOnPress = null;
             }
         }
@@ -195,20 +219,8 @@ export default class Player {
         return !!value && Math.abs(value) > this.threshold;
     }
 
-    updateButtons(gamepad: Gamepad) {
-        const prevButtons = this.buttons;
-
-        this.buttons = mapValues(this.buttonBindings, (binding: IButtonBinding, inputName) => {
-            const previous: IButton = prevButtons[inputName];
-            const value: number = binding.mapper(gamepad);
-            const pressed = this.isButtonSignificant(value);
-
-            return {
-                pressed,
-                justChanged: pressed !== this.isButtonSignificant(previous.value),
-                value: this.getButtonValue(value)
-            };
-        });
+    updateButtons(gamepad: IParsedGamepad) {
+        this.buttons = mapValues(this.buttonBindings, (binding: IButtonBinding) => binding.mapper(gamepad));
     }
 
     getStickValue(sticks: IPoint = { x: 0, y: 0 }): IPoint {
@@ -226,7 +238,7 @@ export default class Player {
             && (Math.abs(sticks.x) > this.threshold || Math.abs(sticks.y) > this.threshold);
     }
 
-    updateStick(gamepad: Gamepad) {
+    updateStick(gamepad: IParsedGamepad) {
         const prevStick = this.sticks;
 
         this.sticks = mapValues(this.stickBindings, (binding: IStickBinding, inputName: string) => {

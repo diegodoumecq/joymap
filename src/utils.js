@@ -25,15 +25,22 @@ export const buttonIndexMapping = {
     select: 8
 };
 
+const mockButtons = {
+    home: {
+        index: -1,
+        mapper: () => 0
+    }
+};
+
 export function makeButtonMapper(index: number): IButtonBinding {
     return {
         index,
-        mapper: pad => pad.buttons[index].value
+        mapper: pad => pad.buttons[index]
     };
 }
 
 export const buttonsMap: { [key: string]: IButtonBinding } =
-    mapValues(value => makeButtonMapper(value), buttonIndexMapping);
+    assign(mapValues(value => makeButtonMapper(value), buttonIndexMapping), mockButtons);
 
 export function addButtonAlias(alias: ?IButtonAlias, inputs: string[]) {
     if (!alias) {
