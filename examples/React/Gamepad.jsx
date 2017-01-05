@@ -23,6 +23,27 @@ class Gamepad extends React.Component {
         children: React.PropTypes.node
     };
 
+    state = {
+        waiting: null
+    };
+
+    handleRebind(inputName) {
+        const { player } = this.props;
+
+        if (player.connected) {
+            player.buttonRebindOnPress(
+                `${inputName}3`,
+                () => this.setState({ waiting: null })
+            );
+            this.setState({ waiting: inputName });
+        }
+    }
+
+    handleCancelRebind = () => {
+        this.props.player.cancelButtonRebindOnPress();
+        this.setState({ waiting: null });
+    };
+
     renderStick(inputName) {
         const { pressedColor } = this.props;
         const { sticks, buttons } = this.props.player;
@@ -32,6 +53,7 @@ class Gamepad extends React.Component {
             <div
                 key={inputName}
                 styleName={inputName}
+                onClick={() => this.handleRebind(`${inputName}3`)}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
                     backgroundColor: buttons[`${inputName}3`].pressed ? pressedColor : ''
@@ -46,6 +68,7 @@ class Gamepad extends React.Component {
             <div
                 key={inputName}
                 styleName={inputName}
+                onClick={() => this.handleRebind(inputName)}
                 style={{
                     backgroundColor: pressed ? pressedColor : ''
                 }} />);
@@ -68,18 +91,25 @@ class Gamepad extends React.Component {
 
     render() {
         const { player, backgroundColor, pressedColor, children } = this.props;
+        const { waiting } = this.state;
 
         return (
             <div
-                styleName={classnames('gamepad', { disconnected: !player.connected })}
+                styleName={classnames('gamepad', { disconnected: !player.connected, waiting: !!waiting })}
                 style={{ backgroundColor }}>
                 <div styleName="react-inputs">
                     <span styleName="player-name" style={{ color: pressedColor }}>{player.name}</span>
                     <div styleName="back" />
+                    {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                     {map(inputName => this.renderStick(inputName), analogInputs)}
                     {map(inputName => this.renderDigital(inputName), digitalInputs)}
-                    {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                 </div>
+                {!waiting ? null :
+                    <div
+                        styleName="waiting-message"
+                        onClick={this.handleCancelRebind}>
+                        Rebinding {waiting}
+                    </div>}
                 {children}
             </div>);
     }

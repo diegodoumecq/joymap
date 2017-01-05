@@ -89,6 +89,10 @@ export default class Player {
         this.stickBindings[inputName] = binding;
     }
 
+    cancelButtonRebindOnPress() {
+        this.listenOnPress = null;
+    }
+
     buttonRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
         this.listenOnPress = index => {
             const bindingIndex = find(

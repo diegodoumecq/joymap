@@ -33,7 +33,12 @@ shoulder(right)
 .disconnected
     filter unquote('brightness(40%)')
 
+.waiting
+    // filter unquote('brightness(40%)')
+    background-color red
+
 .gamepad
+    position relative
     flex 1
     display flex
     justify-content center
@@ -53,103 +58,118 @@ shoulder(right)
     > div
         position absolute
 
-    .player-name
-        position absolute
-        top 70px
-        width 100%
-        text-align center
-        z-index 15
-        font-size 3rem
+.waiting-message
+    position absolute
+    display flex
+    justify-content center
+    align-items center
+    width 100%
+    height 100%
+    line-height 100%
+    z-index 30
+    color white
+    font-size 3rem
+    background: rgba(0,0,0,0.5)
 
-    .count
-        bottom 0
 
-    .back
-        width 100%
-        height 100%
-        z-index 10
-        background-image url('../../public/gamepad.png')
+.player-name
+    position absolute
+    top 70px
+    width 100%
+    text-align center
+    z-index 15
+    font-size 3rem
 
-    .L
-        stick()
-        left 150px
+.count
+    bottom 0
 
-    .R
-        stick()
-        right 150px
+.back
+    width 100%
+    height 100%
+    z-index 10
+    background-image url('../../public/gamepad.png')
+    pointer-events none
 
-    .L1
-        shoulder(false)
-        background-image url('../../public/L1.png')
+.L
+    stick()
+    left 150px
 
-    .L2
-        shoulder(false)
-        background-image url('../../public/L2.png')
+.R
+    stick()
+    right 150px
 
-    .R1
-        shoulder(true)
-        background-image url('../../public/L1.png')
+.L1
+    shoulder(false)
+    background-image url('../../public/L1.png')
 
-    .R2
-        shoulder(true)
-        background-image url('../../public/L2.png')
+.L2
+    shoulder(false)
+    background-image url('../../public/L2.png')
 
-    .A
-        button()
-        transform translate(-25px, 49px)
+.R1
+    shoulder(true)
+    background-image url('../../public/L1.png')
 
-    .B
-        button()
-        transform translateY(25px)
+.R2
+    shoulder(true)
+    background-image url('../../public/L2.png')
 
-    .X
-        button()
-        transform translate(-50px, 25px)
+.A
+    button()
+    transform translate(-25px, 49px)
 
-    .Y
-        button()
-        transform translateX(-25px)
+.B
+    button()
+    transform translateY(25px)
 
-    .dpadLeft
-        dpad()
-        transform translateY(30px)
-        width 40px
+.X
+    button()
+    transform translate(-50px, 25px)
 
-    .dpadRight
-        dpad()
-        transform translate(55px, 30px)
-        width 40px
+.Y
+    button()
+    transform translateX(-25px)
 
-    .dpadDown
-        dpad()
-        transform translate(32px, 50px)
-        height 40px
+.dpadLeft
+    dpad()
+    transform translateY(30px)
+    width 40px
 
-    .dpadUp
-        dpad()
-        transform translateX(30px)
-        height 40px
+.dpadRight
+    dpad()
+    transform translate(55px, 30px)
+    width 40px
 
-    .start
-        background-color gray
-        border-radius 10px
-        top 106px
-        width 30px
-        height 30px
-        right 170px
+.dpadDown
+    dpad()
+    transform translate(32px, 50px)
+    height 40px
 
-    .select
-        background-color gray
-        border-radius 10px
-        top 106px
-        width 30px
-        height 30px
-        left 170px
+.dpadUp
+    dpad()
+    transform translateX(30px)
+    height 40px
 
-    .home
-        background-color gray
-        border-radius 10px
-        top 144px
-        width 40px
-        height 40px
-        left 223px
+.start
+    background-color gray
+    border-radius 10px
+    top 106px
+    width 30px
+    height 30px
+    right 170px
+
+.select
+    background-color gray
+    border-radius 10px
+    top 106px
+    width 30px
+    height 30px
+    left 170px
+
+.home
+    background-color gray
+    border-radius 10px
+    top 144px
+    width 40px
+    height 40px
+    left 223px
