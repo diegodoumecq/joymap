@@ -49,8 +49,6 @@ export default class JoyMap {
 
     step = () => {
         this.poll();
-        this.onPoll();
-
         this.animationFrameRequestId = window.requestAnimationFrame(this.step);
     };
 
@@ -93,6 +91,8 @@ export default class JoyMap {
     }
 
     poll() {
+        this.onPoll();
+
         this.gamepads = filter((rawGamepad: ?Gamepad) =>
             rawGamepad
             && rawGamepad.connected

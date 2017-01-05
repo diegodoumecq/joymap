@@ -81,6 +81,14 @@ export default class Player {
         this.gamepadId = gamepadId;
     }
 
+    clearButtonBindings() {
+        this.buttonBindings = {};
+    }
+
+    clearStickBindings() {
+        this.stickBindings = {};
+    }
+
     buttonRebind(inputName: string, binding: IButtonBinding) {
         this.buttonBindings[inputName] = binding;
     }

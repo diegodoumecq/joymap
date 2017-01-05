@@ -8,12 +8,13 @@ Run **yarn add joymap**
 
 ### Key features
 
-* Wraps the ever-changing gamepad standard into a flexible and more useful API
-* Based around player configuration, it organizes input by player rather than by gamepad
-* Supports stateful inputs for ease of use: Each input consists of { value, pressed, justChanged }
-* Supports button remapping by the user
+* Wraps the bare-bones gamepad standard into a flexible and more powerful API
+* Organizes inputs and configurations by player instead of by gamepad
+* Supports stateful inputs for ease of use: Each input consists of at least { value, pressed, justChanged }
+* Supports easy button rebinding methods (stick rebinding is coming)
+* Supports simple aliases for ease of use
 * Supports functional aggregators that let the programmer combine any input and return any result
-* Button mappings are based around the XInput standard, just because it is the only one that works without strange behaviors across all browsers
+* Button bindings are set by default to the XInput standard. All inputs supported by the Gamepad API itself are supported here, they may just require some more elbow grease (meaning: set the bindings yourself somewhere)
 
 ### How to run all the things
 
@@ -23,6 +24,21 @@ Run **yarn add joymap**
   * For the canvas example, run **yarn canvas**
   * For the HTML state log example, run **yarn log**
 * Build only the minified library to /bin folder with **yarn build**
+
+### Exported API
+
+* **Player** is the Player class itself. Detailed in its own section
+* **makeButtonMapper** is a function to create a button mapper function
+* **makeStickMapper** is a function to create a stick mapper function
+* **Joymap** is the default export and main point of usage. Once instanced, the methods are:
+  * **start() => void**: calls **poll()** using requestAnimationFrame
+  * **stop() => void**: Stops calling **poll()**
+  * **poll() => void**: Polls the gamepad API and updates all Players with the data. Can be called manually if desired
+  * **getUnusedGamepadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
+  * **setPlayers(jsonString) => void**: [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
+  * **addPlayer(name) => player**: Instantiate a new Player, add it to joymap.players[name] and return it
+  * **removePlayer(name) => void**: Remove a Player by name
+  * **cleanPlayers() => void**: Remove all the players
 
 ### Initialization and usage
 
@@ -57,18 +73,57 @@ The browser's gamepad API works under the assumption that the programmer is goin
 
 To make this as painless as possible, JoyMap offers the methods **joyMap.start()** and **joyMap.stop()** which just start and stop polling the gamepad API using requestAnimationFrame. However, if more precision is needed as to when the polling is done, one can completely ignore both of these methods and directly call **joyMap.poll()** when necessary.
 
-### Data structures
+### The Player
 
-* **joyMap.players** is an object that stores the players themselves as you've named them. In the initialization example **joyMap.players** will be an object with three values: player1, player2 and player3
-* **player.buttons** is an object with all of the inputs except for the analog sticks. For each input you have { value, pressed, justChanged }
-  * **value** is the value given by the gamepad object itself for the specified button
-  * **pressed** indicates if the value passes the threshold
-  * **justChanged** indicates if pressed has changed since the last time we polled the gamepad (useful for those actions that need to be triggered only when a button is pressed for the first time, like a mario jump)
-  * **player.buttons** has these inputs: { dpadUp, dpadDown, dpadLeft, dpadRight, L1, L2, L3, R1, R2, R3, A, B, X, Y, start, select }
+* **joyMap.players** is an object that stores the players as you've named them
+* **player.buttonAliases**, **player.stickAliases**, **player.aggregators** are all detailed in their own section
+* **player.buttons** is an object with all of the buttons specified in the buttonBindings. For each button you have { value, pressed, justChanged }
+  * By default, it has these values: { dpadUp, dpadDown, dpadLeft, dpadRight, L1, L2, L3, R1, R2, R3, A, B, X, Y, start, select }
+  * **value** is the number given by the gamepad object itself for the specified button. Goes from 0 to 1
+  * **pressed** is a boolean that indicates if the value passes the threshold
+  * **justChanged** is a boolean  that indicates if pressed has changed since the last time the gamepad was polled (useful for those actions that need to be triggered only when a button is pressed for the first time, like a mario jump)
 * **player.sticks** is an object that normally consists of the left and right sticks, **L** and **R** respectively
   * For each stick you have { value, pressed, justChanged, invertX, invertY }. They behave similarly to the buttons but the value itself is not a number but an object { x, y }
   * **x** and **y** are both numbers between -1 and 1
   * **invertX** and **invertY** do what it says on the tin and invert the individual axis of each stick independently
+* **player.buttonBindings** is an object that stores each button binding
+  * Each button binding is an object of the format { index, mapper }
+  * See the binding section
+* **player.stickBindings** is an object that stores each stick binding
+  * Each stick binding is an object of the format { index, mapper }
+  * See the binding section
+* **player.parsedGamepad** is a parsed copy of the gamepad object. All inputs are parsed, not just the ones that have bindings
+  * It has two properties: { axes, buttons }
+  * **axes** is a direct copy of the gamepad.axes array
+  * **buttons** is an array of { pressed, justChanged, value }
+
+### Bindings
+
+JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. They may look like aliases but they are not constrained by the classical XInput mappings and will allow either the developer or the player to change the bindings to suit their particular gamepad mapping.
+
+The main interactions with these data structures are through the player functions:
+
+* **buttonRebindOnPress(inputName, callback = noop, allowDuplication = false) => void**
+  * Once called, JoyMap will ask in each poll for a pressed button and once one is found it will set a binding of the given inputName to that pressed button
+  * **inputName** is the name string of the button to be stored in this.buttons
+  * **callback** is a callback that will be called (with argument index) when a pressed button is detected and the new input binding is set
+  * **allowDuplication** is a flag that when false will swap bindings when one press would trigger more than one binding
+* **cancelButtonRebindOnPress() => void**
+  * Will cancel the waiting process of **buttonRebindOnPress**
+* **clearButtonBindings() => void**
+  * Will clear all of the button bindings, leaving player.buttons also empty in the process
+* **buttonRebind(inputName, binding) => void**
+  * Sets a button binding to inputName.
+  * **binding** is an object of the format { index, mapper }
+    * **index** is the index number used in the rawGamepad
+    * **mapper** is the mapping function of the format **pad => pad.buttons[index]**
+* **clearStickBindings() => void**
+  * Will clear all of the stick bindings, leaving player.sticks also empty in the process
+* **stickRebind(inputName, binding) => void**
+  * Sets a stick binding to inputName.
+  * **binding** is an object of the format { index, mapper }
+    * **index** is the index number used in the rawGamepad
+    * **mapper** is the mapping function of the format **(pad, invertX, invertY) => ({ x: pad.axes[index], y: pad.axes[index + 1] })**
 
 ### Aliases
 
@@ -99,39 +154,32 @@ The callback will be given three arguments: the player itself that is currently 
 
 ### Coming soon(ish):
 
-1) Make it easier for the user to change the default mappings for buttons and sticks
-  
-  * Right now it is assumed that the user will always use a controller with XInput, but the web standard allows for any kind of weird stuff as long as it consists of buttons and sticks (a flight simulator cockpit for example). It is up to the dev to support that strange stuff and this library needs to make it easier.
+1) Implement stickRebindOnPress
 
-2) Implement the listen function in Player for allowing the user to rebind a button to whatever is pressed next
+2) Include the ability to add/remove players from the canvas example
 
-  * Add that to the examples
+3) Add a 3d example using threejs
 
-3) Include the ability to add/remove players from the react example
+4) Add a gamepad config menu example
 
-4) Gamepad rebinding
+  * Store in the sessionStorage the config of the player and on refresh restore it using joymap.setPlayers 
 
-  * Add a few basic functions to handle a player changing controllers
-  * Add a listen function to joymap for allowing the user to use the next gamepad to press anything (or a specified button)
+5) Might want to find a better name than "Aggregators"
 
-5) Add a 3d example using threejs
-
-6) Might want to find a better name than "Aggregators"
-
-7) Add an event system? Maybe?
+6) Add an event system? Maybe?
 
   * The ability to handle inputs as events
-  * player.addEvent('A.justPressed', () => console.log('jump!'))
-  * player.addEvent('B', () => console.log('run!'))
+  * player.addEvent('A.justPressed', ()=> console.log('jump!'))
+  * player.addEvent('B', ()=> console.log('run!'))
   * Also should handle connecting/disconnecting gamepads
 
-8) Controller types
+7) Controller types
 
   * Add support for identifying types of controllers (need to wait for standardization between browsers)
   * Will be used for showing the right button prompts in-game
   * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
 
-9) Rumble support 
+8) Rumble support 
 
   * Check later for real support. All we have right now is for mobile devices
   * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
