@@ -6,7 +6,6 @@ import { map } from 'lodash/fp';
 import ColorHash from 'color-hash';
 import tinycolor from 'tinycolor2';
 
-import '../main.styl';
 import styles from './React.mstyl';
 
 import JoyMap from '../../src/JoyMap';
@@ -48,9 +47,10 @@ class ReactExample extends React.Component {
 
     render() {
         return (
-            <article className="examples-container">
+            <article styleName="examples-container">
                 <header>
-                    <h1 className="title">JoyMap React example</h1>
+                    <h1 styleName="title">JoyMap React example</h1>
+                    <span>Connect one or more Gamepads. Use them. Click on buttons to rebind them.</span>
                 </header>
                 <section styleName="react-example">
                     {map(player => {
