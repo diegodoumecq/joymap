@@ -51,6 +51,12 @@ As you can see in the example above, you can create as many players as you'd lik
 
 For more a in-depth view on what the library supports and how, do please look at the examples in /examples.
 
+### Exported API
+
+* **Joymap** default export, the library itself and main point of usage
+* **Player** the Player class itself
+* **makeButtonMapper** function to create a button mapper function
+
 ### What's the deal with that ... polling stuff?
 
 The browser's gamepad API works under the assumption that the programmer is going to be calling **navigator.getGamepads()** each time they want to check on what the gamepads are doing. Due to the nature of gamepads themselves, they tend to change state every femtosecond or so and therefore the programmer needs to poll **navigator.getGamepads()** every time there's a game loop.
@@ -69,10 +75,17 @@ To make this as painless as possible, JoyMap offers the methods **joyMap.start()
   * For each stick you have { value, pressed, justChanged, invertX, invertY }. They behave similarly to the buttons but the value itself is not a number but an object { x, y }
   * **x** and **y** are both numbers between -1 and 1
   * **invertX** and **invertY** do what it says on the tin and invert the individual axis of each stick independently
+* **player.buttonBindings**
+* **player.stickBindings**
+* **player.parsedGamepad**
+* **player.buttonAliases**
+* **player.stickAliases**
 
 ### Bindings
 
-JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. The main interactions with these data structures are through the functions:
+JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. They may look like aliases but they are not constrained by the classical XInput mappings and will allow either the developer or the player to change the bindings to suit their particular gamepad mapping.
+
+The main interactions with these data structures are through the functions:
 
 * **buttonRebindOnPress(inputName, callback = noop, allowDuplication = false)**
   * Once called, JoyMap waits for the next button to be pressed and sets the input named to that press
@@ -91,7 +104,7 @@ JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindin
   * Sets a stick binding to inputName.
   * **binding** is an object of the format { index, mapper }
     * **index** is the index number used in the rawGamepad
-    * **mapper** is the mapping function of the format **(pad, invertX, invertY) => ({ x: pad.axes[index],y: pad.axes[index + 1] })**
+    * **mapper** is the mapping function of the format **(pad, invertX, invertY) => ({ x: pad.axes[index], y: pad.axes[index + 1] })**
       
 ### Aliases
 
@@ -122,7 +135,7 @@ The callback will be given three arguments: the player itself that is currently 
 
 ### Coming soon(ish):
 
-1) Make it easier for the user to change the default mappings for buttons and sticks
+1) Implement rebinding of sticks
   
   * Right now it is assumed that the user will always use a controller with XInput, but the web standard allows for any kind of weird stuff as long as it consists of buttons and sticks (a flight simulator cockpit for example). It is up to the dev to support that strange stuff and this library needs to make it easier.
 
@@ -132,29 +145,24 @@ The callback will be given three arguments: the player itself that is currently 
 
 3) Include the ability to add/remove players from the react example
 
-4) Gamepad rebinding
+4) Add a 3d example using threejs
 
-  * Add a few basic functions to handle a player changing controllers
-  * Add a listen function to joymap for allowing the user to use the next gamepad to press anything (or a specified button)
+5) Might want to find a better name than "Aggregators"
 
-5) Add a 3d example using threejs
-
-6) Might want to find a better name than "Aggregators"
-
-7) Add an event system? Maybe?
+6) Add an event system? Maybe?
 
   * The ability to handle inputs as events
-  * player.addEvent('A.justPressed', () => console.log('jump!'))
-  * player.addEvent('B', () => console.log('run!'))
+  * player.addEvent('A.justPressed', ()=> console.log('jump!'))
+  * player.addEvent('B', ()=> console.log('run!'))
   * Also should handle connecting/disconnecting gamepads
 
-8) Controller types
+7) Controller types
 
   * Add support for identifying types of controllers (need to wait for standardization between browsers)
   * Will be used for showing the right button prompts in-game
   * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
 
-9) Rumble support 
+8) Rumble support 
 
   * Check later for real support. All we have right now is for mobile devices
   * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
