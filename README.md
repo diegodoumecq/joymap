@@ -70,6 +70,29 @@ To make this as painless as possible, JoyMap offers the methods **joyMap.start()
   * **x** and **y** are both numbers between -1 and 1
   * **invertX** and **invertY** do what it says on the tin and invert the individual axis of each stick independently
 
+### Bindings
+
+JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. The main interactions with these data structures are through the functions:
+
+* **buttonRebindOnPress(inputName, callback = noop, allowDuplication = false)**
+  * Once called, JoyMap waits for the next button to be pressed and sets the input named to that press
+  * **inputName** is the name of the button to be stored in this.buttons
+  * **callback** is a callback that will be called (with argument index) when the press is detected and the new input binding is set
+  * **allowDuplication** is a flag that when false will swap bindings when one press would be set to multiple inputNames
+* **cancelButtonRebindOnPress()**
+  * Will cancel the waiting process of **buttonRebindOnPress**
+  * Receives nothing, returns nothing
+* **buttonRebind(inputName, binding)**
+  * Sets a button binding to inputName.
+  * **binding** is an object of the format { index, mapper }
+    * **index** is the index number used in the rawGamepad
+    * **mapper** is the mapping function of the format **pad => pad.buttons[index]**
+* **stickRebind(inputName, binding)**
+  * Sets a stick binding to inputName.
+  * **binding** is an object of the format { index, mapper }
+    * **index** is the index number used in the rawGamepad
+    * **mapper** is the mapping function of the format **(pad, invertX, invertY) => ({ x: pad.axes[index],y: pad.axes[index + 1] })**
+      
 ### Aliases
 
 Aliases are simple remappings of inputs.
