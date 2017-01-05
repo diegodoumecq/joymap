@@ -8,12 +8,13 @@ Run **yarn add joymap**
 
 ### Key features
 
-* Wraps the ever-changing gamepad standard into a flexible and more useful API
-* Based around player configuration, it organizes input by player rather than by gamepad
-* Supports stateful inputs for ease of use: Each input consists of { value, pressed, justChanged }
-* Supports button remapping by the user
+* Wraps the bare-bones gamepad standard into a flexible and more powerful API
+* Organizes inputs and configurations by player instead of by gamepad
+* Supports stateful inputs for ease of use: Each input consists of at least { value, pressed, justChanged }
+* Supports easy button rebinding methods (stick rebinding is coming)
+* Supports simple aliases for ease of use
 * Supports functional aggregators that let the programmer combine any input and return any result
-* Button mappings are based around the XInput standard, just because it is the only one that works without strange behaviors across all browsers
+* Button bindings are set by default to the XInput standard. All inputs supported by the Gamepad API itself are supported here, they may just require some more elbow grease (meaning: set the bindings yourself somewhere)
 
 ### How to run all the things
 
@@ -75,6 +76,7 @@ To make this as painless as possible, JoyMap offers the methods **joyMap.start()
 ### The Player
 
 * **joyMap.players** is an object that stores the players as you've named them
+* **player.buttonAliases**, **player.stickAliases**, **player.aggregators** are all detailed in their own section
 * **player.buttons** is an object with all of the buttons specified in the buttonBindings. For each button you have { value, pressed, justChanged }
   * By default, it has these values: { dpadUp, dpadDown, dpadLeft, dpadRight, L1, L2, L3, R1, R2, R3, A, B, X, Y, start, select }
   * **value** is the number given by the gamepad object itself for the specified button. Goes from 0 to 1
@@ -86,15 +88,14 @@ To make this as painless as possible, JoyMap offers the methods **joyMap.start()
   * **invertX** and **invertY** do what it says on the tin and invert the individual axis of each stick independently
 * **player.buttonBindings** is an object that stores each button binding
   * Each button binding is an object of the format { index, mapper }
+  * See the binding section
 * **player.stickBindings** is an object that stores each stick binding
   * Each stick binding is an object of the format { index, mapper }
+  * See the binding section
 * **player.parsedGamepad** is a parsed copy of the gamepad object. All inputs are parsed, not just the ones that have bindings
   * It has two properties: { axes, buttons }
   * **axes** is a direct copy of the gamepad.axes array
   * **buttons** is an array of { pressed, justChanged, value }
-* **player.buttonAliases** Explained in the aliases section
-* **player.stickAliases** Explained in the aliases section
-* **player.aggregators** Explained in the aggregators section
 
 ### Bindings
 
