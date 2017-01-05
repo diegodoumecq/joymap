@@ -5,6 +5,7 @@ button()
     right 45px
     width 30px
     height 30px
+    cursor pointer
 
 stick()
     bottom 53px
@@ -14,6 +15,7 @@ stick()
     background-color gray
     border solid 3px black
     border-radius 40px
+    cursor pointer
 
 dpad()
     background-color gray
@@ -22,6 +24,7 @@ dpad()
     left 45px
     width 30px
     height 30px
+    cursor pointer
 
 shoulder(right)
     width 100%
@@ -48,6 +51,7 @@ shoulder(right)
     margin 1rem
     max-width 50%
     border dashed 1rem rgba(0,0,0,0.5)
+    min-width 500px
 
 .react-inputs
     position relative
@@ -157,6 +161,7 @@ shoulder(right)
     width 30px
     height 30px
     right 170px
+    cursor pointer
 
 .select
     background-color gray
@@ -165,6 +170,7 @@ shoulder(right)
     width 30px
     height 30px
     left 170px
+    cursor pointer
 
 .home
     background-color gray
@@ -173,3 +179,4 @@ shoulder(right)
     width 40px
     height 40px
     left 223px
+    cursor pointer
