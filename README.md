@@ -1,6 +1,8 @@
 # JOYMAP
 
-A Javascript Gamepad API wrapper of the much needed but seriously underpowered browser Gamepad API (https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
+A Javascript Gamepad browser API wrapper
+
+For the simple cases use [the browser API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API). Otherwise, continue reading
 
 ### How to install
 
