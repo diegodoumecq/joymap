@@ -21,12 +21,12 @@ export default class JoyMap {
     clampThreshold: boolean;
     onPoll: () => void;
     animationFrameRequestId: number | null = null;
-    isSupported: boolean = isFunction(navigator.getGamepads);
+    isSupported: boolean = navigator && isFunction(navigator.getGamepads);
 
     gamepads: Gamepad[] = [];
     players: { [key: any]: Player } = {};
 
-    constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }: IParams) {
+    constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }: IParams = {}) {
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;
         this.onPoll = onPoll;
