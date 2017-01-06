@@ -11,6 +11,19 @@
     "build": "cross-env NODE_ENV=production webpack --config webpack.build.config.babel.js",
     "test": "ava"
   },
+  "author": {
+    "name": "Diego Doumecq",
+    "email": "licenciado.diego@gmail.com"
+  },
+  "keywords": [
+    "gamepad",
+    "joystick",
+    "flow"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diegodoumecq/joymap"
+  },
   "ava": {
     "require": [
       "babel-register",
