@@ -1,10 +1,6 @@
 /* @flow */
 import {
-    omit, includes, difference, forEach, find, findIndex, noop
-} from 'lodash/fp';
-import { mapValues, map } from 'lodash';
-
-import {
+    noop, includes, mapValues, findKey, omit, difference,
     buttonsMap, sticksMap,
     makeButtonMapper, addButtonAlias,
     addStickAlias
@@ -53,19 +49,19 @@ export default class Player {
         this.buttonBindings = buttonsMap;
         this.stickBindings = sticksMap;
 
-        this.buttons = mapValues(this.buttonBindings, () => ({
+        this.buttons = mapValues(() => ({
             value: 0,
             pressed: false,
             justChanged: false
-        }));
+        }), this.buttonBindings);
 
-        this.sticks = mapValues(this.stickBindings, () => ({
+        this.sticks = mapValues(() => ({
             value: { x: 0, y: 0 },
             pressed: false,
             justChanged: false,
             invertX: false,
             invertY: false
-        }));
+        }), this.stickBindings);
     }
 
     disconnect() {
@@ -103,10 +99,7 @@ export default class Player {
 
     buttonRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
         this.listenOnPress = index => {
-            const bindingIndex = find(
-                value => this.buttonBindings[value].index === index,
-                Object.keys(this.buttonBindings)
-            );
+            const bindingIndex = findKey({ index }, this.buttonBindings);
 
             if (bindingIndex) {
                 if (inputName !== bindingIndex) {
@@ -187,7 +180,7 @@ export default class Player {
         const prevGamepad = this.parsedGamepad;
 
         return {
-            buttons: map(gamepad.buttons, ({ value }: { value: number }, index: number) => {
+            buttons: gamepad.buttons.map(({ value }: { value: number }, index: number) => {
                 const previous: IButton = prevGamepad.buttons[index];
                 const pressed = this.isButtonSignificant(value);
 
@@ -210,7 +203,7 @@ export default class Player {
 
         const callback = this.listenOnPress;
         if (callback) {
-            const index = findIndex(({ pressed, justChanged }) => pressed && justChanged, this.parsedGamepad.buttons);
+            const index = this.parsedGamepad.buttons.findIndex(({ pressed, justChanged }) => pressed && justChanged);
 
             if (index !== -1) {
                 callback(index);
@@ -232,7 +225,7 @@ export default class Player {
     }
 
     updateButtons(gamepad: IParsedGamepad) {
-        this.buttons = mapValues(this.buttonBindings, (binding: IButtonBinding) => binding.mapper(gamepad));
+        this.buttons = mapValues((binding: IButtonBinding) => binding.mapper(gamepad), this.buttonBindings);
     }
 
     getStickValue(sticks: IPoint = { x: 0, y: 0 }): IPoint {
@@ -253,7 +246,7 @@ export default class Player {
     updateStick(gamepad: IParsedGamepad) {
         const prevStick = this.sticks;
 
-        this.sticks = mapValues(this.stickBindings, (binding: IStickBinding, inputName: string) => {
+        this.sticks = mapValues((binding: IStickBinding, inputName: string) => {
             const previous: IStick = prevStick[inputName];
             const { invertX, invertY } = previous;
             const value: IPoint = binding.mapper(gamepad, invertX, invertY);
@@ -266,19 +259,19 @@ export default class Player {
                 invertX,
                 invertY
             };
-        });
+        }, this.stickBindings);
     }
 
     updateAliases() {
         // When an alias has more than 1 button assigned to it, use for reference the one that's pressed the most
-        this.buttonAliases = mapValues(this.buttonAliases, (alias: IButtonAlias) => {
+        this.buttonAliases = mapValues((alias: IButtonAlias) => {
             let value = 0;
 
-            forEach(name => {
+            alias.inputs.forEach(name => {
                 if (this.buttons[name].value > value) {
                     value = this.buttons[name].value;
                 }
-            }, alias.inputs);
+            });
 
             value = this.getButtonValue(value);
             const pressed = this.isButtonSignificant(value);
@@ -289,22 +282,22 @@ export default class Player {
                 value,
                 inputs: alias.inputs
             };
-        });
+        }, this.buttonAliases);
 
         // When an alias has more than 1 stick assigned to it, do an average
-        this.stickAliases = mapValues(this.stickAliases, (alias: IStickAlias) => {
+        this.stickAliases = mapValues((alias: IStickAlias) => {
             let xCount = 0;
             let yCount = 0;
             let count = 0;
 
-            forEach(name => {
+            alias.inputs.forEach(name => {
                 if (this.sticks[name].pressed) {
                     const { x, y } = this.sticks[name].value;
                     xCount += x;
                     yCount += y;
                     count += 1;
                 }
-            }, alias.inputs);
+            });
 
             const value = this.getStickValue({
                 x: count === 0 ? 0 : xCount / count,
@@ -318,13 +311,13 @@ export default class Player {
                 value,
                 inputs: alias.inputs
             };
-        });
+        }, this.stickAliases);
     }
 
     updateAggregators(gamepad: Gamepad) {
-        this.aggregators = mapValues(this.aggregators, ({ callback, value }: IAggregator) => ({
+        this.aggregators = mapValues(({ callback, value }: IAggregator) => ({
             callback,
             value: callback(this, value, gamepad)
-        }));
+        }), this.aggregators);
     }
 }

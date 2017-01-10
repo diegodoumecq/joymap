@@ -50,9 +50,7 @@ export default {
             compress: {
                 warnings: false
             },
-            output: {
-                comments: false
-            }
+            comments: false
         })
     ]
 };

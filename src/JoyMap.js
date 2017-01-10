@@ -1,17 +1,10 @@
 /* @flow */
 import {
-    isFunction, find, map, noop, omit,
-    filter, difference, forEach, flow
-} from 'lodash/fp';
+    noop, map, isFunction, find, omit, difference, findKey,
+    getRawGamepads
+} from './utils';
 
 import Player from './Player';
-
-function getRawGamepads(): Gamepad[] {
-    if (navigator && navigator.getGamepads) {
-        return navigator.getGamepads();
-    }
-    return [];
-}
 
 type IParams = { threshold: number, clampThreshold: boolean, onPoll: () => void };
 
@@ -66,10 +59,8 @@ export default class JoyMap {
 
         const player: Player = new Player({ name, threshold, clampThreshold });
 
-        const unusedId: ?string = flow(
-            map('id'),
-            find((gamepadId: string) => !find({ gamepadId }, this.players))
-        )(this.gamepads);
+        const gamepadIds: string[] = map('id', this.gamepads);
+        const unusedId: ?string = gamepadIds.find((gamepadId: string) => !findKey({ gamepadId }, this.players));
 
         if (unusedId) {
             player.connect(unusedId);
@@ -87,20 +78,21 @@ export default class JoyMap {
     }
 
     cleanPlayers() {
-        forEach(({ name }) => this.removePlayer(name), this.players);
+        Object.keys(this.players).forEach(name => this.removePlayer(name));
     }
 
     poll() {
         this.onPoll();
 
-        this.gamepads = filter((rawGamepad: ?Gamepad) =>
+        this.gamepads = getRawGamepads().filter((rawGamepad: ?Gamepad) =>
             rawGamepad
             && rawGamepad.connected
             && rawGamepad.buttons.length
             && rawGamepad.axes.length
-            && (!!rawGamepad.id || rawGamepad.id === 0), getRawGamepads());
+            && (!!rawGamepad.id || rawGamepad.id === 0));
 
-        forEach((player: Player) => {
+        Object.keys(this.players).forEach((name: string) => {
+            const player: Player = this.players[name];
             const unusedGamepadIds = this.getUnusedGamepadIds();
 
             // Given unassigned players and unusued gamepads, automatically assign them
@@ -120,6 +112,6 @@ export default class JoyMap {
             } else {
                 player.disconnect();
             }
-        }, this.players);
+        });
     }
 }

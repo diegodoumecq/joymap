@@ -1,4 +1,12 @@
 {
-    "presets": ["latest", "stage-0", "react"],
-    "plugins": ["lodash", "transform-runtime"]
+    "presets": ["latest", "stage-0"],
+    "plugins": [
+        "lodash",
+        "transform-runtime",
+        "syntax-flow",
+        "syntax-jsx",
+        "transform-flow-comments",
+        "transform-react-jsx",
+        "transform-react-display-name"
+    ]
 }
