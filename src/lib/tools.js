@@ -1,3 +1,5 @@
+/* @flow */
+
 // Lodash function replacements
 
 type IteratorCb = (value: any, name: string) => boolean;
