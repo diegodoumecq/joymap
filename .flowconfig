@@ -1,11 +1,13 @@
 [options]
-suppress_comment=\\(.\\|\n\\)*\\#FlowExpectError
+suppress_comment= \\(.\\|\n\\)*\\#FlowExpectError
 esproposal.class_instance_fields=enable
 esproposal.class_static_fields=enable
 
 module.name_mapper='.*\(.styl\|.css\|.png\)' -> 'empty/object'
 
 [ignore]
+<PROJECT_ROOT>/bin/.*
+<PROJECT_ROOT>/devBundle/.*
 
 [libs]
 flow-typed
