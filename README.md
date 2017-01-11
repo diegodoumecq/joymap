@@ -156,33 +156,22 @@ The callback will be given three arguments: the player itself that is currently 
 
 ### Coming soon(ish):
 
-1) Implement stickRebindOnPress
-
-2) Include the ability to add/remove players from the canvas example
-
-3) Add a 3d example using threejs
-
-4) Add a gamepad config menu example
-
+* Implement stickRebindOnPress
+* Include the ability to add/remove players from the canvas example
+* Add a 3d example using threejs
+* Add a gamepad config menu example
   * Store in the sessionStorage the config of the player and on refresh restore it using joymap.setPlayers 
-
-5) Might want to find a better name than "Aggregators"
-
-6) Add an event system? Maybe?
-
+* Might want to find a better name than "Aggregators"
+* Add an event system? Maybe?
   * The ability to handle inputs as events
   * player.addEvent('A.justPressed', ()=> console.log('jump!'))
   * player.addEvent('B', ()=> console.log('run!'))
   * Also should handle connecting/disconnecting gamepads
-
-7) Controller types
-
+* Controller types
   * Add support for identifying types of controllers (need to wait for standardization between browsers)
   * Will be used for showing the right button prompts in-game
   * Will be used for mapping the right buttons for the main gamepads and browsers (though its not clear yet if this is even necessary)
-
-8) Rumble support 
-
+* Rumble support 
   * Check later for real support. All we have right now is for mobile devices
   * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
   * https://www.w3.org/TR/vibration/
