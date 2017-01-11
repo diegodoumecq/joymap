@@ -1,12 +1,22 @@
 {
     "presets": ["latest", "stage-0"],
-    "plugins": [
-        "lodash",
-        "transform-runtime",
-        "syntax-flow",
-        "syntax-jsx",
-        "transform-flow-comments",
-        "transform-react-jsx",
-        "transform-react-display-name"
-    ]
+    "env": {
+        "production": {
+            "plugins": [
+                "transform-flow-comments",
+                "syntax-flow"
+            ]
+        },
+        "development": {
+            "plugins": [
+                "lodash",
+                "transform-runtime",
+                "syntax-flow",
+                "syntax-jsx",
+                "transform-flow-comments",
+                "transform-react-jsx",
+                "transform-react-display-name"
+            ]
+        }
+    }
 }
