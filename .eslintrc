@@ -12,6 +12,7 @@
   "rules": {
     "linebreak-style": 0,
     "no-param-reassign": 0,
+    "import/no-extraneous-dependencies": 0,
     "indent": ["error", 4],
     "comma-dangle": ["error", "never"],
     "arrow-parens": ["error", "as-needed"],
@@ -30,7 +31,6 @@
             ]
         }
     ]
-
   },
   "env": {
     "browser": true

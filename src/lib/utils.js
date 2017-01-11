@@ -32,16 +32,15 @@ const mockButtons = {
     }
 };
 
-export function makeButtonMapper(index: number): IButtonBinding {
+export function makeButtonBinding(index: number): IButtonBinding {
     return {
         index,
         mapper: pad => pad.buttons[index]
     };
 }
 
-export const buttonsMap: { [key: string]: IButtonBinding } =
-    Object.assign(mapValues(value =>
-        makeButtonMapper(value), buttonIndexMapping), mockButtons);
+export const buttonBindings: { [key: string]: IButtonBinding } =
+    Object.assign(mapValues(value => makeButtonBinding(value), buttonIndexMapping), mockButtons);
 
 export function addButtonAlias(alias: ?IButtonAlias, inputs: string[]) {
     if (!alias) {
@@ -63,7 +62,7 @@ export const stickIndexMapping = {
     R: 2
 };
 
-export function makeStickMapper(index: number): IStickBinding {
+export function makeStickBinding(index: number): IStickBinding {
     return {
         index,
         mapper: (pad, invertX = false, invertY = false) => ({
@@ -72,8 +71,8 @@ export function makeStickMapper(index: number): IStickBinding {
         })
     };
 }
-export const sticksMap: { [key: string]: IStickBinding } =
-    mapValues(value => makeStickMapper(value), stickIndexMapping);
+export const stickBindings: { [key: string]: IStickBinding } =
+    mapValues(value => makeStickBinding(value), stickIndexMapping);
 
 export function addStickAlias(alias: ?IStickAlias, inputs: string[]) {
     if (!alias) {

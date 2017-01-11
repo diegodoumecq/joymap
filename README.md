@@ -16,7 +16,7 @@ Run **yarn add joymap**
 * Supports easy button rebinding methods (stick rebinding is coming)
 * Supports simple aliases for ease of use
 * Supports functional aggregators that let the programmer combine any input and return any result
-* Button bindings are set by default to the XInput standard. All inputs supported by the Gamepad API itself are supported here, they may just require some more elbow grease (meaning: set the bindings yourself somewhere)
+* Button bindings are set by default to the XInput standard. All inputs supported by the Gamepad API itself are supported, they may just require some more elbow grease (meaning: set the bindings yourself somewhere)
 
 ### How to run all the things
 
@@ -30,8 +30,8 @@ Run **yarn add joymap**
 ### Exported API
 
 * **Player** is the Player class itself. Detailed in its own section
-* **makeButtonMapper** is a function to create a button mapper function
-* **makeStickMapper** is a function to create a stick mapper function
+* **makeButtonBinding** is a function to create a button binding function
+* **makeStickBinding** is a function to create a stick binding function
 * **Joymap** is the default export and main point of usage. Once instanced, the methods are:
   * **start() => void**: calls **poll()** using requestAnimationFrame
   * **stop() => void**: Stops calling **poll()**

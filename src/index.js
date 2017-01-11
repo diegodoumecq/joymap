@@ -5,10 +5,10 @@
 import j from './JoyMap';
 import p from './Player';
 
-import { makeButtonMapper as makeB, makeStickMapper as makeS } from './lib/utils';
+import { makeButtonBinding as makeB, stickBindings as makeS } from './lib/utils';
 
 export default j;
 
 export const Player = p;
-export const makeButtonMapper = makeB;
-export const makeStickMapper = makeS;
+export const makeButtonBinding = makeB;
+export const stickBindings = makeS;

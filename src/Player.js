@@ -1,7 +1,7 @@
 /* @flow */
 import {
-    buttonsMap, sticksMap,
-    makeButtonMapper, addButtonAlias,
+    buttonBindings, stickBindings,
+    makeButtonBinding, addButtonAlias,
     addStickAlias
 } from './lib/utils';
 
@@ -29,8 +29,8 @@ export default class Player {
 
     sticks: { [key: string]: IStick };
     buttons: { [key: string]: IButton };
-    buttonBindings: { [key: string]: IButtonBinding } = buttonsMap;
-    stickBindings: { [key: string]: IStickBinding } = sticksMap;
+    buttonBindings: { [key: string]: IButtonBinding };
+    stickBindings: { [key: string]: IStickBinding };
 
     listenOnPress: null | Function = null;
 
@@ -49,8 +49,8 @@ export default class Player {
     }
 
     cleanInputs() {
-        this.buttonBindings = buttonsMap;
-        this.stickBindings = sticksMap;
+        this.buttonBindings = buttonBindings;
+        this.stickBindings = stickBindings;
 
         this.buttons = mapValues(() => ({
             value: 0,
@@ -107,7 +107,7 @@ export default class Player {
             if (bindingIndex) {
                 if (inputName !== bindingIndex) {
                     if (allowDuplication) {
-                        this.buttonBindings[inputName] = makeButtonMapper(index);
+                        this.buttonBindings[inputName] = makeButtonBinding(index);
                     } else {
                         const binding = this.buttonBindings[bindingIndex];
                         this.buttonBindings[bindingIndex] = this.buttonBindings[inputName];
@@ -115,7 +115,7 @@ export default class Player {
                     }
                 }
             } else {
-                this.buttonBindings[inputName] = makeButtonMapper(index);
+                this.buttonBindings[inputName] = makeButtonBinding(index);
             }
 
             callback(bindingIndex);

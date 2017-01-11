@@ -3,7 +3,7 @@ suppress_comment= \\(.\\|\n\\)*\\#FlowExpectError
 esproposal.class_instance_fields=enable
 esproposal.class_static_fields=enable
 
-module.name_mapper='.*\(.styl\|.css\|.png\)' -> 'empty/object'
+module.name_mapper='.*\(.mstyl\|.styl\|.css\|.png\|.woff\|.woff2\|.ttf\|.eot\|.svg\)' -> 'empty/object'
 
 [ignore]
 <PROJECT_ROOT>/bin/.*
