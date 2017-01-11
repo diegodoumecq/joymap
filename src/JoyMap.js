@@ -1,8 +1,8 @@
 /* @flow */
+import { getRawGamepads } from './lib/utils';
 import {
-    noop, map, isFunction, find, omit, difference, findKey,
-    getRawGamepads
-} from './utils';
+    noop, map, isFunction, find, omit, difference, findKey
+} from './lib/tools';
 
 import Player from './Player';
 

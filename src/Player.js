@@ -1,10 +1,13 @@
 /* @flow */
 import {
-    noop, includes, mapValues, findKey, omit, difference,
     buttonsMap, sticksMap,
     makeButtonMapper, addButtonAlias,
     addStickAlias
-} from './utils';
+} from './lib/utils';
+
+import {
+    noop, includes, mapValues, findKey, omit, difference
+} from './lib/tools';
 
 import type {
     IPoint, IParsedGamepad, IStick, IButton,
