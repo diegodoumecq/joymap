@@ -1,4 +1,4 @@
-import { DefinePlugin, optimize } from 'webpack';
+import { DefinePlugin, BannerPlugin/* , optimize*/ } from 'webpack';
 import path from 'path';
 
 import CleanWebpackPlugin from 'clean-webpack-plugin';
@@ -26,7 +26,7 @@ export default {
     module: {
         rules: [{
             test: /\.js$/,
-            use: ['babel-loader'],
+            rules: [{ loader: 'babel-loader' }],
             include: entryPath
         }]
     },
@@ -37,20 +37,26 @@ export default {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV)
             }
         }),
+
         new CleanWebpackPlugin([deployFolder], {
             root: __dirname,
             verbose: true,
             dry: false
         }),
 
-        new optimize.UglifyJsPlugin({
-            minify: true,
-            mangle: true,
-            sourceMap: false,
-            compress: {
-                warnings: false
-            },
-            comments: false
-        })
+        new BannerPlugin({ banner: '/* @flow */', raw: true })
+
+        // Can't enable minification without it having an impact on flow comments
+        /* new optimize.UglifyJsPlugin({
+            minify: false,
+            mangle: false,
+            sourceMap: true,
+            compress: false,
+            output: {
+                comments: function(node, { value }) {
+                    return value.split('').filter(a => a !== '*').length !== 0
+                }
+            }
+        })*/
     ]
 };
