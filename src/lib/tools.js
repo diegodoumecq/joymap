@@ -60,6 +60,40 @@ export function omit(indexes: string[], target: Object): Object {
     return result;
 }
 
+export function isConsecutive(target: number[]): boolean {
+    const length = target.length;
+
+    if (length <= 1) {
+        return true;
+    }
+
+    let i = 0;
+    while (i < length - 1) {
+        if (target[i] + 1 !== target[i + 1]) {
+            return false;
+        }
+        i += 1;
+    }
+
+    return true;
+}
+
+type FindIndexesCb = (value: any, index: number) => boolean;
+export function findIndexes(iterator: FindIndexesCb, target: any[]): number[] {
+    const length = target.length;
+    const result = [];
+    let i = 0;
+
+    while (i < length) {
+        if (iterator(target[i], i)) {
+            result.push(i);
+        }
+        i += 1;
+    }
+
+    return result;
+}
+
 type MapValuesCb = (value: any, name: string) => any;
 export function mapValues(iterator: MapValuesCb, obj: Object): Object {
     const result = {};

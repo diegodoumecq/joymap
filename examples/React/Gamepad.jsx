@@ -33,7 +33,7 @@ class Gamepad extends React.Component {
         if (player.connected) {
             player.buttonRebindOnPress(
                 inputName,
-                () => this.setState({ waiting: null })
+                { callback: () => this.setState({ waiting: null }) }
             );
             this.setState({ waiting: inputName });
         }

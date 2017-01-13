@@ -1,12 +1,14 @@
 /* @flow */
 import {
     buttonBindings, stickBindings,
-    makeButtonBinding, addButtonAlias,
-    addStickAlias
+    addButtonAlias, addStickAlias,
+    makeButtonBinding
 } from './lib/utils';
 
 import {
-    noop, includes, mapValues, findKey, omit, difference
+    includes, mapValues, findKey,
+    omit, difference, findIndexes,
+    isConsecutive
 } from './lib/tools';
 
 import type {
@@ -16,6 +18,8 @@ import type {
 } from './types';
 
 type IParams = { name: string, threshold: number, clampThreshold: boolean };
+
+const listenOptions = { waitFor: ['poll', 1], consecutive: false, allowOffset: true };
 
 export default class Player {
     name: string;
@@ -32,13 +36,13 @@ export default class Player {
     buttonBindings: { [key: string]: IButtonBinding };
     stickBindings: { [key: string]: IStickBinding };
 
-    listenOnPress: null | Function = null;
-
     gamepadId: ?string = null;
     connected: boolean = false;
     buttonAliases: { [key: string]: IButtonAlias } = {};
     stickAliases: { [key: string]: IStickAlias } = {};
     aggregators: { [key: string]: IAggregator } = {};
+
+    listenOptions: Object | null = null;
 
     constructor({ name, threshold = 0.3, clampThreshold = true }: IParams = {}) {
         this.name = name;
@@ -96,12 +100,30 @@ export default class Player {
         this.stickBindings[inputName] = binding;
     }
 
-    cancelButtonRebindOnPress() {
-        this.listenOnPress = null;
+    cancelListen() {
+        this.listenOptions = null;
     }
 
-    buttonRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
-        this.listenOnPress = index => {
+    listenButton(
+        callback: Function,
+        quantity: number = 1,
+        { waitFor, consecutive, allowOffset }: Object = listenOptions) {
+        this.listenOptions = {
+            callback, quantity, type: 'buttons', state: 0, waitFor, consecutive, allowOffset
+        };
+    }
+
+    listenAxis(
+        callback: Function,
+        quantity: number = 1,
+        { waitFor, consecutive, allowOffset }: Object = listenOptions) {
+        this.listenOptions = {
+            callback, quantity, type: 'axes', state: 0, waitFor, consecutive, allowOffset
+        };
+    }
+
+    buttonRebindOnPress(inputName: string, callback: Function, allowDuplication: boolean = false) {
+        this.listenButton(index => {
             const bindingIndex = findKey({ index }, this.buttonBindings);
 
             if (bindingIndex) {
@@ -119,7 +141,7 @@ export default class Player {
             }
 
             callback(bindingIndex);
-        };
+        });
     }
 
     setAggregator(aggregatorName: string, callback: Function) {
@@ -204,13 +226,38 @@ export default class Player {
         this.updateAliases();
         this.updateAggregators(gamepad);
 
-        const callback = this.listenOnPress;
-        if (callback) {
-            const index = this.parsedGamepad.buttons.findIndex(({ pressed, justChanged }) => pressed && justChanged);
+        if (this.listenOptions) {
+            const {
+                callback, quantity, type,
+                state, waitFor, consecutive, allowOffset
+            } = this.listenOptions;
 
-            if (index !== -1) {
-                callback(index);
-                this.listenOnPress = null;
+            const result = findIndexes(
+                ({ pressed, justChanged }) => pressed && justChanged,
+                this.parsedGamepad[type]
+            ).slice(0, quantity);
+
+            if (result.length === quantity
+            && (!consecutive || isConsecutive(result))
+            && (allowOffset || result[0] % quantity === 0)) {
+                let comparison;
+                const isMs = waitFor[1] === 'ms';
+                if (isMs) {
+                    comparison = state === 0 ? 0 : Date.now() - state;
+                } else {
+                    comparison = state + 1;
+                }
+
+                if (waitFor[0] <= comparison) {
+                    callback(...result);
+                    this.listenOptions = null;
+                } else if (isMs) {
+                    this.listenOptions = Object.assign({}, this.listenOptions, { state: Date.now() });
+                } else {
+                    this.listenOptions = Object.assign({}, this.listenOptions, { state: state + 1 });
+                }
+            } else {
+                this.listenOptions = Object.assign({}, this.listenOptions, { state: 0 });
             }
         }
     }
