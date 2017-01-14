@@ -32,7 +32,7 @@ export function stringifyInputs(player, inputType) {
                 return `${result} ${inputName}: ${input.pressed ? 'pressed' : 'released'}(${input.value}),`;
             }
 
-            const { x, y } = input.value;
+            const [x, y] = input.value;
             return `${result} ${inputName}: ${input.pressed ? 'pressed' : 'released'}(x: ${x}, y: ${y}),`;
         }
 

@@ -22,8 +22,7 @@ function joyMapSetup() {
     joyMap.addPlayer('Jim');
 
     const { L } = joyMap.players.James.sticks;
-    L.invertX = true;
-    L.invertY = true;
+    L.inverts = [true, true];
 
     return joyMap;
 }

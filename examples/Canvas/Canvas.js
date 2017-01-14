@@ -32,12 +32,12 @@ function updateMascot() {
     const { L, R } = mainPlayer.sticks;
 
     // Move the mascot itself
-    mascot.x += L.value.x * 5;
-    mascot.y += L.value.y * 5;
+    mascot.x += L.value[0] * 5;
+    mascot.y += L.value[1] * 5;
 
     // Don't assign a new angle if the stick isn't being used
     if (R.pressed) {
-        mascot.angle = Math.atan2(R.value.y, R.value.x) + (Math.PI * 0.5);
+        mascot.angle = Math.atan2(R.value[1], R.value[0]) + (Math.PI * 0.5);
     }
 }
 

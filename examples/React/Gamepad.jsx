@@ -27,33 +27,31 @@ class Gamepad extends React.Component {
         waiting: null
     };
 
-    handleRebind(inputName) {
-        const { player } = this.props;
-
-        if (player.connected) {
-            player.buttonRebindOnPress(
-                inputName,
-                { callback: () => this.setState({ waiting: null }) }
-            );
-            this.setState({ waiting: inputName });
-        }
-    }
-
     handleCancelRebind = () => {
-        this.props.player.cancelButtonRebindOnPress();
+        this.props.player.cancelListen();
         this.setState({ waiting: null });
     };
 
     renderStick(inputName) {
         const { pressedColor } = this.props;
         const { sticks, buttons } = this.props.player;
-        const { x, y } = sticks[inputName].value;
+        const [x, y] = sticks[inputName].value;
 
         return (
             <div
                 key={inputName}
                 styleName={inputName}
-                onClick={() => this.handleRebind(`${inputName}3`)}
+                onClick={() => {
+                    const { player } = this.props;
+
+                    if (player.connected) {
+                        player.stickRebindOnPress(
+                            inputName,
+                            () => this.setState({ waiting: null })
+                        );
+                        this.setState({ waiting: inputName });
+                    }
+                }}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
                     backgroundColor: buttons[`${inputName}3`].pressed ? pressedColor : ''
@@ -68,7 +66,17 @@ class Gamepad extends React.Component {
             <div
                 key={inputName}
                 styleName={inputName}
-                onClick={() => this.handleRebind(inputName)}
+                onClick={() => {
+                    const { player } = this.props;
+
+                    if (player.connected) {
+                        player.buttonRebindOnPress(
+                            inputName,
+                            () => this.setState({ waiting: null })
+                        );
+                        this.setState({ waiting: inputName });
+                    }
+                }}
                 style={{
                     backgroundColor: pressed ? pressedColor : ''
                 }} />);
