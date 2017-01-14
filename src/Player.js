@@ -2,24 +2,22 @@
 import {
     buttonBindings, stickBindings,
     addButtonAlias, addStickAlias,
-    makeButtonBinding
+    makeButtonBinding, makeStickBinding
 } from './lib/utils';
 
 import {
     includes, mapValues, findKey,
     omit, difference, findIndexes,
-    isConsecutive
+    isConsecutive, noop, unique
 } from './lib/tools';
 
 import type {
-    IPoint, IParsedGamepad, IStick, IButton,
+    IStickValue, IParsedGamepad, IStick, IButton,
     IStickAlias, IButtonAlias, IAggregator,
     IStickBinding, IButtonBinding
 } from './types';
 
 type IParams = { name: string, threshold: number, clampThreshold: boolean };
-
-const listenOptions = { waitFor: ['poll', 1], consecutive: false, allowOffset: true };
 
 export default class Player {
     name: string;
@@ -42,7 +40,16 @@ export default class Player {
     stickAliases: { [key: string]: IStickAlias } = {};
     aggregators: { [key: string]: IAggregator } = {};
 
-    listenOptions: Object | null = null;
+    listenOptions: null | {
+        callback: Function,
+        quantity: number,
+        type: 'buttons' | 'axes',
+        currentValue: number,
+        useTimeStamp: boolean,
+        threshold: number,
+        consecutive: boolean,
+        allowOffset: boolean
+    } = null;
 
     constructor({ name, threshold = 0.3, clampThreshold = true }: IParams = {}) {
         this.name = name;
@@ -63,11 +70,10 @@ export default class Player {
         }), this.buttonBindings);
 
         this.sticks = mapValues(() => ({
-            value: { x: 0, y: 0 },
+            value: [0, 0],
             pressed: false,
             justChanged: false,
-            invertX: false,
-            invertY: false
+            inverts: [false, false]
         }), this.stickBindings);
     }
 
@@ -107,22 +113,38 @@ export default class Player {
     listenButton(
         callback: Function,
         quantity: number = 1,
-        { waitFor, consecutive, allowOffset }: Object = listenOptions) {
+        { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }: Object = {}
+    ) {
         this.listenOptions = {
-            callback, quantity, type: 'buttons', state: 0, waitFor, consecutive, allowOffset
+            callback,
+            quantity,
+            type: 'buttons',
+            currentValue: 0,
+            useTimeStamp: waitFor[1] === 'ms',
+            threshold: waitFor[0],
+            consecutive,
+            allowOffset
         };
     }
 
     listenAxis(
         callback: Function,
-        quantity: number = 1,
-        { waitFor, consecutive, allowOffset }: Object = listenOptions) {
+        quantity: number = 2,
+        { waitFor = [100, 'polls'], consecutive = true, allowOffset = true }: Object = {}
+    ) {
         this.listenOptions = {
-            callback, quantity, type: 'axes', state: 0, waitFor, consecutive, allowOffset
+            callback,
+            quantity,
+            type: 'axes',
+            currentValue: 0,
+            useTimeStamp: waitFor[1] === 'ms',
+            threshold: waitFor[0],
+            consecutive,
+            allowOffset
         };
     }
 
-    buttonRebindOnPress(inputName: string, callback: Function, allowDuplication: boolean = false) {
+    buttonRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
         this.listenButton(index => {
             const bindingIndex = findKey({ index }, this.buttonBindings);
 
@@ -144,6 +166,31 @@ export default class Player {
         });
     }
 
+    stickRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
+        this.listenAxis((index1, index2) => {
+            // TODO Fix typing issue with mixed argument for findKey
+            const bindingIndex: string | null = findKey(({ indexes }) => (
+                indexes.includes(index1) && indexes.includes(index2)
+            ), this.stickBindings);
+
+            if (bindingIndex) {
+                if (inputName !== bindingIndex) {
+                    if (allowDuplication) {
+                        this.stickBindings[inputName] = makeStickBinding(index1, index2);
+                    } else {
+                        const binding = this.stickBindings[bindingIndex];
+                        this.stickBindings[bindingIndex] = this.stickBindings[inputName];
+                        this.stickBindings[inputName] = binding;
+                    }
+                }
+            } else {
+                this.stickBindings[inputName] = makeStickBinding(index1, index2);
+            }
+
+            callback(bindingIndex);
+        });
+    }
+
     setAggregator(aggregatorName: string, callback: Function) {
         this.aggregators[aggregatorName] = { callback, value: null };
     }
@@ -157,22 +204,25 @@ export default class Player {
     }
 
     setAlias(aliasName: string, inputs: string | string[]) {
-        let inputList: string[];
-
-        if (typeof inputs === 'string') {
-            inputList = [inputs];
-        } else {
-            inputList = inputs;
-        }
+        const inputList: string[] = typeof inputs === 'string' ? [inputs] : inputs;
 
         if (difference(inputList, Object.keys(this.buttons)).length === 0) {
             this.buttonAliases[aliasName] = addButtonAlias(this.buttonAliases[aliasName], inputList);
         } else if (difference(inputList, Object.keys(this.sticks)).length === 0) {
-            this.stickAliases[aliasName] = addStickAlias(this.stickAliases[aliasName], inputList);
+            const lengths: IStickValue = inputList.map(name => this.sticks[name].value.length);
+
+            if (unique(lengths).length === 1) {
+                this.stickAliases[aliasName] = addStickAlias(this.stickAliases[aliasName], inputList);
+            } else {
+                throw new Error(
+                    `joymap.players.${this.name}.setAlias(${aliasName}),
+                    all sticks specified did not have the same number of axes`
+                );
+            }
         } else {
             throw new Error(
-                `joymap.players.${this.name}.setAlias(${aliasName},
-                couldn't every single input ('${inputList.join(', ')}') in buttons or sticks exclusively`
+                `joymap.players.${this.name}.setAlias(${aliasName}),
+                either on of the inputs is void or it wasn't all a collection of just buttons or just sticks`
             );
         }
     }
@@ -219,47 +269,54 @@ export default class Player {
         };
     }
 
+    updateListenOptions() {
+        if (this.listenOptions) {
+            const {
+                callback, quantity, type,
+                currentValue, useTimeStamp, threshold,
+                consecutive, allowOffset
+            } = this.listenOptions;
+
+            let result;
+
+            if (type === 'axes') {
+                result = findIndexes(value => Math.abs(value) > this.threshold, this.parsedGamepad.axes);
+            } else {
+                result = findIndexes(
+                    ({ pressed, justChanged }) => pressed && (currentValue !== 0 || justChanged),
+                    this.parsedGamepad.buttons
+                );
+            }
+
+            if (result.length === quantity
+            && (!consecutive || isConsecutive(result.slice(0, quantity)))
+            && (allowOffset || result[0] % quantity === 0)) {
+                if (useTimeStamp && currentValue === 0) {
+                    this.listenOptions = Object.assign({}, this.listenOptions, { currentValue: Date.now() });
+                } else {
+                    const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
+
+                    if (threshold <= comparison) {
+                        callback(...result.slice(0, quantity));
+                        this.listenOptions = null;
+                    } else if (!useTimeStamp) {
+                        this.listenOptions = Object.assign({}, this.listenOptions, { currentValue: comparison });
+                    }
+                }
+            } else {
+                this.listenOptions = Object.assign({}, this.listenOptions, { currentValue: 0 });
+            }
+        }
+    }
+
     update(gamepad: Gamepad) {
         this.parsedGamepad = this.parseGamepad(gamepad);
         this.updateButtons(this.parsedGamepad);
         this.updateStick(this.parsedGamepad);
         this.updateAliases();
-        this.updateAggregators(gamepad);
+        this.updateAggregators(gamepad); // REVIEW: Shouldn't this use parsedGamepad too?
 
-        if (this.listenOptions) {
-            const {
-                callback, quantity, type,
-                state, waitFor, consecutive, allowOffset
-            } = this.listenOptions;
-
-            const result = findIndexes(
-                ({ pressed, justChanged }) => pressed && justChanged,
-                this.parsedGamepad[type]
-            ).slice(0, quantity);
-
-            if (result.length === quantity
-            && (!consecutive || isConsecutive(result))
-            && (allowOffset || result[0] % quantity === 0)) {
-                let comparison;
-                const isMs = waitFor[1] === 'ms';
-                if (isMs) {
-                    comparison = state === 0 ? 0 : Date.now() - state;
-                } else {
-                    comparison = state + 1;
-                }
-
-                if (waitFor[0] <= comparison) {
-                    callback(...result);
-                    this.listenOptions = null;
-                } else if (isMs) {
-                    this.listenOptions = Object.assign({}, this.listenOptions, { state: Date.now() });
-                } else {
-                    this.listenOptions = Object.assign({}, this.listenOptions, { state: state + 1 });
-                }
-            } else {
-                this.listenOptions = Object.assign({}, this.listenOptions, { state: 0 });
-            }
-        }
+        this.updateListenOptions();
     }
 
     getButtonValue(value: number = 0): number {
@@ -278,19 +335,16 @@ export default class Player {
         this.buttons = mapValues((binding: IButtonBinding) => binding.mapper(gamepad), this.buttonBindings);
     }
 
-    getStickValue(sticks: IPoint = { x: 0, y: 0 }): IPoint {
-        if (this.clampThreshold
-        && Math.abs(sticks.x) < this.threshold
-        && Math.abs(sticks.y) < this.threshold) {
-            return { x: 0, y: 0 };
+    getStickValue(stickValues: IStickValue): IStickValue {
+        if (this.clampThreshold && !this.isStickSignificant(stickValues)) {
+            return stickValues.map(() => 0);
         }
-        return sticks;
+
+        return stickValues;
     }
 
-    isStickSignificant(sticks: IPoint = { x: 0, y: 0 }): boolean {
-        return !!sticks
-            && (!!sticks.x || !!sticks.y)
-            && (Math.abs(sticks.x) > this.threshold || Math.abs(sticks.y) > this.threshold);
+    isStickSignificant(stickValues: IStickValue): boolean {
+        return stickValues.findIndex(value => Math.abs(value) >= this.threshold) !== -1;
     }
 
     updateStick(gamepad: IParsedGamepad) {
@@ -298,16 +352,14 @@ export default class Player {
 
         this.sticks = mapValues((binding: IStickBinding, inputName: string) => {
             const previous: IStick = prevStick[inputName];
-            const { invertX, invertY } = previous;
-            const value: IPoint = binding.mapper(gamepad, invertX, invertY);
+            const value: IStickValue = binding.mapper(gamepad, previous.inverts);
             const pressed = this.isStickSignificant(value);
 
             return {
                 pressed,
                 justChanged: pressed !== this.isStickSignificant(previous.value),
                 value: this.getStickValue(value),
-                invertX,
-                invertY
+                inverts: previous.inverts
             };
         }, this.stickBindings);
     }
@@ -336,23 +388,18 @@ export default class Player {
 
         // When an alias has more than 1 stick assigned to it, do an average
         this.stickAliases = mapValues((alias: IStickAlias) => {
-            let xCount = 0;
-            let yCount = 0;
+            const length = this.sticks[alias.inputs[0]].value.map(() => 0);
+            let counts = [];
             let count = 0;
 
             alias.inputs.forEach(name => {
                 if (this.sticks[name].pressed) {
-                    const { x, y } = this.sticks[name].value;
-                    xCount += x;
-                    yCount += y;
+                    counts = this.sticks[name].value.map((v, i) => v + (counts[i] || 0));
                     count += 1;
                 }
             });
 
-            const value = this.getStickValue({
-                x: count === 0 ? 0 : xCount / count,
-                y: count === 0 ? 0 : yCount / count
-            });
+            const value = count === 0 ? [...Array(length)].map(() => 0) : counts.map(v => v / count);
             const pressed = this.isStickSignificant(value);
 
             return {

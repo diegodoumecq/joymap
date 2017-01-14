@@ -2,8 +2,6 @@
 
 // Lodash function replacements
 
-type IteratorCb = (value: any, name: string) => boolean;
-
 export function noop() {}
 
 export function map(attr: string = '', target: Object[] | Object): any[] {
@@ -54,6 +52,25 @@ export function omit(indexes: string[], target: Object): Object {
 
     while (i < length) {
         delete result[indexes[i]];
+        i += 1;
+    }
+
+    return result;
+}
+
+export function unique<T>(target: T[]): T[] {
+    const length = target.length;
+
+    if (length <= 1) {
+        return target;
+    }
+
+    const result = [];
+    let i = 0;
+    while (i < length) {
+        if (!result.includes(target[i])) {
+            result.push(target[i]);
+        }
         i += 1;
     }
 
@@ -148,7 +165,8 @@ export function findIndex(search: Object, target: any[]): number {
     return -1;
 }
 
-export function findKey(search: IteratorCb | Object, target: Object): string | null {
+type FindKeyCb = (value: any, name?: string) => boolean;
+export function findKey(search: FindKeyCb | Object, target: Object): string | null {
     const targetIndexes = Object.keys(target);
     const length = targetIndexes.length;
     let i = 0;

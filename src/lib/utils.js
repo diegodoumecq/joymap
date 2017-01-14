@@ -58,27 +58,26 @@ export function addButtonAlias(alias: ?IButtonAlias, inputs: string[]) {
 }
 
 export const stickIndexMapping = {
-    L: 0,
-    R: 2
+    L: [0, 1],
+    R: [2, 3]
 };
 
-export function makeStickBinding(index: number): IStickBinding {
+export function makeStickBinding(...indexes: number[]): IStickBinding {
     return {
-        index,
-        mapper: (pad, invertX = false, invertY = false) => ({
-            x: !invertX ? pad.axes[index] : -1 * pad.axes[index],
-            y: !invertY ? pad.axes[index + 1] : -1 * pad.axes[index + 1]
-        })
+        indexes,
+        mapper: (pad, inverts) => indexes.map((value, i) => (
+            !inverts[i] ? pad.axes[value] : pad.axes[value] * -1
+        ))
     };
 }
 export const stickBindings: { [key: string]: IStickBinding } =
-    mapValues(value => makeStickBinding(value), stickIndexMapping);
+    mapValues(values => makeStickBinding(...values), stickIndexMapping);
 
 export function addStickAlias(alias: ?IStickAlias, inputs: string[]) {
     if (!alias) {
         return {
             inputs,
-            value: { x: 0, y: 0 },
+            value: [0, 0],
             pressed: false,
             justChanged: false
         };

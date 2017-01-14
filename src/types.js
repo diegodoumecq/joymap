@@ -1,27 +1,37 @@
 /* @flow */
 export type IPoint = { x: number, y: number };
+export type IStickValue = number[];
+export type IButtonValue = number;
 
 export type IStick = {
-    value: IPoint,
+    value: IStickValue,
     pressed: boolean,
     justChanged: boolean,
-    invertX: boolean,
-    invertY: boolean
+    inverts: boolean[]
 };
-export type IButton = { value: number, pressed: boolean, justChanged: boolean };
+export type IButton = { value: IButtonValue, pressed: boolean, justChanged: boolean };
 
 export type IParsedGamepad = {
     buttons: IButton[],
     axes: number[]
 };
 
-export type IStickAlias = { inputs: string[], value: IPoint, pressed: boolean, justChanged: boolean };
-export type IButtonAlias = { inputs: string[], value: number, pressed: boolean, justChanged: boolean };
+export type IStickAlias = { inputs: string[], value: IStickValue, pressed: boolean, justChanged: boolean };
+export type IButtonAlias = { inputs: string[], value: IButtonValue, pressed: boolean, justChanged: boolean };
 
 export type IAggregator = { callback: Function, value: any };
 
-export type IStickMapper = (pad: IParsedGamepad, invertX: boolean, invertY: boolean) => IPoint;
+export type IStickMapper = (
+    pad: IParsedGamepad,
+    inverts: boolean[]
+) => IStickValue;
 export type IButtonMapper = (pad: IParsedGamepad) => IButton;
 
-export type IStickBinding = { index: number, mapper: IStickMapper };
-export type IButtonBinding = { index: number, mapper: IButtonMapper };
+export type IStickBinding = {
+    indexes: number[],
+    mapper: IStickMapper
+};
+export type IButtonBinding = {
+    index: number,
+    mapper: IButtonMapper
+};
