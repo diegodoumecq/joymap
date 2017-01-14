@@ -1,10 +1,13 @@
 /* @flow */
 import type {
     IStickAlias, IButtonAlias,
-    IStickBinding, IButtonBinding
+    IStickBinding, IButtonBinding,
+    IParsedGamepad, IListenOptions
 } from '../types';
 
-import { mapValues } from './tools';
+import {
+    mapValues, findIndexes, isConsecutive
+} from './tools';
 
 export const buttonIndexMapping = {
     dpadUp: 12,
@@ -93,4 +96,51 @@ export function getRawGamepads(): Gamepad[] {
         return Array.from(navigator.getGamepads());
     }
     return [];
+}
+
+export function updateListenOptions(
+    listenOptions: IListenOptions | null,
+    parsedGamepad: IParsedGamepad,
+    threshold: number
+) {
+    if (!listenOptions) {
+        return null;
+    }
+
+    const {
+        callback, quantity, type,
+        currentValue, targetValue,
+        useTimeStamp, consecutive, allowOffset
+    } = listenOptions;
+
+    const indexes = type === 'axes' ?
+        findIndexes(value => Math.abs(value) > threshold, parsedGamepad.axes) :
+        findIndexes(
+            ({ pressed, justChanged }) => pressed && (currentValue !== 0 || justChanged),
+            parsedGamepad.buttons
+        );
+
+    if (indexes.length === quantity
+    && (!consecutive || isConsecutive(indexes))
+    && (allowOffset || indexes[0] % quantity === 0)) {
+        if (useTimeStamp && currentValue === 0) {
+            return Object.assign({}, listenOptions, { currentValue: Date.now() });
+        }
+
+        const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
+
+        if (targetValue <= comparison) {
+            callback(...indexes);
+            return null;
+        }
+
+        if (!useTimeStamp) {
+            return Object.assign({}, listenOptions, { currentValue: comparison });
+        }
+
+        return listenOptions;
+    }
+
+    // Clean currentValue
+    return Object.assign({}, listenOptions, { currentValue: 0 });
 }

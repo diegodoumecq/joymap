@@ -35,3 +35,14 @@ export type IButtonBinding = {
     index: number,
     mapper: IButtonMapper
 };
+
+export type IListenOptions = {
+    callback: Function,
+    quantity: number,
+    type: 'buttons' | 'axes',
+    currentValue: number,
+    useTimeStamp: boolean,
+    targetValue: number,
+    consecutive: boolean,
+    allowOffset: boolean
+};

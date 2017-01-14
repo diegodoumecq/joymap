@@ -2,19 +2,19 @@
 import {
     buttonBindings, stickBindings,
     addButtonAlias, addStickAlias,
-    makeButtonBinding, makeStickBinding
+    makeButtonBinding, makeStickBinding,
+    updateListenOptions
 } from './lib/utils';
 
 import {
     includes, mapValues, findKey,
-    omit, difference, findIndexes,
-    isConsecutive, noop, unique
+    omit, difference, noop, unique
 } from './lib/tools';
 
 import type {
-    IStickValue, IParsedGamepad, IStick, IButton,
+    IStickValue, IButtonValue, IParsedGamepad, IStick, IButton,
     IStickAlias, IButtonAlias, IAggregator,
-    IStickBinding, IButtonBinding
+    IStickBinding, IButtonBinding, IListenOptions
 } from './types';
 
 type IParams = { name: string, threshold: number, clampThreshold: boolean };
@@ -40,16 +40,7 @@ export default class Player {
     stickAliases: { [key: string]: IStickAlias } = {};
     aggregators: { [key: string]: IAggregator } = {};
 
-    listenOptions: null | {
-        callback: Function,
-        quantity: number,
-        type: 'buttons' | 'axes',
-        currentValue: number,
-        useTimeStamp: boolean,
-        threshold: number,
-        consecutive: boolean,
-        allowOffset: boolean
-    } = null;
+    listenOptions: null | IListenOptions = null;
 
     constructor({ name, threshold = 0.3, clampThreshold = true }: IParams = {}) {
         this.name = name;
@@ -121,7 +112,7 @@ export default class Player {
             type: 'buttons',
             currentValue: 0,
             useTimeStamp: waitFor[1] === 'ms',
-            threshold: waitFor[0],
+            targetValue: waitFor[0],
             consecutive,
             allowOffset
         };
@@ -130,7 +121,7 @@ export default class Player {
     listenAxis(
         callback: Function,
         quantity: number = 2,
-        { waitFor = [100, 'polls'], consecutive = true, allowOffset = true }: Object = {}
+        { waitFor = [100, 'ms'], consecutive = true, allowOffset = true }: Object = {}
     ) {
         this.listenOptions = {
             callback,
@@ -138,7 +129,7 @@ export default class Player {
             type: 'axes',
             currentValue: 0,
             useTimeStamp: waitFor[1] === 'ms',
-            threshold: waitFor[0],
+            targetValue: waitFor[0],
             consecutive,
             allowOffset
         };
@@ -168,10 +159,13 @@ export default class Player {
 
     stickRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
         this.listenAxis((index1, index2) => {
-            // TODO Fix typing issue with mixed argument for findKey
-            const bindingIndex: string | null = findKey(({ indexes }) => (
+            // REVIEW Needed to define the callback as a function
+            // because of https://github.com/facebook/flow/issues/1948
+            const findCallback: Function = ({ indexes }) => (
                 indexes.includes(index1) && indexes.includes(index2)
-            ), this.stickBindings);
+            );
+
+            const bindingIndex: string | null = findKey(findCallback, this.stickBindings);
 
             if (bindingIndex) {
                 if (inputName !== bindingIndex) {
@@ -209,7 +203,7 @@ export default class Player {
         if (difference(inputList, Object.keys(this.buttons)).length === 0) {
             this.buttonAliases[aliasName] = addButtonAlias(this.buttonAliases[aliasName], inputList);
         } else if (difference(inputList, Object.keys(this.sticks)).length === 0) {
-            const lengths: IStickValue = inputList.map(name => this.sticks[name].value.length);
+            const lengths: number[] = inputList.map(name => this.sticks[name].value.length);
 
             if (unique(lengths).length === 1) {
                 this.stickAliases[aliasName] = addStickAlias(this.stickAliases[aliasName], inputList);
@@ -269,46 +263,6 @@ export default class Player {
         };
     }
 
-    updateListenOptions() {
-        if (this.listenOptions) {
-            const {
-                callback, quantity, type,
-                currentValue, useTimeStamp, threshold,
-                consecutive, allowOffset
-            } = this.listenOptions;
-
-            let result;
-
-            if (type === 'axes') {
-                result = findIndexes(value => Math.abs(value) > this.threshold, this.parsedGamepad.axes);
-            } else {
-                result = findIndexes(
-                    ({ pressed, justChanged }) => pressed && (currentValue !== 0 || justChanged),
-                    this.parsedGamepad.buttons
-                );
-            }
-
-            if (result.length === quantity
-            && (!consecutive || isConsecutive(result.slice(0, quantity)))
-            && (allowOffset || result[0] % quantity === 0)) {
-                if (useTimeStamp && currentValue === 0) {
-                    this.listenOptions = Object.assign({}, this.listenOptions, { currentValue: Date.now() });
-                } else {
-                    const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
-
-                    if (threshold <= comparison) {
-                        callback(...result.slice(0, quantity));
-                        this.listenOptions = null;
-                    } else if (!useTimeStamp) {
-                        this.listenOptions = Object.assign({}, this.listenOptions, { currentValue: comparison });
-                    }
-                }
-            } else {
-                this.listenOptions = Object.assign({}, this.listenOptions, { currentValue: 0 });
-            }
-        }
-    }
-
     update(gamepad: Gamepad) {
         this.parsedGamepad = this.parseGamepad(gamepad);
         this.updateButtons(this.parsedGamepad);
@@ -316,19 +270,19 @@ export default class Player {
         this.updateAliases();
         this.updateAggregators(gamepad); // REVIEW: Shouldn't this use parsedGamepad too?
 
-        this.updateListenOptions();
+        this.listenOptions = updateListenOptions(this.listenOptions, this.parsedGamepad, this.threshold);
     }
 
-    getButtonValue(value: number = 0): number {
+    getButtonValue(value: IButtonValue = 0): IButtonValue {
         if (!this.clampThreshold) {
             return value;
         }
 
-        return Math.abs(value) < this.threshold ? 0 : value;
+        return !this.isButtonSignificant(value) ? 0 : value;
     }
 
-    isButtonSignificant(value: number = 0): boolean {
-        return !!value && Math.abs(value) > this.threshold;
+    isButtonSignificant(value: IButtonValue = 0): boolean {
+        return Math.abs(value) > this.threshold;
     }
 
     updateButtons(gamepad: IParsedGamepad) {
@@ -388,7 +342,6 @@ export default class Player {
 
         // When an alias has more than 1 stick assigned to it, do an average
         this.stickAliases = mapValues((alias: IStickAlias) => {
-            const length = this.sticks[alias.inputs[0]].value.map(() => 0);
             let counts = [];
             let count = 0;
 
@@ -399,7 +352,9 @@ export default class Player {
                 }
             });
 
-            const value = count === 0 ? [...Array(length)].map(() => 0) : counts.map(v => v / count);
+            const value = count === 0 ?
+                this.sticks[alias.inputs[0]].value.map(() => 0) :
+                counts.map(v => v / count);
             const pressed = this.isStickSignificant(value);
 
             return {

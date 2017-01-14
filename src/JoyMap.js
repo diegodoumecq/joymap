@@ -82,8 +82,6 @@ export default class JoyMap {
     }
 
     poll() {
-        this.onPoll();
-
         this.gamepads = getRawGamepads().filter((rawGamepad: ?Gamepad) =>
             rawGamepad
             && rawGamepad.connected
@@ -113,5 +111,7 @@ export default class JoyMap {
                 player.disconnect();
             }
         });
+
+        this.onPoll();
     }
 }
