@@ -157,6 +157,7 @@ The callback will be given three arguments: the player itself that is currently 
 ### Coming soon(ish):
 
 * Implement stickRebindOnPress
+* Implement a different way to export flow types since flow comments seem to be on the way out
 * Include the ability to add/remove players from the canvas example
 * Add a 3d example using threejs
 * Add a gamepad config menu example
