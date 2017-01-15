@@ -3,7 +3,7 @@ import {
     buttonBindings, stickBindings,
     addButtonAlias, addStickAlias,
     makeButtonBinding, makeStickBinding,
-    updateListenOptions
+    updateListenOptions, nameIsValid
 } from './lib/utils';
 
 import {
@@ -90,10 +90,16 @@ export default class Player {
     }
 
     buttonRebind(inputName: string, binding: IButtonBinding) {
+        if (!nameIsValid(inputName)) {
+            throw new Error(`On buttonRebind('${inputName}'): argument contains invalid characters`);
+        }
         this.buttonBindings[inputName] = binding;
     }
 
     stickRebind(inputName: string, binding: IStickBinding) {
+        if (!nameIsValid(inputName)) {
+            throw new Error(`On stickRebind('${inputName}'): argument contains invalid characters`);
+        }
         this.stickBindings[inputName] = binding;
     }
 
@@ -136,6 +142,9 @@ export default class Player {
     }
 
     buttonRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
+        if (!nameIsValid(inputName)) {
+            throw new Error(`On buttonRebindOnPress('${inputName}', ...): first argument contains invalid characters`);
+        }
         this.listenButton(index => {
             const bindingIndex = findKey({ index }, this.buttonBindings);
 
@@ -158,6 +167,10 @@ export default class Player {
     }
 
     stickRebindOnPress(inputName: string, callback: Function = noop, allowDuplication: boolean = false) {
+        if (!nameIsValid(inputName)) {
+            throw new Error(`On stickRebindOnPress('${inputName}', ...): first argument contains invalid characters`);
+        }
+
         this.listenAxis((index1, index2) => {
             // REVIEW Needed to define the callback as a function
             // because of https://github.com/facebook/flow/issues/1948
@@ -186,6 +199,9 @@ export default class Player {
     }
 
     setAggregator(aggregatorName: string, callback: Function) {
+        if (!nameIsValid(aggregatorName)) {
+            throw new Error(`On setAggregator('${aggregatorName}', ...): first argument contains invalid characters`);
+        }
         this.aggregators[aggregatorName] = { callback, value: null };
     }
 
@@ -198,6 +214,9 @@ export default class Player {
     }
 
     setAlias(aliasName: string, inputs: string | string[]) {
+        if (!nameIsValid(aliasName)) {
+            throw new Error(`On setAlias('${aliasName}', ...): first argument contains invalid characters`);
+        }
         const inputList: string[] = typeof inputs === 'string' ? [inputs] : inputs;
 
         if (difference(inputList, Object.keys(this.buttons)).length === 0) {
@@ -209,14 +228,14 @@ export default class Player {
                 this.stickAliases[aliasName] = addStickAlias(this.stickAliases[aliasName], inputList);
             } else {
                 throw new Error(
-                    `joymap.players.${this.name}.setAlias(${aliasName}),
+                    `On setAlias(${aliasName}, [${inputList.join(', ')}]):
                     all sticks specified did not have the same number of axes`
                 );
             }
         } else {
             throw new Error(
-                `joymap.players.${this.name}.setAlias(${aliasName}),
-                either on of the inputs is void or it wasn't all a collection of just buttons or just sticks`
+                `On setAlias(${aliasName}, [${inputList.join(', ')}]):
+                either one of the inputs is void or it wasn't all a collection of just buttons or just sticks`
             );
         }
     }
@@ -227,9 +246,7 @@ export default class Player {
         } else if (includes(aliasName, Object.keys(this.stickAliases))) {
             this.stickAliases = omit([aliasName], this.stickAliases);
         } else {
-            throw new Error(
-                `joymap.players.${this.name}.removeAlias(${aliasName}) couldn't find the alias '${aliasName}'`
-            );
+            throw new Error(`On removeAlias('${aliasName}'): Specified alias does not exist`);
         }
     }
 

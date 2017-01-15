@@ -144,3 +144,7 @@ export function updateListenOptions(
     // Clean currentValue
     return Object.assign({}, listenOptions, { currentValue: 0 });
 }
+
+export function nameIsValid(name: string) {
+    return /^[a-z0-9]+$/i.test(name);
+}

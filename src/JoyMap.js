@@ -1,5 +1,5 @@
 /* @flow */
-import { getRawGamepads } from './lib/utils';
+import { getRawGamepads, nameIsValid } from './lib/utils';
 import {
     noop, map, isFunction, find, omit, difference, findKey
 } from './lib/tools';
@@ -62,6 +62,10 @@ export default class JoyMap {
     }
 
     addPlayer(name: string): Player {
+        if (!nameIsValid(name)) {
+            throw new Error(`On addPlayer('${name}'): argument contains invalid characters`);
+        }
+
         const { threshold, clampThreshold } = this;
 
         const player: Player = new Player({ name, threshold, clampThreshold });

@@ -2,7 +2,7 @@
 
 A Javascript Gamepad browser API wrapper
 
-For the simple cases use [the browser API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API). Otherwise, continue reading
+For the simple cases use [the browser API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API). Otherwise, continue reading.
 
 ### How to install
 
@@ -102,10 +102,9 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
 
 ### Bindings
 
-JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. They may look like aliases but they are not constrained by the classical XInput mappings and will allow either the developer or the player to change the bindings to suit their particular gamepad
+JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. They may look like aliases but they are not constrained by the classical XInput mappings and will allow either the developer or the player to change the bindings to suit their particular gamepad.
 
 The main interactions with these data structures are through these player functions:
-
 
 * **listenButton(callback, quantity = 1, options: { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }) => void**
   * Once called, JoyMap will ask in each poll for a **quantity** of pressed buttons and once such a thing is found given the criteria specified by the options, it will call callback with the activated input indexes as arguments.
@@ -170,9 +169,13 @@ The idea behind aggregators is to provide a simple way to combine different inpu
 
 The callback will be given three arguments: the player itself, the previous value returned by the aggregator and the raw gamepad object obtained from **navigator.getGamepads()**. The results are stored in **player.aggregators** as you've named them, just like with aliases, but this time the callback for each aggregator is the one that decides what is being stored.
 
+### Naming restrictions
+
+Throughout the library you're invited to name stuff. Like players, bindings, aliases and aggregators. For the sake of making things easier for everybody in the future, these values shall only be alphanumeric. Why? Well, the event handling system that is not developed yet would require a strict naming convention to avoid mixing up names of stuff with possible operators.
+
 ### Roadmap
 
-Keep in mind these bullet points are in no particular order.
+Stuff to do. Keep in mind these bullet points are in no particular order.
 
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
