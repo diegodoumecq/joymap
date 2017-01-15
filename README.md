@@ -71,7 +71,7 @@ For more a in-depth view on what the library supports and how, do please look at
 
 ### Why use polling instead of events?
 
-The browser gamepad API works under the assumption that the programmer is going to be calling **navigator.getGamepads()** each time they want to check on what the gamepads are doing. It is by no means a robust solution and will in fact not notice the player pressing a button if they press and release fast enough between **navigator.getGamepads()** calls. Unfortunately, there's no current support for gamepad input events, there's just two events for connecting and disconnecting the gamepad itself.
+The browser gamepad API works under the assumption that the programmer is going to be calling **navigator.getGamepads()** each time they want to check on what the gamepads are doing. It is by no means a robust solution and will in fact not notice the player pressing a button if they press and release fast enough between **navigator.getGamepads()** calls. Unfortunately, [there's no current support for gamepad input events](https://github.com/w3c/gamepad/issues/4), there's just two events for connecting and disconnecting the gamepad itself.
 
 Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joyMap.stop()** which just start and stop polling the browser gamepad API using **requestAnimationFrame()**. However, if more precision is needed as to when the polling is done, one can completely ignore both of these methods and directly call **joyMap.poll()** when one decides that such a thing would be nice and convenient.
 
@@ -199,11 +199,12 @@ Keep in mind these bullet points are in no particular order.
   * player.addEvent('A B') would be triggered by pressing A, releasing it and then pressing B
   * Need to somehow figure out a timing configuration for the above example
   * player.addEvent('A + !B') would only trigger if A is pressed and B is not pressed
+* Implement most of this library inside a web-worker [when/if that becomes a possibility](https://github.com/w3c/gamepad/issues/37)
 * Controller types
   * Add support for identifying types of controllers (need to wait for standardization between browsers)
   * Will be used for showing the right button prompts in-game
   * Will be used for mapping the right buttons for the main gamepads and browsers by default (though its not clear yet if this is even necessary)
 * Rumble support 
-  * Check later for real support. All we have right now is for mobile devices
-  * https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
+  * Check later for real support. [All we have right now is for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
+  * There's an [open issue](https://github.com/w3c/gamepad/issues/19) about this
   * https://www.w3.org/TR/vibration/
