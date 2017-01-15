@@ -174,11 +174,16 @@ The callback will be given three arguments: the player itself, the previous valu
 
 Keep in mind these bullet points are in no particular order.
 
-* Implement a different way to export flow types since flow comments seem to be on the way out and can't handle class properties
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers
   * It should also offer a "RESET" button for these player configs
+* Implement a different way to export flow types since flow comments seem to be on the way out and can't handle class properties
+  * [There seems to be kind of a consensus](https://github.com/facebook/flow/issues/1996) at least
+* Implement most of this library inside a web-worker [when/if that becomes a possibility](https://github.com/w3c/gamepad/issues/37)
+* Implement rumble when it gets supported
+  * [We do have vibration support but only for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
+  * There's an [open issue](https://github.com/w3c/gamepad/issues/19) about this
 * Add simple event handling
   * joyMap.onConnect(eventHandler) would be triggered by connecting a gamepad
   * joyMap.onDisconnect(eventHandler) would be triggered by disconnecting a gamepad
@@ -193,18 +198,9 @@ Keep in mind these bullet points are in no particular order.
   * player.addEvent('A.!justChanged', eventHandler) will trigger when the A button is pressed but not justChanged
   * player.addEvent('button.justChanged', eventHandler) will trigger when any button is pressed and justChanged
   * player.addEvent('!button', eventHandler) will trigger when no button is pressed. Consequently the eventHandler will receive index as -1 as part of the event object
-* Support multiple inputs on a single event handling
+* Support multiple inputs on a single event handler
   * This can get out of hand pretty quickly, but it certainly would be pretty neat
   * This would improve **player.addEvent** by allowing the syntax player.addEvent('A + B') for combination of inputs
   * player.addEvent('A B') would be triggered by pressing A, releasing it and then pressing B
   * Need to somehow figure out a timing configuration for the above example
   * player.addEvent('A + !B') would only trigger if A is pressed and B is not pressed
-* Implement most of this library inside a web-worker [when/if that becomes a possibility](https://github.com/w3c/gamepad/issues/37)
-* Controller types
-  * Add support for identifying types of controllers (need to wait for standardization between browsers)
-  * Will be used for showing the right button prompts in-game
-  * Will be used for mapping the right buttons for the main gamepads and browsers by default (though its not clear yet if this is even necessary)
-* Rumble support 
-  * Check later for real support. [All we have right now is for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
-  * There's an [open issue](https://github.com/w3c/gamepad/issues/19) about this
-  * https://www.w3.org/TR/vibration/
