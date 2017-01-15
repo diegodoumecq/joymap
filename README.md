@@ -173,7 +173,6 @@ The callback will be given three arguments: the player itself, the previous valu
 ### Coming soon(ish):
 
 * Implement a different way to export flow types since flow comments seem to be on the way out
-* Include the ability to add/remove players from the canvas example
 * Add a 3d example using threejs
 * Add a gamepad config menu example
   * Add the ability to store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers 
