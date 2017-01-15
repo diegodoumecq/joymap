@@ -6,23 +6,30 @@ import {
 
 import Player from './Player';
 
-type IParams = { threshold: number, clampThreshold: boolean, onPoll: () => void };
+type IParams = {
+    threshold: number,
+    clampThreshold: boolean,
+    onPoll: () => void,
+    playerHandling: 'manual' | 'auto'
+};
 
 export default class JoyMap {
 
     threshold: number;
     clampThreshold: boolean;
     onPoll: () => void;
+    playerHandling: 'manual' | 'auto';
     animationFrameRequestId: number | null = null;
     isSupported: boolean = navigator && isFunction(navigator.getGamepads);
 
     gamepads: Gamepad[] = [];
-    players: { [key: any]: Player } = {};
+    players: { [key: string]: Player } = {};
 
-    constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop }: IParams = {}) {
+    constructor({ threshold = 0.2, clampThreshold = true, onPoll = noop, playerHandling = 'auto' }: IParams = {}) {
         this.threshold = threshold;
         this.clampThreshold = clampThreshold;
         this.onPoll = onPoll;
+        this.playerHandling = playerHandling;
 
         this.poll();
     }
@@ -71,14 +78,15 @@ export default class JoyMap {
         return player;
     }
 
-    removePlayer(name: string) {
-        const player: Player = this.players[name];
-        this.players = omit([name], this.players);
+    removePlayer(player: Player) {
+        this.players = omit([player.name], this.players);
         player.destroy();
     }
 
     cleanPlayers() {
-        Object.keys(this.players).forEach(name => this.removePlayer(name));
+        // REVIEW: Had to use "any" type because flow thinks Object.values return mixed
+        // and fails to notice that this.players is { [key: string]: Player }
+        Object.values(this.players).forEach((player: any) => this.removePlayer(player));
     }
 
     poll() {
@@ -94,7 +102,9 @@ export default class JoyMap {
             const unusedGamepadIds = this.getUnusedGamepadIds();
 
             // Given unassigned players and unusued gamepads, automatically assign them
-            if (player.gamepadId === null && unusedGamepadIds.length > 0) {
+            if (this.playerHandling === 'auto'
+            && player.gamepadId === null
+            && unusedGamepadIds.length > 0) {
                 player.connect(unusedGamepadIds[0]);
             }
 

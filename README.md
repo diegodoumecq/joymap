@@ -39,7 +39,7 @@ Run **yarn add joymap**
   * **getUnusedGamepadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
   * **setPlayers(jsonString) => void**: [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
   * **addPlayer(name) => player**: Instantiate a new Player, add it to joymap.players[name] and return it
-  * **removePlayer(name) => void**: Remove a Player by name
+  * **removePlayer(player) => void**: Remove a Player
   * **cleanPlayers() => void**: Remove all the players
 
 ### Initialization and usage
