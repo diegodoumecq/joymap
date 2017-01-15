@@ -37,7 +37,8 @@ export default function (env = {}) {
             historyApiFallback: true,
             hot: true,
             port,
-            contentBase: entry.path
+            contentBase: entry.path,
+            host: '0.0.0.0'
         },
 
         performance: { hints: false },
