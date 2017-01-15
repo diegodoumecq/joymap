@@ -35,7 +35,7 @@ Run **yarn add joymap**
 * **Joymap** is the default export and main point of usage. Once instanced, the methods are:
   * **start() => void**: calls **poll()** using requestAnimationFrame
   * **stop() => void**: Stops calling **poll()**
-  * **poll() => void**: Polls the gamepad API and updates all Players with the data. Can be called manually if desired
+  * **poll() => void**: Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
   * **getUnusedGamepadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
   * **setPlayers(jsonString) => void**: [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
   * **addPlayer(name) => player**: Instantiate a new Player, add it to joymap.players[name] and return it
@@ -69,11 +69,11 @@ As you can see in the example above, you can create as many players as you'd lik
 
 For more a in-depth view on what the library supports and how, do please look at the examples in /examples.
 
-### What's the deal with that ... polling stuff?
+### Why use polling instead of events?
 
-The browser's gamepad API works under the assumption that the programmer is going to be calling **navigator.getGamepads()** each time they want to check on what the gamepads are doing. Due to the nature of gamepads themselves, they tend to change state every femtosecond or so and therefore the programmer needs to poll **navigator.getGamepads()** every time there's a game loop.
+The browser gamepad API works under the assumption that the programmer is going to be calling **navigator.getGamepads()** each time they want to check on what the gamepads are doing. It is by no means a robust solution and will in fact not notice the player pressing a button if they press and release fast enough between **navigator.getGamepads()** calls. Unfortunately, there's no current support for gamepad input events, there's just two events for connecting and disconnecting the gamepad itself.
 
-To make this as painless as possible, JoyMap offers the methods **joyMap.start()** and **joyMap.stop()** which just start and stop polling the gamepad API using requestAnimationFrame. However, if more precision is needed as to when the polling is done, one can completely ignore both of these methods and directly call **joyMap.poll()** when necessary.
+Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joyMap.stop()** which just start and stop polling the browser gamepad API using **requestAnimationFrame()**. However, if more precision is needed as to when the polling is done, one can completely ignore both of these methods and directly call **joyMap.poll()** when one decides that such a thing would be nice and convenient.
 
 ### The Player and their data structures
 
@@ -159,7 +159,7 @@ Their results are stored inside either **player2.buttonAliases** or **player2.st
 
 **player2.stickAliases.Move** is again the same thing as before except that we are dealing with the stick data of **player2.sticks.R**. Stick aliases however differ from buttons in the sense that not all data is copied over (if the stick is inverted) and if more than one stick name is given, then the resulting alias is the combination of said sticks (Two opposing sticks result in an alias value of [0, 0]).
 
-### Aggregators (name change pending? maybe?)
+### Aggregators
 
 The idea behind aggregators is to provide a simple way to combine different inputs into a single unrestricted output. To add one, all we need is a name and a callback.
 
@@ -170,18 +170,35 @@ The idea behind aggregators is to provide a simple way to combine different inpu
 
 The callback will be given three arguments: the player itself, the previous value returned by the aggregator and the raw gamepad object obtained from **navigator.getGamepads()**. The results are stored in **player.aggregators** as you've named them, just like with aliases, but this time the callback for each aggregator is the one that decides what is being stored.
 
-### Coming soon(ish):
+### Roadmap
 
-* Implement a different way to export flow types since flow comments seem to be on the way out
-* Add a 3d example using threejs
-* Add a gamepad config menu example
-  * Add the ability to store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers 
-* Might want to find a better name than "Aggregators"
-* Add an event system? Maybe?
-  * The ability to handle inputs as events
-  * player.addEvent('A.justPressed', ()=> console.log('jump!'))
-  * player.addEvent('B', ()=> console.log('run!'))
-  * Also should handle connecting/disconnecting gamepads
+Keep in mind these bullet points are in no particular order.
+
+* Implement a different way to export flow types since flow comments seem to be on the way out and can't handle class properties
+* Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js)
+  * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
+  * It should also store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers
+  * It should also offer a "RESET" button for these player configs
+* Add simple event handling
+  * joyMap.onConnect(eventHandler) would be triggered by connecting a gamepad
+  * joyMap.onDisconnect(eventHandler) would be triggered by disconnecting a gamepad
+  * On both of those, **eventHandler** is a function that would receive the raw gamepad as an argument
+  * player.addEvent(eventName: string, eventHandler: (event) => void) would be used for input handling
+  * **eventName** could be either 'button', 'axis' or any input name under player.buttons or player.sticks or any alias
+  * **eventName** can also specify if the event should only be triggered when pressed, when not pressed, when justChanged and when not justChanged
+  * **eventHandler** is a function that will be called with an event object that consists of at least { value, pressed, justChanged }
+  * **eventHandler** will also receive index in the event object when listening for the 'button' or 'axis' events
+  * player.addEvent('A', eventHandler) will trigger every time the A button is pressed
+  * player.addEvent('!A', eventHandler) will trigger every time the A button is not pressed
+  * player.addEvent('A.!justChanged', eventHandler) will trigger when the A button is pressed but not justChanged
+  * player.addEvent('button.justChanged', eventHandler) will trigger when any button is pressed and justChanged
+  * player.addEvent('!button', eventHandler) will trigger when no button is pressed. Consequently the eventHandler will receive index as -1 as part of the event object
+* Support multiple inputs on a single event handling
+  * This can get out of hand pretty quickly, but it certainly would be pretty neat
+  * This would improve **player.addEvent** by allowing the syntax player.addEvent('A + B') for combination of inputs
+  * player.addEvent('A B') would be triggered by pressing A, releasing it and then pressing B
+  * Need to somehow figure out a timing configuration for the above example
+  * player.addEvent('A + !B') would only trigger if A is pressed and B is not pressed
 * Controller types
   * Add support for identifying types of controllers (need to wait for standardization between browsers)
   * Will be used for showing the right button prompts in-game
