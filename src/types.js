@@ -36,8 +36,14 @@ export type IButtonBinding = {
     mapper: IButtonMapper
 };
 
+export type IListenParams = {
+    waitFor: [number, 'polls' | 'ms'],
+    consecutive: boolean,
+    allowOffset: boolean
+};
+
 export type IListenOptions = {
-    callback: Function,
+    callback: (...indexes: number[]) => void,
     quantity: number,
     type: 'buttons' | 'axes',
     currentValue: number,

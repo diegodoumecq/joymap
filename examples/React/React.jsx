@@ -13,8 +13,8 @@ import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });
 
-function joyMapSetup() {
-    const joyMap = new JoyMap({ threshold: 0.2 });
+function joyMapSetup(params) {
+    const joyMap = JoyMap({ threshold: 0.2, ...params });
 
     joyMap.addPlayer('James');
     joyMap.addPlayer('Juan');
@@ -31,11 +31,9 @@ class ReactExample extends React.Component {
 
     // Setup joymap
     componentWillMount() {
-        this.joyMap = joyMapSetup();
-
         // Force React to rerender after each joymap.poll
         // poll is called roughly 60 times a second, using requestAnimationFrame
-        this.joyMap.onPoll = () => this.setState({});
+        this.joyMap = joyMapSetup({ onPoll: () => this.setState({}) });
     }
 
     // Tell joymap to start polling the gamepads

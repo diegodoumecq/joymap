@@ -31,28 +31,29 @@ Run **yarn add joymap**
 
 * **makeButtonBinding(index)** is a function to create a button binding function
 * **makeStickBinding(...indexes)** is a function to create a stick binding function
-* **Joymap** is the default export and main point of usage. Yes, it is a class. No, [don't even think about inheriting from it](https://medium.com/@dan_abramov/how-to-use-classes-and-sleep-at-night-9af8de78ccb4). Once instanced, treat it just as a bag of functions and state.
+* **createJoyMap** is the default export function and main point of usage. When called it returns an object with a bunch of functions:
   * **start() => void**: calls **poll()** using requestAnimationFrame
   * **stop() => void**: Stops calling **poll()**
   * **poll() => void**: Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
   * **getUnusedGamepadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
   * **setPlayers(jsonString) => void**: [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
-  * **addPlayer(name) => player**: Instantiate a new Player, add it to joymap.players[name] and return it
+  * **addPlayer(name) => player**: Create a new Player, add it to joymap.players[name] and return it
   * **removePlayer(player) => void**: Remove a Player
   * **cleanPlayers() => void**: Remove all the players
 
 ### Initialization and usage
 
-JoyMap is not a singleton and so, must be initialized. You can pass three optional parameters
+JoyMap is not a singleton and so, must be initialized. You can pass three optional parameters:
 * **threshold** is the number between 0 and 1 that any given input must surpass to qualify as **pressed**
-* **clampThreshold** is a boolean that determines if all inputs should be set to 0 if they don't qualify as **pressed**
-* **onPoll** is the callback that will be called once after each poll of the gamepad object is finished
+* **clampThreshold** is a boolean that determines if all input values should be set to 0 if they don't qualify as **pressed**
+* **onPoll** is the callback that will be called after each poll of the gamepad object
 
 So, for example:
 
     /... somewhere up here there's a declared stepFunction that does stuff on each step/
+    import createJoyMap from 'joymap';
 
-    const joyMap = new JoyMap({ threshold: 0.5, clampThreshold: true, onPoll: stepFunction });
+    const joyMap = createJoyMap({ threshold: 0.5, clampThreshold: true, onPoll: stepFunction });
     const player1 = joyMap.addPlayer('player1');
     const player2 = joyMap.addPlayer('player2');
     const player3 = joyMap.addPlayer('player3');
@@ -180,7 +181,7 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers
   * It should also offer a "RESET" button for these player configs
-* Implement a different way to export flow types since flow comments seem to be on the way out and can't handle class properties
+* Implement a different way to export flow types since flow comments seem to be on the way out
   * [There seems to be kind of a consensus](https://github.com/facebook/flow/issues/1996) at least
 * Implement most of this library inside a web-worker [when/if that becomes a possibility](https://github.com/w3c/gamepad/issues/37)
 * Implement rumble when it gets supported

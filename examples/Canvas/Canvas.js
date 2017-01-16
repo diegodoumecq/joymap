@@ -31,10 +31,6 @@ document.getElementById('app').innerHTML = `
 const gamepadImage = new Image();
 gamepadImage.src = 'gamepad.png';
 
-const joyMap = new JoyMap({ threshold: 0.2 });
-
-const characters = [];
-
 function drawCharacter(ctx, character) {
     const { x, y } = character;
 
@@ -69,37 +65,42 @@ function updateCharacter(character) {
     }
 }
 
-joyMap.onPoll = () => {
-    // Get the canvas context so we can draw on it
-    const ctx = document.getElementById('canvas').getContext('2d');
+const characters = [];
 
-    // Draw background color, clearing the canvas
-    ctx.fillStyle = '#EEE';
-    ctx.fillRect(0, 0, SIZE.width, SIZE.height);
-    const unusedIds = joyMap.getUnusedGamepadIds();
+const joyMap = JoyMap({
+    threshold: 0.2,
+    onPoll() {
+        // Get the canvas context so we can draw on it
+        const ctx = document.getElementById('canvas').getContext('2d');
 
-    if (unusedIds.length > 0) {
-        forEach(() => {
-            const c = {
-                player: joyMap.addPlayer(uniqueId()),
-                x: Math.random() * SIZE.width,
-                y: Math.random() * SIZE.height,
-                angle: Math.random() * 2 * Math.PI
-            };
-            c.player.setAggregator('AnyButton', ({ buttons }) => some('pressed', buttons));
-            characters.push(c);
-        }, unusedIds);
-    }
+        // Draw background color, clearing the canvas
+        ctx.fillStyle = '#EEE';
+        ctx.fillRect(0, 0, SIZE.width, SIZE.height);
+        const unusedIds = joyMap.getUnusedGamepadIds();
 
-    forEach(c => {
-        if (!c.player.connected) {
-            pull(c, characters);
-            joyMap.removePlayer(c.player);
-        } else {
-            updateCharacter(c);
-            drawCharacter(ctx, c);
+        if (unusedIds.length > 0) {
+            forEach(() => {
+                const c = {
+                    player: joyMap.addPlayer(uniqueId()),
+                    x: Math.random() * SIZE.width,
+                    y: Math.random() * SIZE.height,
+                    angle: Math.random() * 2 * Math.PI
+                };
+                c.player.setAggregator('AnyButton', ({ buttons }) => some('pressed', buttons));
+                characters.push(c);
+            }, unusedIds);
         }
-    }, characters);
-};
+
+        forEach(c => {
+            if (!c.player.connected) {
+                pull(c, characters);
+                joyMap.removePlayer(c.player);
+            } else {
+                updateCharacter(c);
+                drawCharacter(ctx, c);
+            }
+        }, characters);
+    }
+});
 
 joyMap.start();
