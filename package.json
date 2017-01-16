@@ -1,6 +1,6 @@
 {
   "name": "joymap",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "A Gamepad API wrapper and mapping tool.",
   "main": "./bin/index.js",
   "files": [
