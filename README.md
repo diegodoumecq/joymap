@@ -29,10 +29,9 @@ Run **yarn add joymap**
 
 ### Exported API
 
-* **Player** is the Player class itself. Detailed in its own section
 * **makeButtonBinding(index)** is a function to create a button binding function
 * **makeStickBinding(...indexes)** is a function to create a stick binding function
-* **Joymap** is the default export and main point of usage. Once instanced, the methods are:
+* **Joymap** is the default export and main point of usage. Yes, it is a class. No, [don't even think about inheriting from it](https://medium.com/@dan_abramov/how-to-use-classes-and-sleep-at-night-9af8de78ccb4). Once instanced, treat it just as a bag of functions and state.
   * **start() => void**: calls **poll()** using requestAnimationFrame
   * **stop() => void**: Stops calling **poll()**
   * **poll() => void**: Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
