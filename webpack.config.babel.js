@@ -1,11 +1,10 @@
-import { DefinePlugin, LoaderOptionsPlugin } from 'webpack';
+import { LoaderOptionsPlugin } from 'webpack';
 import path from 'path';
 
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import WriteFilePlugin from 'write-file-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 
-import PostcssSmartImport from 'postcss-smart-import';
 import Autoprefixer from 'autoprefixer';
 
 const port = 9000;
@@ -148,12 +147,6 @@ export default function (env = {}) {
         },
 
         plugins: [
-            new DefinePlugin({
-                'process.env': {
-                    NODE_ENV: JSON.stringify(process.env.NODE_ENV)
-                }
-            }),
-
             new WriteFilePlugin(),
 
             new CleanWebpackPlugin([bundleFolder], {
@@ -166,10 +159,7 @@ export default function (env = {}) {
 
             new LoaderOptionsPlugin({
                 options: {
-                    postcss: [
-                        PostcssSmartImport({}),
-                        Autoprefixer({})
-                    ]
+                    postcss: [Autoprefixer({})]
                 }
             })
         ]
