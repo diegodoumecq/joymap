@@ -33,8 +33,6 @@ exports.findKey = findKey;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Lodash function replacements
-
 function noop() {}
 
 function map() {

@@ -172,7 +172,6 @@ function updateListenOptions(listenOptions, parsedGamepad, threshold) {
         return listenOptions;
     }
 
-    // Clean currentValue
     return (0, _assign2.default)({}, listenOptions, { currentValue: 0 });
 }
 

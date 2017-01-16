@@ -94,8 +94,6 @@ function createJoyMap() {
             player.destroy();
         },
         cleanPlayers: function cleanPlayers() {
-            // REVIEW: Had to use "any" type because flow thinks Object.values return mixed
-            // and fails to notice that joyMap.players is { [key: string]: IPlayer }
             (0, _values2.default)(joyMap.players).forEach(function (player) {
                 return joyMap.removePlayer(player);
             });
@@ -109,7 +107,6 @@ function createJoyMap() {
                 var player = joyMap.players[name];
                 var unusedGamepadIds = joyMap.getUnusedGamepadIds();
 
-                // Given unassigned players and unusued gamepads, automatically assign them
                 if (playerHandling === 'auto' && player.gamepadId === null && unusedGamepadIds.length > 0) {
                     player.connect(unusedGamepadIds[0]);
                 }

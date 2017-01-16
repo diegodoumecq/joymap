@@ -182,7 +182,6 @@ function createPlayer() {
             }
 
             player.listenAxis(function (index1, index2) {
-                // REVIEW Needed to define the callback as a function
                 var findCallback = function findCallback(_ref4) {
                     var indexes = _ref4.indexes;
                     return indexes.includes(index1) && indexes.includes(index2);
@@ -284,7 +283,7 @@ function createPlayer() {
             player.updateButtons(player.parsedGamepad);
             player.updateStick(player.parsedGamepad);
             player.updateAliases();
-            player.updateAggregators(gamepad); // REVIEW: Shouldn't this use parsedGamepad too?
+            player.updateAggregators(gamepad);
 
             listenOptions = (0, _utils.updateListenOptions)(listenOptions, player.parsedGamepad, threshold);
         },
@@ -338,7 +337,6 @@ function createPlayer() {
             }, player.stickBindings);
         },
         updateAliases: function updateAliases() {
-            // When an alias has more than 1 button assigned to it, use for reference the one that's pressed the most
             player.buttonAliases = (0, _tools.mapValues)(function (alias) {
                 var value = 0;
 
@@ -359,7 +357,6 @@ function createPlayer() {
                 };
             }, player.buttonAliases);
 
-            // When an alias has more than 1 stick assigned to it, do an average
             player.stickAliases = (0, _tools.mapValues)(function (alias) {
                 var counts = [];
                 var count = 0;
