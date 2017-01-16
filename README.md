@@ -181,8 +181,6 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers
   * It should also offer a "RESET" button for these player configs
-* Implement a different way to export flow types since flow comments seem to be on the way out
-  * [There seems to be kind of a consensus](https://github.com/facebook/flow/issues/1996) at least
 * Implement most of this library inside a web-worker [when/if that becomes a possibility](https://github.com/w3c/gamepad/issues/37)
 * Implement rumble when it gets supported
   * [We do have vibration support but only for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
