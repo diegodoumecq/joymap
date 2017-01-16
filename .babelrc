@@ -1,4 +1,5 @@
 {
     "presets": ["latest", "stage-0", "react"],
-    "plugins": ["lodash", "transform-runtime"]
+    "plugins": ["lodash", "transform-runtime"],
+    "comments": false
 }
