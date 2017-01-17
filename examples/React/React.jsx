@@ -8,21 +8,20 @@ import tinycolor from 'tinycolor2';
 
 import styles from './React.mstyl';
 
-import JoyMap from '../../src/JoyMap';
+import createJoyMap from '../../src/JoyMap';
 import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });
 
 function joyMapSetup(params) {
-    const joyMap = JoyMap({ threshold: 0.2, ...params });
+    const joyMap = createJoyMap({ threshold: 0.2, ...params });
 
-    joyMap.addPlayer('James');
+    const James = joyMap.addPlayer('James');
     joyMap.addPlayer('Juan');
     joyMap.addPlayer('John');
     joyMap.addPlayer('Jim');
 
-    const { L } = joyMap.players.James.sticks;
-    L.inverts = [true, true];
+    James.sticks.L.inverts = [true, true];
 
     return joyMap;
 }
@@ -60,7 +59,7 @@ class ReactExample extends React.Component {
                                 player={player}>
                                 <h2>{player.gamepadId || 'Player has no gamepad associated'}</h2>
                             </Gamepad>);
-                    }, this.joyMap.players)}
+                    }, this.joyMap.getPlayers())}
                 </section>
             </article>
         );

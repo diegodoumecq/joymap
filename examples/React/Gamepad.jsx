@@ -34,7 +34,8 @@ class Gamepad extends React.Component {
 
     renderStick(inputName) {
         const { pressedColor } = this.props;
-        const { sticks, buttons } = this.props.player;
+        const sticks = this.props.player.getSticks();
+        const buttons = this.props.player.getButtons();
         const [x, y] = sticks[inputName].value;
 
         return (
@@ -60,7 +61,7 @@ class Gamepad extends React.Component {
 
     renderDigital(inputName) {
         const { pressedColor } = this.props;
-        const { pressed } = this.props.player.buttons[inputName];
+        const { pressed } = this.props.player.getButtons()[inputName];
 
         return (
             <div
@@ -69,7 +70,7 @@ class Gamepad extends React.Component {
                 onClick={() => {
                     const { player } = this.props;
 
-                    if (player.connected) {
+                    if (player.isConnected()) {
                         player.buttonRebindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
@@ -83,7 +84,7 @@ class Gamepad extends React.Component {
     }
 
     renderShoulder(inputName) {
-        const { value } = this.props.player.buttons[inputName];
+        const { value } = this.props.player.getButtons()[inputName];
 
         return (
             <div
@@ -103,10 +104,10 @@ class Gamepad extends React.Component {
 
         return (
             <div
-                styleName={classnames('gamepad', { disconnected: !player.connected, waiting: !!waiting })}
+                styleName={classnames('gamepad', { disconnected: !player.isConnected(), waiting: !!waiting })}
                 style={{ backgroundColor }}>
                 <div styleName="react-inputs">
-                    <span styleName="player-name" style={{ color: pressedColor }}>{player.name}</span>
+                    <span styleName="player-name" style={{ color: pressedColor }}>{player.getName()}</span>
                     <div styleName="back" />
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                     {map(inputName => this.renderStick(inputName), analogInputs)}

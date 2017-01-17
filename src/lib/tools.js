@@ -136,7 +136,7 @@ export function matches(comparison: Object, source: Object) {
     return true;
 }
 
-export function find(search: Object, target: any[]): any | null {
+export function find(search: Object, target: Object[]): any | null {
     const length = target.length;
     let i = 0;
 

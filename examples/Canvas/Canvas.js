@@ -1,6 +1,6 @@
 import { some, forEach, pull, uniqueId } from 'lodash/fp';
 
-import JoyMap from '../../src/JoyMap';
+import createJoyMap from '../../src/JoyMap';
 
 import '../main.styl';
 import './Canvas.styl';
@@ -67,7 +67,7 @@ function updateCharacter(character) {
 
 const characters = [];
 
-const joyMap = JoyMap({
+const joyMap = createJoyMap({
     threshold: 0.2,
     onPoll() {
         // Get the canvas context so we can draw on it

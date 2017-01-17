@@ -52,3 +52,22 @@ export type IListenOptions = {
     consecutive: boolean,
     allowOffset: boolean
 };
+
+export type IButtonBindings = { [key: string]: IButtonBinding };
+export type IStickBindings = { [key: string]: IStickBinding };
+
+export type IPlayerState = {
+    name: string,
+    parsedGamepad: IParsedGamepad,
+
+    sticks: { [key: string]: IStick },
+    buttons: { [key: string]: IButton },
+    buttonBindings: IButtonBindings,
+    stickBindings: IStickBindings,
+
+    gamepadId: ?string,
+    connected: boolean,
+    buttonAliases: { [key: string]: IButtonAlias },
+    stickAliases: { [key: string]: IStickAlias },
+    aggregators: { [key: string]: IAggregator }
+};
