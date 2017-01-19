@@ -1,23 +1,17 @@
 /* @flow */
 import {
-    addButtonAlias, addStickAlias,
-    makeButtonBinding, makeStickBinding,
     updateListenOptions, nameIsValid,
-    getDefaultBindings, isButtonSignificant,
-    getButtonValue, isStickSignificant, getStickValue,
-    updateButtonAliases, updateStickAliases
+    getDefaultButtons, getDefaultSticks, parseGamepad,
+    updateMappers, stickMap, buttonMap
 } from './lib/utils';
 
 import {
-    includes, mapValues, findKey,
-    omit, difference, noop, unique
+    findKey, omit, arraysEqual
 } from './lib/tools';
 
 import type {
-    IStickValue, IParsedGamepad, IStick, IButton,
-    IStickAlias, IButtonAlias, IAggregator,
-    IStickBinding, IButtonBinding, IListenOptions, IListenParams,
-    IPlayerState
+    IParsedGamepad, IStickState, IButtonState,
+    IListenOptions, IListenParams, IPlayerState
 } from './types';
 
 export type IPlayer = {
@@ -26,36 +20,27 @@ export type IPlayer = {
     getGamepadId: () => ?string,
     getParsedGamepad: () => IParsedGamepad,
 
-    getButtonAliases: () => { [key: string]: IButtonAlias },
-    getStickAliases: () => { [key: string]: IStickAlias },
-    setAlias: (aliasName: string, inputs: string | string[]) => void,
-    removeAlias: (aliasName: string) => void,
-    clearAliases: () => void,
+    setMapper: (mapperName: string, callback: Function, automatic?: boolean) => void,
+    removeMapper: (mapperName: string) => void,
+    clearMappers: () => void,
 
-    getAggregators: () => { [key: string]: IAggregator },
-    setAggregator: (aggregatorName: string, callback: Function) => void,
-    removeAggregator: (aggregatorName: string) => void,
-    clearAggregators: () => void,
+    button: (name: string) => IButtonState,
+    stick: (name: string) => IStickState,
+    setButton: (inputName: string, indexes: number | number[]) => void,
+    setStick: (inputName: string, indexes: number[] | Array<number[]>, inverts?: boolean[]) => void,
 
-    getButtonBindings: () => { [key: string]: IButtonBinding },
-    getStickBindings: () => { [key: string]: IStickBinding },
-    clearButtonBindings: () => void,
-    clearStickBindings: () => void,
-
-    getButtons: () => { [key: string]: IButton },
-    getSticks: () => { [key: string]: IStick },
+    swapButtons: (btn1: string, btn2: string) => void,
+    swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
 
     disconnect: () => void,
     reconnect: () => void,
     connect: (gamepadId: string) => void,
 
-    buttonRebind: (inputName: string, binding: IButtonBinding) => void,
-    stickRebind: (inputName: string, binding: IStickBinding) => void,
     listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
     listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
     cancelListen: () => void,
-    buttonRebindOnPress: (inputName: string, callback: Function, allowDuplication: boolean) => void,
-    stickRebindOnPress: (inputName: string, callback: Function, allowDuplication: boolean) => void,
+    buttonBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
+    stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
 
     destroy: () => void,
     update: (gamepad: Gamepad) => void
@@ -70,40 +55,107 @@ export default function createPlayer({
 
     const state: IPlayerState = {
         name,
-        parsedGamepad: {
+        pad: {
             buttons: [],
             axes: []
         },
-        buttonAliases: {},
-        stickAliases: {},
-        aggregators: {},
+        prevPad: {
+            buttons: [],
+            axes: []
+        },
+        mappers: {},
         gamepadId: null,
         connected: false,
-        ...getDefaultBindings()
+        buttons: getDefaultButtons(),
+        sticks: getDefaultSticks()
     };
-
-    function updateAggregators(gamepad: Gamepad) {
-        state.aggregators = mapValues(({ callback, value }: IAggregator) => ({
-            callback,
-            value: callback(this, value, gamepad)
-        }), state.aggregators);
-    }
 
     const player: IPlayer = {
         getName: () => state.name,
-        getParsedGamepad: () => state.parsedGamepad,
-        getButtonAliases: () => state.buttonAliases,
-        getStickAliases: () => state.stickAliases,
-
-        getAggregators: () => state.aggregators,
         getGamepadId: () => state.gamepadId,
         isConnected: () => state.connected,
 
-        getButtonBindings: () => state.buttonBindings,
-        getStickBindings: () => state.stickBindings,
+        getParsedGamepad: () => state.pad,
 
-        getButtons: () => state.buttons,
-        getSticks: () => state.sticks,
+        setMapper(mapperName: string, callback: Function, automatic: boolean = false) {
+            if (!nameIsValid(mapperName)) {
+                throw new Error(`On setMapper('${mapperName}', ...):
+                first argument contains invalid characters`);
+            }
+            state.mappers[mapperName] = { callback, value: null, automatic };
+        },
+
+        removeMapper(mapperName: string) {
+            state.mappers = omit([mapperName], state.mappers);
+        },
+
+        clearMappers() {
+            state.mappers = {};
+        },
+
+        button(inputName: string) {
+            return buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
+        },
+
+        stick(inputName: string) {
+            const { indexes, inverts } = state.sticks[inputName];
+            return stickMap(state.pad, state.prevPad, indexes, inverts);
+        },
+
+        setButton(inputName: string, indexes: number | number[]) {
+            if (!nameIsValid(inputName)) {
+                throw new Error(`On setButton('${inputName}'): argument contains invalid characters`);
+            }
+            state.buttons[inputName] = (typeof indexes === 'number') ? [indexes] : indexes;
+        },
+
+        setStick(
+            inputName: string,
+            indexes: number[] | Array<number[]>,
+            inverts?: boolean[]
+        ) {
+            if (!nameIsValid(inputName)) {
+                throw new Error(`On setStick('${inputName}'): argument contains invalid characters`);
+            }
+
+            if (indexes.length === 0) {
+                throw new Error(`On setStick('${inputName}', indexes):
+                    argument indexes is empty`);
+            }
+
+            if (Array.isArray(indexes[0])) {
+                state.sticks[inputName] = {
+                    indexes,
+                    inverts: inverts || indexes[0].map(() => false)
+                };
+            } else {
+                state.sticks[inputName] = {
+                    indexes: [indexes],
+                    inverts: inverts || indexes.map(() => false)
+                };
+            }
+        },
+
+        swapButtons(btn1: string, btn2: string): void {
+            const { buttons } = state;
+            // For some reason I can't do:
+            // [buttons[btn1], buttons[btn2]] = [buttons[btn2], buttons[btn1]];
+            const replacement = buttons[btn1];
+            buttons[btn1] = buttons[btn2];
+            buttons[btn2] = replacement;
+        },
+
+        swapSticks(btn1: string, btn2: string, includeInverts?: boolean = false): void {
+            const { sticks } = state;
+            if (includeInverts) {
+                const replacement = sticks[btn1];
+                sticks[btn1] = sticks[btn2];
+                sticks[btn2] = replacement;
+            }
+            const replacement = sticks[btn1].indexes;
+            sticks[btn1].indexes = sticks[btn2].indexes;
+            sticks[btn2].indexes = replacement;
+        },
 
         disconnect() {
             state.connected = false;
@@ -118,34 +170,12 @@ export default function createPlayer({
             state.gamepadId = gamepadId;
         },
 
-        clearButtonBindings() {
-            state.buttonBindings = {};
-        },
-
-        clearStickBindings() {
-            state.stickBindings = {};
-        },
-
-        buttonRebind(inputName: string, binding: IButtonBinding) {
-            if (!nameIsValid(inputName)) {
-                throw new Error(`On buttonRebind('${inputName}'): argument contains invalid characters`);
-            }
-            state.buttonBindings[inputName] = binding;
-        },
-
-        stickRebind(inputName: string, binding: IStickBinding) {
-            if (!nameIsValid(inputName)) {
-                throw new Error(`On stickRebind('${inputName}'): argument contains invalid characters`);
-            }
-            state.stickBindings[inputName] = binding;
-        },
-
         cancelListen() {
             listenOptions = null;
         },
 
         listenButton(
-            callback: (...indexes: number[]) => void,
+            callback: (indexes: number[]) => void,
             quantity?: number = 1,
             { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }: IListenParams = {}
         ) {
@@ -162,7 +192,7 @@ export default function createPlayer({
         },
 
         listenAxis(
-            callback: (...indexes: number[]) => void,
+            callback: (indexes: number[]) => void,
             quantity: number = 2,
             { waitFor = [100, 'ms'], consecutive = true, allowOffset = true }: IListenParams = {}
         ) {
@@ -178,148 +208,72 @@ export default function createPlayer({
             };
         },
 
-        buttonRebindOnPress(
+        buttonBindOnPress(
             inputName: string,
-            callback: () => void = noop,
-            allowDuplication: boolean = false
+            callback: () => void,
+            allowDuplication?: boolean = false
         ) {
             if (!nameIsValid(inputName)) {
-                throw new Error(`On buttonRebindOnPress('${inputName}', ...):
-                first argument contains invalid characters`);
+                throw new Error(`On buttonBindOnPress('${inputName}', ...):
+                    first argument contains invalid characters`);
             }
-            player.listenButton(index => {
-                const bindingIndex = findKey({ index }, state.buttonBindings);
+            player.listenButton(indexes => {
+                const index = indexes[0];
+                const bindingIndex = findKey(index, state.buttons);
 
-                if (bindingIndex) {
-                    if (inputName !== bindingIndex) {
-                        if (allowDuplication) {
-                            state.buttonBindings[inputName] = makeButtonBinding(index);
-                        } else {
-                            const binding = state.buttonBindings[bindingIndex];
-                            state.buttonBindings[bindingIndex] = state.buttonBindings[inputName];
-                            state.buttonBindings[inputName] = binding;
-                        }
-                    }
+                if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
+                    player.swapButtons(inputName, bindingIndex);
                 } else {
-                    state.buttonBindings[inputName] = makeButtonBinding(index);
+                    player.setButton(inputName, index);
                 }
 
                 callback(bindingIndex);
             });
         },
 
-        stickRebindOnPress(
+        stickBindOnPress(
             inputName: string,
-            callback: () => void = noop,
-            allowDuplication: boolean = false
+            callback: () => void,
+            allowDuplication?: boolean = false
         ) {
             if (!nameIsValid(inputName)) {
-                throw new Error(`On stickRebindOnPress('${inputName}', ...):
-                first argument contains invalid characters`);
+                throw new Error(`On stickBindOnPress('${inputName}', ...):
+                    first argument contains invalid characters`);
             }
 
-            player.listenAxis((index1, index2) => {
-                // REVIEW Needed to define the callback as a function
-                // because of https://github.com/facebook/flow/issues/1948
-                const findCallback: Function = ({ indexes }) => (
-                    indexes.includes(index1) && indexes.includes(index2)
-                );
+            player.listenAxis((indexesResult: number[]) => {
+                const c: Function = ({ indexes }) => arraysEqual(indexes, indexesResult);
+                const bindingIndex: string | null = findKey(c, state.sticks);
 
-                const bindingIndex: string | null = findKey(findCallback, state.stickBindings);
-
-                if (bindingIndex) {
-                    if (inputName !== bindingIndex) {
-                        if (allowDuplication) {
-                            state.stickBindings[inputName] = makeStickBinding(index1, index2);
-                        } else {
-                            const binding = state.stickBindings[bindingIndex];
-                            state.stickBindings[bindingIndex] = state.stickBindings[inputName];
-                            state.stickBindings[inputName] = binding;
-                        }
-                    }
+                if (!allowDuplication && bindingIndex && state.sticks[inputName]) {
+                    player.swapSticks(inputName, bindingIndex);
                 } else {
-                    state.stickBindings[inputName] = makeStickBinding(index1, index2);
+                    player.setStick(inputName, indexesResult);
                 }
 
                 callback(bindingIndex);
             });
-        },
-
-        setAggregator(aggregatorName: string, callback: Function) {
-            if (!nameIsValid(aggregatorName)) {
-                throw new Error(`On setAggregator('${aggregatorName}', ...):
-                first argument contains invalid characters`);
-            }
-            state.aggregators[aggregatorName] = { callback, value: null };
-        },
-
-        removeAggregator(aggregatorName: string) {
-            state.aggregators = omit([aggregatorName], state.aggregators);
-        },
-
-        clearAggregators() {
-            state.aggregators = {};
-        },
-
-        setAlias(aliasName: string, inputs: string | string[]) {
-            if (!nameIsValid(aliasName)) {
-                throw new Error(`On setAlias('${aliasName}', ...): first argument contains invalid characters`);
-            }
-            const inputList: string[] = typeof inputs === 'string' ? [inputs] : inputs;
-
-            if (difference(inputList, Object.keys(state.buttons)).length === 0) {
-                state.buttonAliases[aliasName] = addButtonAlias(state.buttonAliases[aliasName], inputList);
-            } else if (difference(inputList, Object.keys(state.sticks)).length === 0) {
-                const lengths: number[] = inputList.map(inputName => state.sticks[inputName].value.length);
-
-                if (unique(lengths).length === 1) {
-                    state.stickAliases[aliasName] = addStickAlias(state.stickAliases[aliasName], inputList);
-                } else {
-                    throw new Error(
-                        `On setAlias(${aliasName}, [${inputList.join(', ')}]):
-                        all sticks specified did not have the same number of axes`
-                    );
-                }
-            } else {
-                throw new Error(
-                    `On setAlias(${aliasName}, [${inputList.join(', ')}]):
-                    either one of the inputs is void or it wasn't all a collection of just buttons or just sticks`
-                );
-            }
-        },
-
-        removeAlias(aliasName: string) {
-            if (includes(aliasName, Object.keys(state.buttonAliases))) {
-                state.buttonAliases = omit([aliasName], state.buttonAliases);
-            } else if (includes(aliasName, Object.keys(state.stickAliases))) {
-                state.stickAliases = omit([aliasName], state.stickAliases);
-            } else {
-                throw new Error(`On removeAlias('${aliasName}'): Specified alias does not exist`);
-            }
-        },
-
-        clearAliases() {
-            state.buttonAliases = {};
-            state.stickAliases = {};
         },
 
         destroy() {
             player.disconnect();
-            player.clearButtonBindings();
-            player.clearStickBindings();
-            player.clearAliases();
-            player.clearAggregators();
+            state.pad = {
+                buttons: [],
+                axes: []
+            };
+            state.prevPad = {
+                buttons: [],
+                axes: []
+            };
+            player.clearMappers();
         },
 
         update(gamepad: Gamepad) {
-            state.parsedGamepad = parseGamepad(gamepad, state.parsedGamepad, threshold, clampThreshold);
-            state.buttons = updateButtons(state.buttonBindings, state.parsedGamepad);
-            state.sticks = updateStick(state, threshold, clampThreshold);
-            state.buttonAliases = updateButtonAliases(state, threshold);
-            state.stickAliases = updateStickAliases(state, threshold);
-            updateAggregators(gamepad); // REVIEW: Shouldn't this use parsedGamepad too?
+            state.prevPad = state.pad;
+            state.pad = parseGamepad(gamepad, state.prevPad, threshold, clampThreshold);
+            state.mappers = updateMappers(state.pad, state.prevPad, state.mappers);
 
-            listenOptions = updateListenOptions(listenOptions, state.parsedGamepad, threshold);
+            listenOptions = updateListenOptions(listenOptions, state.pad, threshold);
         }
     };
 

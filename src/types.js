@@ -1,39 +1,33 @@
 /* @flow */
-export type IPoint = { x: number, y: number };
-export type IStickValue = number[];
 export type IButtonValue = number;
+export type IStickValue = number[];
 
-export type IStick = {
+export type IButtonState = {
+    value: IButtonValue,
+    pressed: boolean,
+    justChanged: boolean
+};
+export type IStickState = {
     value: IStickValue,
     pressed: boolean,
     justChanged: boolean,
     inverts: boolean[]
 };
-export type IButton = { value: IButtonValue, pressed: boolean, justChanged: boolean };
+
+export type IButton = number[];
+export type IStick = {
+    indexes: Array<number[]>,
+    inverts: boolean[]
+};
+export type IMapper = {
+    callback: Function,
+    value: any,
+    automatic: boolean
+};
 
 export type IParsedGamepad = {
-    buttons: IButton[],
+    buttons: IButtonState[],
     axes: number[]
-};
-
-export type IStickAlias = { inputs: string[], value: IStickValue, pressed: boolean, justChanged: boolean };
-export type IButtonAlias = { inputs: string[], value: IButtonValue, pressed: boolean, justChanged: boolean };
-
-export type IAggregator = { callback: Function, value: any };
-
-export type IStickMapper = (
-    pad: IParsedGamepad,
-    inverts: boolean[]
-) => IStickValue;
-export type IButtonMapper = (pad: IParsedGamepad) => IButton;
-
-export type IStickBinding = {
-    indexes: number[],
-    mapper: IStickMapper
-};
-export type IButtonBinding = {
-    index: number,
-    mapper: IButtonMapper
 };
 
 export type IListenParams = {
@@ -43,7 +37,7 @@ export type IListenParams = {
 };
 
 export type IListenOptions = {
-    callback: (...indexes: number[]) => void,
+    callback: (indexes: number[]) => void,
     quantity: number,
     type: 'buttons' | 'axes',
     currentValue: number,
@@ -53,21 +47,15 @@ export type IListenOptions = {
     allowOffset: boolean
 };
 
-export type IButtonBindings = { [key: string]: IButtonBinding };
-export type IStickBindings = { [key: string]: IStickBinding };
-
 export type IPlayerState = {
     name: string,
-    parsedGamepad: IParsedGamepad,
+    pad: IParsedGamepad,
+    prevPad: IParsedGamepad,
 
     sticks: { [key: string]: IStick },
     buttons: { [key: string]: IButton },
-    buttonBindings: IButtonBindings,
-    stickBindings: IStickBindings,
+    mappers: { [key: string]: IMapper },
 
     gamepadId: ?string,
-    connected: boolean,
-    buttonAliases: { [key: string]: IButtonAlias },
-    stickAliases: { [key: string]: IStickAlias },
-    aggregators: { [key: string]: IAggregator }
+    connected: boolean
 };
