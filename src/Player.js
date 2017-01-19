@@ -10,7 +10,7 @@ import {
 } from './lib/tools';
 
 import type {
-    IParsedGamepad, IStickState, IButtonState,
+    IParsedGamepad, IStickState, IButtonState, IButtonIndexes, IStickIndexes, IStickInverts,
     IListenOptions, IListenParams, IPlayerState
 } from './types';
 
@@ -26,8 +26,8 @@ export type IPlayer = {
 
     button: (name: string) => IButtonState,
     stick: (name: string) => IStickState,
-    setButton: (inputName: string, indexes: number | number[]) => void,
-    setStick: (inputName: string, indexes: number[] | Array<number[]>, inverts?: boolean[]) => void,
+    setButton: (inputName: string, indexes: number | IButtonIndexes) => void,
+    setStick: (inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void,
 
     swapButtons: (btn1: string, btn2: string) => void,
     swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
@@ -93,16 +93,16 @@ export default function createPlayer({
             state.mappers = {};
         },
 
-        button(inputName: string) {
+        button(inputName: string): IButtonState {
             return buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
         },
 
-        stick(inputName: string) {
+        stick(inputName: string): IStickState {
             const { indexes, inverts } = state.sticks[inputName];
-            return stickMap(state.pad, state.prevPad, indexes, inverts);
+            return stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
         },
 
-        setButton(inputName: string, indexes: number | number[]) {
+        setButton(inputName: string, indexes: number | IButtonIndexes) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On setButton('${inputName}'): argument contains invalid characters`);
             }
@@ -111,8 +111,8 @@ export default function createPlayer({
 
         setStick(
             inputName: string,
-            indexes: number[] | Array<number[]>,
-            inverts?: boolean[]
+            indexes: number[] | IStickIndexes,
+            inverts?: IStickInverts
         ) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On setStick('${inputName}'): argument contains invalid characters`);
@@ -120,7 +120,7 @@ export default function createPlayer({
 
             if (indexes.length === 0) {
                 throw new Error(`On setStick('${inputName}', indexes):
-                    argument indexes is empty`);
+                    argument indexes is an empty array`);
             }
 
             if (Array.isArray(indexes[0])) {
@@ -136,7 +136,7 @@ export default function createPlayer({
             }
         },
 
-        swapButtons(btn1: string, btn2: string): void {
+        swapButtons(btn1: string, btn2: string) {
             const { buttons } = state;
             // For some reason I can't do:
             // [buttons[btn1], buttons[btn2]] = [buttons[btn2], buttons[btn1]];
@@ -145,7 +145,7 @@ export default function createPlayer({
             buttons[btn2] = replacement;
         },
 
-        swapSticks(btn1: string, btn2: string, includeInverts?: boolean = false): void {
+        swapSticks(btn1: string, btn2: string, includeInverts?: boolean = false) {
             const { sticks } = state;
             if (includeInverts) {
                 const replacement = sticks[btn1];

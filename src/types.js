@@ -1,6 +1,10 @@
 /* @flow */
 export type IButtonValue = number;
+export type IButtonIndexes = number[];
+
 export type IStickValue = number[];
+export type IStickIndexes = Array<number[]>;
+export type IStickInverts = boolean[];
 
 export type IButtonState = {
     value: IButtonValue,
@@ -11,13 +15,13 @@ export type IStickState = {
     value: IStickValue,
     pressed: boolean,
     justChanged: boolean,
-    inverts: boolean[]
+    inverts: IStickInverts
 };
 
-export type IButton = number[];
+export type IButton = IButtonIndexes;
 export type IStick = {
-    indexes: Array<number[]>,
-    inverts: boolean[]
+    indexes: IStickIndexes,
+    inverts: IStickInverts
 };
 export type IMapper = {
     callback: Function,

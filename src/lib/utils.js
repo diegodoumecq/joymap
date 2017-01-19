@@ -1,8 +1,8 @@
 /* @flow */
 import type {
     IParsedGamepad, IListenOptions,
-    IButtonValue, IStickValue,
-    IButtonState, IMapper
+    IButtonValue, IStickValue, IStickInverts,
+    IButtonState, IStickState, IMapper
 } from '../types';
 
 import {
@@ -105,10 +105,6 @@ export function isButtonSignificant(value: IButtonValue = 0, threshold: number):
     return Math.abs(value) > threshold;
 }
 
-export function getButtonValue(value: IButtonValue = 0, threshold: number): IButtonValue {
-    return !isButtonSignificant(value, threshold) ? 0 : value;
-}
-
 export function isStickSignificant(stickValues: IStickValue, threshold: number): boolean {
     return stickValues.findIndex(value => Math.abs(value) >= threshold) !== -1;
 }
@@ -130,13 +126,12 @@ export function parseGamepad(
     return {
         buttons: pad.buttons.map((button: { value: number }, index: number) => {
             const previous: IButtonState = prevPad.buttons[index];
-            const value = clampThreshold ? getButtonValue(button.value, threshold) : button.value;
-            const pressed = isButtonSignificant(value, threshold);
+            const pressed = isButtonSignificant(button.value, threshold);
 
             return {
                 pressed,
                 justChanged: pressed !== (previous ? isButtonSignificant(previous.value, threshold) : false),
-                value
+                value: clampThreshold && !pressed ? 0 : button.value
             };
         }),
         axes: pad.axes
@@ -147,7 +142,7 @@ export function buttonMap(
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
     indexes: number[]
-) {
+): IButtonState {
     const length = indexes.length;
 
     let prevPressed = false;
@@ -171,18 +166,37 @@ export function buttonMap(
     };
 }
 
+function roundSticks(indexMaps: IStickValue[], axes: number[], threshold: number): IStickValue {
+    let count = 0;
+    let counts = [];
+
+    indexMaps.forEach(indexes => {
+        const values = indexes.map(i => axes[i]);
+
+        if (isStickSignificant(values, threshold)) {
+            counts = values.map((v, i) => v + (counts[i] || 0));
+            count += 1;
+        }
+    });
+
+    return count === 0 ? counts.map(() => 0) : counts.map(v => v / count);
+}
+
 export function stickMap(
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
-    indexes: Array<number[]>,
-    inverts: boolean[]
-) {
-    // TODO
+    indexMaps: IStickValue[],
+    inverts: IStickInverts,
+    threshold: number
+): IStickState {
+    const prevPressed = isStickSignificant(roundSticks(indexMaps, prevPad.axes, threshold), threshold);
+    const value = roundSticks(indexMaps, pad.axes, threshold).map((v, i) => (!inverts[i] ? v : v * -1));
+    const pressed = isStickSignificant(value, threshold);
 
     return {
-        value: [0, 0],
-        pressed: false,
-        justChanged: false,
+        value,
+        pressed,
+        justChanged: pressed !== prevPressed,
         inverts
     };
 }
