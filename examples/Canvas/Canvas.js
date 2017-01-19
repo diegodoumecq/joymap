@@ -34,7 +34,7 @@ gamepadImage.src = 'gamepad.png';
 function drawCharacter(ctx, character) {
     const { x, y } = character;
 
-    const angle = !character.player.aggregators.AnyButton.value ? character.angle : character.angle + Math.PI;
+    const angle = !character.player.getAggregators().AnyButton.value ? character.angle : character.angle + Math.PI;
 
     // Rotate whole canvas
     ctx.translate(x, y);
@@ -44,7 +44,7 @@ function drawCharacter(ctx, character) {
     // Draw straight image onto the rotated canvas
     ctx.drawImage(gamepadImage, x - 121, y - 75, 242, 150);
     ctx.font = '48px serif';
-    ctx.strokeText(character.player.name, x - 15, y);
+    ctx.strokeText(character.player.getName(), x - 15, y);
 
     // Unrotate canvas to straighten it and leave the image rotated instead
     ctx.translate(x, y);
@@ -53,7 +53,7 @@ function drawCharacter(ctx, character) {
 }
 
 function updateCharacter(character) {
-    const { L, R } = character.player.sticks;
+    const { L, R } = character.player.getSticks();
 
     // Move the character itself
     character.x += L.value[0] * 5;
@@ -92,7 +92,7 @@ const joyMap = createJoyMap({
         }
 
         forEach(c => {
-            if (!c.player.connected) {
+            if (!c.player.isConnected()) {
                 pull(c, characters);
                 joyMap.removePlayer(c.player);
             } else {

@@ -21,7 +21,7 @@ function joyMapSetup(params) {
     joyMap.addPlayer('John');
     joyMap.addPlayer('Jim');
 
-    James.sticks.L.inverts = [true, true];
+    James.getSticks().L.inverts = [true, true];
 
     return joyMap;
 }
@@ -30,8 +30,7 @@ class ReactExample extends React.Component {
 
     // Setup joymap
     componentWillMount() {
-        // Force React to rerender after each joymap.poll
-        // poll is called roughly 60 times a second, using requestAnimationFrame
+        // setSTate is called to force React to rerender after each poll
         this.joyMap = joyMapSetup({ onPoll: () => this.setState({}) });
     }
 
@@ -50,14 +49,14 @@ class ReactExample extends React.Component {
                 </header>
                 <section styleName="react-example">
                     {map(player => {
-                        const color = colorHash.hex(player.name);
+                        const color = colorHash.hex(player.getName());
                         return (
                             <Gamepad
-                                key={player.name}
+                                key={player.getName()}
                                 backgroundColor={color}
                                 pressedColor={`#${tinycolor(color).darken(20).toHex()}`}
                                 player={player}>
-                                <h2>{player.gamepadId || 'Player has no gamepad associated'}</h2>
+                                <h2>{player.getGamepadId() || 'Player has no gamepad associated'}</h2>
                             </Gamepad>);
                     }, this.joyMap.getPlayers())}
                 </section>
