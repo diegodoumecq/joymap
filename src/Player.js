@@ -55,6 +55,10 @@ export default function createPlayer({
         },
 
         update(gamepad: Gamepad) {
+            // TODO Store the buttons, sticks and mappers that have already been queried
+            // and clear those structures at the start of update
+            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
+            // Maybe add a memoizeMappers flag (default true) to Player construction
             state.prevPad = state.pad;
             state.pad = parseGamepad(gamepad, state.prevPad, threshold, clampThreshold);
 
