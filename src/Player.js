@@ -15,15 +15,20 @@ import type {
     IListenParams, IPlayerState, IPlayer
 } from './types';
 
-export default function createPlayer({
-    name,
-    threshold = 0.3,
-    clampThreshold = true
-}: { name: string, threshold: number, clampThreshold: boolean } = {}): IPlayer {
+export default function createPlayer(params?: {
+    name?: string,
+    threshold?: number,
+    clampThreshold?: boolean
+} = {}): IPlayer {
     let listenOptions: null | IListenOptions = null;
 
     const state: IPlayerState = {
-        name,
+        connected: false,
+        gamepadId: null,
+
+        name: params.name || '',
+        threshold: params.threshold || 0.2,
+        clampThreshold: params.clampThreshold !== false,
         pad: {
             buttons: [],
             axes: []
@@ -32,16 +37,15 @@ export default function createPlayer({
             buttons: [],
             axes: []
         },
-        mappers: {},
-        gamepadId: null,
-        connected: false,
+
         buttons: getDefaultButtons(),
-        sticks: getDefaultSticks()
+        sticks: getDefaultSticks(),
+        mappers: {}
     };
 
     const player: IPlayer = {
         getName: () => state.name,
-        getGamepadId: () => state.gamepadId,
+        getPadId: () => state.gamepadId,
         isConnected: () => state.connected,
 
         getParsedGamepad: () => state.pad,
@@ -60,9 +64,9 @@ export default function createPlayer({
             // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
             // Maybe add a memoizeMappers flag (default true) to Player construction
             state.prevPad = state.pad;
-            state.pad = parseGamepad(gamepad, state.prevPad, threshold, clampThreshold);
+            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
 
-            listenOptions = updateListenOptions(listenOptions, state.pad, threshold);
+            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
         },
 
         getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
@@ -86,19 +90,19 @@ export default function createPlayer({
             if (inputNames.length === 0) {
                 return mapValues(stick => {
                     const { indexes, inverts } = stick;
-                    return stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+                    return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
                 }, state.sticks);
             }
 
             if (inputNames.length === 0) {
                 const { indexes, inverts } = state.sticks[inputNames[0]];
-                return stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+                return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
             }
 
             const result = {};
             inputNames.forEach(inputName => {
                 const { indexes, inverts } = state.sticks[inputName];
-                result[inputName] = stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+                result[inputName] = stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
             });
 
             return result;

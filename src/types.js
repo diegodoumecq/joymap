@@ -24,10 +24,6 @@ export type IStick = {
     indexes: IStickIndexes,
     inverts: IStickInverts
 };
-export type IMapperOnPoll = {
-    callback: Function,
-    value: any
-};
 
 export type IParsedGamepad = {
     buttons: IButtonState[],
@@ -52,22 +48,24 @@ export type IListenOptions = {
 };
 
 export type IPlayerState = {
+    gamepadId: ?string,
+    connected: boolean,
+
     name: string,
+    threshold: number,
+    clampThreshold: boolean,
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
 
-    sticks: { [key: string]: IStick },
     buttons: { [key: string]: IButton },
-    mappers: { [key: string]: Function },
-
-    gamepadId: ?string,
-    connected: boolean
+    sticks: { [key: string]: IStick },
+    mappers: { [key: string]: Function }
 };
 
 export type IPlayer = {
     isConnected: () => boolean,
     getName: () => string,
-    getGamepadId: () => ?string,
+    getPadId: () => ?string,
     getParsedGamepad: () => IParsedGamepad,
 
     removeMapper: (mapperName: string) => void,
@@ -102,16 +100,34 @@ export type IPlayer = {
     destroy: () => void
 };
 
+export type IJoyMapState = {
+    threshold: number,
+    clampThreshold: boolean,
+    onPoll: () => void,
+    autoConnect: 'manual' | 'auto',
+    isSupported: boolean,
+    gamepads: Gamepad[],
+    players: IPlayer[]
+};
+
 export type IJoyMap = {
     isSupported: () => boolean,
-    getGamepads: () => Gamepad[],
-    getPlayers: () => IPlayer[],
     start: () => void,
     stop: () => void,
-    getUnusedGamepadIds: () => string[],
+
+    setThreshold: (threshold: number) => void,
+    setClampThreshold: (clampThreshold: boolean) => void,
+    setOnPoll: (onPoll: Function) => void,
+    setAutoConnect: (autoConnect: 'auto' | 'manual') => void,
+
+    getGamepads: () => Gamepad[],
+    getPlayers: () => IPlayer[],
+    getUnusedPadIds: () => string[],
+    getUnusedPadId: () => string | null,
+
     setPlayers: (jsonString: string) => void,
     addPlayer: (name: string) => IPlayer,
     removePlayer: (player: IPlayer) => void,
-    cleanPlayers: () => void,
+    clearPlayers: () => void,
     poll: () => void
 };

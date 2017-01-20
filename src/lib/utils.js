@@ -2,11 +2,11 @@
 import type {
     IParsedGamepad, IListenOptions,
     IButtonValue, IStickValue, IStickInverts,
-    IButtonState, IStickState, IMapperOnPoll, IPlayer
+    IButtonState, IStickState
 } from '../types';
 
 import {
-    findIndexes, isConsecutive, mapValues
+    findIndexes, isConsecutive
 } from './tools';
 
 export function getRawGamepads(): Gamepad[] {
