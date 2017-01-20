@@ -3,125 +3,31 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.stickBindings = exports.stickIndexMapping = exports.buttonBindings = exports.buttonIndexMapping = undefined;
-
-var _from = require('babel-runtime/core-js/array/from');
-
-var _from2 = _interopRequireDefault(_from);
-
-var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
-
-var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
 
 var _assign = require('babel-runtime/core-js/object/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
 
-exports.makeButtonBinding = makeButtonBinding;
-exports.addButtonAlias = addButtonAlias;
-exports.makeStickBinding = makeStickBinding;
-exports.addStickAlias = addStickAlias;
+var _from = require('babel-runtime/core-js/array/from');
+
+var _from2 = _interopRequireDefault(_from);
+
 exports.getRawGamepads = getRawGamepads;
 exports.updateListenOptions = updateListenOptions;
 exports.nameIsValid = nameIsValid;
+exports.getDefaultButtons = getDefaultButtons;
+exports.getDefaultSticks = getDefaultSticks;
+exports.isButtonSignificant = isButtonSignificant;
+exports.isStickSignificant = isStickSignificant;
+exports.getStickValue = getStickValue;
+exports.parseGamepad = parseGamepad;
+exports.buttonMap = buttonMap;
+exports.stickMap = stickMap;
+exports.updateMappers = updateMappers;
 
 var _tools = require('./tools');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var buttonIndexMapping = exports.buttonIndexMapping = {
-    dpadUp: 12,
-    dpadDown: 13,
-    dpadLeft: 14,
-    dpadRight: 15,
-    L1: 4,
-    L2: 6,
-    L3: 10,
-    R1: 5,
-    R2: 7,
-    R3: 11,
-    A: 0,
-    B: 1,
-    X: 2,
-    Y: 3,
-    start: 9,
-    select: 8
-};
-
-var mockButtons = {
-    home: {
-        index: -1,
-        mapper: function mapper() {
-            return 0;
-        }
-    }
-};
-
-function makeButtonBinding(index) {
-    return {
-        index: index,
-        mapper: function mapper(pad) {
-            return pad.buttons[index];
-        }
-    };
-}
-
-var buttonBindings = exports.buttonBindings = (0, _assign2.default)((0, _tools.mapValues)(function (value) {
-    return makeButtonBinding(value);
-}, buttonIndexMapping), mockButtons);
-
-function addButtonAlias(alias, inputs) {
-    if (!alias) {
-        return {
-            inputs: inputs,
-            value: 0,
-            pressed: false,
-            justChanged: false
-        };
-    }
-
-    return (0, _assign2.default)({}, alias, {
-        inputs: [].concat((0, _toConsumableArray3.default)(alias.inputs), (0, _toConsumableArray3.default)(inputs))
-    });
-}
-
-var stickIndexMapping = exports.stickIndexMapping = {
-    L: [0, 1],
-    R: [2, 3]
-};
-
-function makeStickBinding() {
-    for (var _len = arguments.length, indexes = Array(_len), _key = 0; _key < _len; _key++) {
-        indexes[_key] = arguments[_key];
-    }
-
-    return {
-        indexes: indexes,
-        mapper: function mapper(pad, inverts) {
-            return indexes.map(function (value, i) {
-                return !inverts[i] ? pad.axes[value] : pad.axes[value] * -1;
-            });
-        }
-    };
-}
-var stickBindings = exports.stickBindings = (0, _tools.mapValues)(function (values) {
-    return makeStickBinding.apply(undefined, (0, _toConsumableArray3.default)(values));
-}, stickIndexMapping);
-
-function addStickAlias(alias, inputs) {
-    if (!alias) {
-        return {
-            inputs: inputs,
-            value: [0, 0],
-            pressed: false,
-            justChanged: false
-        };
-    }
-
-    return (0, _assign2.default)({}, alias, {
-        inputs: [].concat((0, _toConsumableArray3.default)(alias.inputs), (0, _toConsumableArray3.default)(inputs))
-    });
-}
 
 function getRawGamepads() {
     if (navigator && navigator.getGamepads) {
@@ -161,7 +67,7 @@ function updateListenOptions(listenOptions, parsedGamepad, threshold) {
         var comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
 
         if (targetValue <= comparison) {
-            callback.apply(undefined, (0, _toConsumableArray3.default)(indexes));
+            callback(indexes);
             return null;
         }
 
@@ -178,4 +84,152 @@ function updateListenOptions(listenOptions, parsedGamepad, threshold) {
 function nameIsValid(name) {
     return (/^[a-z0-9]+$/i.test(name)
     );
+}
+
+function getDefaultButtons() {
+    return {
+        dpadUp: [12],
+        dpadDown: [13],
+        dpadLeft: [14],
+        dpadRight: [15],
+        L1: [4],
+        L2: [6],
+        L3: [10],
+        R1: [5],
+        R2: [7],
+        R3: [11],
+        A: [0],
+        B: [1],
+        X: [2],
+        Y: [3],
+        start: [9],
+        select: [8]
+    };
+}
+
+function getDefaultSticks() {
+    return {
+        L: {
+            indexes: [[0, 1]],
+            inverts: [false, false]
+        },
+        R: {
+            indexes: [[2, 3]],
+            inverts: [false, false]
+        }
+    };
+}
+
+function isButtonSignificant() {
+    var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var threshold = arguments[1];
+
+    return Math.abs(value) > threshold;
+}
+
+function isStickSignificant(stickValues, threshold) {
+    return stickValues.findIndex(function (value) {
+        return Math.abs(value) >= threshold;
+    }) !== -1;
+}
+
+function getStickValue(stickValues, threshold) {
+    if (!isStickSignificant(stickValues, threshold)) {
+        return stickValues.map(function () {
+            return 0;
+        });
+    }
+
+    return stickValues;
+}
+
+function parseGamepad(pad, prevPad, threshold, clampThreshold) {
+    return {
+        buttons: pad.buttons.map(function (button, index) {
+            var previous = prevPad.buttons[index];
+            var pressed = isButtonSignificant(button.value, threshold);
+
+            return {
+                pressed: pressed,
+                justChanged: pressed !== (previous ? isButtonSignificant(previous.value, threshold) : false),
+                value: clampThreshold && !pressed ? 0 : button.value
+            };
+        }),
+        axes: pad.axes
+    };
+}
+
+function buttonMap(pad, prevPad, indexes) {
+    var length = indexes.length;
+
+    var prevPressed = false;
+    var value = 0;
+    var pressed = false;
+
+    var i = 0;
+    while (i < length) {
+        if (!prevPressed) {
+            prevPressed = prevPad.buttons[indexes[i]].pressed;
+        }
+        value = Math.max(value, pad.buttons[indexes[i]].value);
+        pressed = pressed || pad.buttons[indexes[i]].pressed;
+        i += 1;
+    }
+
+    return {
+        value: value,
+        pressed: pressed,
+        justChanged: pressed !== prevPressed
+    };
+}
+
+function roundSticks(indexMaps, axes, threshold) {
+    var count = 0;
+    var counts = [];
+
+    indexMaps.forEach(function (indexes) {
+        var values = indexes.map(function (i) {
+            return axes[i];
+        });
+
+        if (isStickSignificant(values, threshold)) {
+            counts = values.map(function (v, i) {
+                return v + (counts[i] || 0);
+            });
+            count += 1;
+        }
+    });
+
+    return count === 0 ? counts.map(function () {
+        return 0;
+    }) : counts.map(function (v) {
+        return v / count;
+    });
+}
+
+function stickMap(pad, prevPad, indexMaps, inverts, threshold) {
+    var prevPressed = isStickSignificant(roundSticks(indexMaps, prevPad.axes, threshold), threshold);
+    var value = roundSticks(indexMaps, pad.axes, threshold).map(function (v, i) {
+        return !inverts[i] ? v : v * -1;
+    });
+    var pressed = isStickSignificant(value, threshold);
+
+    return {
+        value: value,
+        pressed: pressed,
+        justChanged: pressed !== prevPressed,
+        inverts: inverts
+    };
+}
+
+function updateMappers(pad, prevPad, mappersOnPoll, player) {
+    return (0, _tools.mapValues)(function (mapper, name) {
+        var callback = mapper.callback;
+
+
+        return {
+            value: callback({ pad: pad, prevPad: prevPad, prevValue: mappersOnPoll[name].value, player: player }),
+            callback: callback
+        };
+    }, mappersOnPoll);
 }

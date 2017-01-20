@@ -3,48 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
-var _assign = require('babel-runtime/core-js/object/assign');
-
-var _assign2 = _interopRequireDefault(_assign);
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
 exports.default = createPlayer;
 
 var _utils = require('./lib/utils');
 
 var _tools = require('./lib/tools');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _cleanBindings() {
-    return {
-        buttonBindings: _utils.buttonBindings,
-        stickBindings: _utils.stickBindings,
-        buttons: (0, _tools.mapValues)(function () {
-            return {
-                value: 0,
-                pressed: false,
-                justChanged: false
-            };
-        }, _utils.buttonBindings),
-        sticks: (0, _tools.mapValues)(function () {
-            return {
-                value: [0, 0],
-                pressed: false,
-                justChanged: false,
-                inverts: [false, false]
-            };
-        }, _utils.stickBindings)
-    };
-}
 
 function createPlayer() {
     var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -56,48 +19,143 @@ function createPlayer() {
 
     var listenOptions = null;
 
-    var player = (0, _extends3.default)({
+    var state = {
         name: name,
-        parsedGamepad: {
+        pad: {
             buttons: [],
             axes: []
         },
-        buttonAliases: {},
-        stickAliases: {},
-        aggregators: {},
+        prevPad: {
+            buttons: [],
+            axes: []
+        },
+        mappers: {},
+        mappersOnPoll: {},
         gamepadId: null,
-        connected: false
-    }, _cleanBindings(), {
-        cleanBindings: function cleanBindings() {
-            (0, _assign2.default)(player, _cleanBindings());
+        connected: false,
+        buttons: (0, _utils.getDefaultButtons)(),
+        sticks: (0, _utils.getDefaultSticks)()
+    };
+
+    var player = {
+        getName: function getName() {
+            return state.name;
+        },
+        getGamepadId: function getGamepadId() {
+            return state.gamepadId;
+        },
+        isConnected: function isConnected() {
+            return state.connected;
+        },
+
+        getParsedGamepad: function getParsedGamepad() {
+            return state.pad;
+        },
+
+        setMapper: function setMapper(mapperName, callback) {
+            var mapOnPoll = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+            if (!(0, _utils.nameIsValid)(mapperName)) {
+                throw new Error('On setMapper(\'' + mapperName + '\', ...):\n                    first argument contains invalid characters');
+            }
+            if (!mapOnPoll) {
+                state.mappers[mapperName] = callback;
+            } else {
+                state.mappersOnPoll[mapperName] = { callback: callback, value: null };
+            }
+        },
+        removeMapper: function removeMapper(mapperName) {
+            state.mappersOnPoll = (0, _tools.omit)([mapperName], state.mappersOnPoll);
+            state.mappers = (0, _tools.omit)([mapperName], state.mappers);
+        },
+        clearMappers: function clearMappers() {
+            state.mappersOnPoll = {};
+            state.mappers = {};
+        },
+        mapper: function mapper(mapperName) {
+            if (state.mappersOnPoll[mapperName]) {
+                return state.mappersOnPoll[mapperName].value;
+            }
+
+            return state.mappers[mapperName]({
+                pad: state.pad,
+                prevPad: state.prevPad,
+                player: player
+            });
+        },
+        button: function button(inputName) {
+            return (0, _utils.buttonMap)(state.pad, state.prevPad, state.buttons[inputName]);
+        },
+        stick: function stick(inputName) {
+            var _state$sticks$inputNa = state.sticks[inputName],
+                indexes = _state$sticks$inputNa.indexes,
+                inverts = _state$sticks$inputNa.inverts;
+
+            return (0, _utils.stickMap)(state.pad, state.prevPad, indexes, inverts, threshold);
+        },
+        setButton: function setButton(inputName, indexes) {
+            if (!(0, _utils.nameIsValid)(inputName)) {
+                throw new Error('On setButton(\'' + inputName + '\'): argument contains invalid characters');
+            }
+            state.buttons[inputName] = typeof indexes === 'number' ? [indexes] : indexes;
+        },
+        setStick: function setStick(inputName, indexes, inverts) {
+            if (!(0, _utils.nameIsValid)(inputName)) {
+                throw new Error('On setStick(\'' + inputName + '\'): argument contains invalid characters');
+            }
+
+            if (indexes.length === 0) {
+                throw new Error('On setStick(\'' + inputName + '\', indexes):\n                    argument indexes is an empty array');
+            }
+
+            var firstValue = indexes[0];
+
+            if (Array.isArray(firstValue)) {
+                state.sticks[inputName] = {
+                    indexes: indexes,
+                    inverts: inverts || firstValue.map(function () {
+                        return false;
+                    })
+                };
+            } else {
+                state.sticks[inputName] = {
+                    indexes: [indexes],
+                    inverts: inverts || indexes.map(function () {
+                        return false;
+                    })
+                };
+            }
+        },
+        swapButtons: function swapButtons(btn1, btn2) {
+            var buttons = state.buttons;
+
+            var replacement = buttons[btn1];
+            buttons[btn1] = buttons[btn2];
+            buttons[btn2] = replacement;
+        },
+        swapSticks: function swapSticks(btn1, btn2) {
+            var includeInverts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+            var sticks = state.sticks;
+
+            if (includeInverts) {
+                var replacement = sticks[btn1];
+                sticks[btn1] = sticks[btn2];
+                sticks[btn2] = replacement;
+            } else {
+                var _replacement = sticks[btn1].indexes;
+                sticks[btn1].indexes = sticks[btn2].indexes;
+                sticks[btn2].indexes = _replacement;
+            }
         },
         disconnect: function disconnect() {
-            player.connected = false;
+            state.connected = false;
         },
         reconnect: function reconnect() {
-            player.connected = true;
+            state.connected = true;
         },
         connect: function connect(gamepadId) {
-            player.connected = true;
-            player.gamepadId = gamepadId;
-        },
-        clearButtonBindings: function clearButtonBindings() {
-            player.buttonBindings = {};
-        },
-        clearStickBindings: function clearStickBindings() {
-            player.stickBindings = {};
-        },
-        buttonRebind: function buttonRebind(inputName, binding) {
-            if (!(0, _utils.nameIsValid)(inputName)) {
-                throw new Error('On buttonRebind(\'' + inputName + '\'): argument contains invalid characters');
-            }
-            player.buttonBindings[inputName] = binding;
-        },
-        stickRebind: function stickRebind(inputName, binding) {
-            if (!(0, _utils.nameIsValid)(inputName)) {
-                throw new Error('On stickRebind(\'' + inputName + '\'): argument contains invalid characters');
-            }
-            player.stickBindings[inputName] = binding;
+            state.connected = true;
+            state.gamepadId = gamepadId;
         },
         cancelListen: function cancelListen() {
             listenOptions = null;
@@ -146,258 +204,68 @@ function createPlayer() {
                 allowOffset: allowOffset
             };
         },
-        buttonRebindOnPress: function buttonRebindOnPress(inputName) {
-            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _tools.noop;
+        buttonBindOnPress: function buttonBindOnPress(inputName, callback) {
             var allowDuplication = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
             if (!(0, _utils.nameIsValid)(inputName)) {
-                throw new Error('On buttonRebindOnPress(\'' + inputName + '\', ...):\n                first argument contains invalid characters');
+                throw new Error('On buttonBindOnPress(\'' + inputName + '\', ...):\n                    first argument contains invalid characters');
             }
-            player.listenButton(function (index) {
-                var bindingIndex = (0, _tools.findKey)({ index: index }, player.buttonBindings);
+            player.listenButton(function (indexes) {
+                var index = indexes[0];
+                var bindingIndex = (0, _tools.findKey)(index, state.buttons);
 
-                if (bindingIndex) {
-                    if (inputName !== bindingIndex) {
-                        if (allowDuplication) {
-                            player.buttonBindings[inputName] = (0, _utils.makeButtonBinding)(index);
-                        } else {
-                            var _binding = player.buttonBindings[bindingIndex];
-                            player.buttonBindings[bindingIndex] = player.buttonBindings[inputName];
-                            player.buttonBindings[inputName] = _binding;
-                        }
-                    }
+                if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
+                    player.swapButtons(inputName, bindingIndex);
                 } else {
-                    player.buttonBindings[inputName] = (0, _utils.makeButtonBinding)(index);
+                    player.setButton(inputName, index);
                 }
 
                 callback(bindingIndex);
             });
         },
-        stickRebindOnPress: function stickRebindOnPress(inputName) {
-            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _tools.noop;
+        stickBindOnPress: function stickBindOnPress(inputName, callback) {
             var allowDuplication = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
             if (!(0, _utils.nameIsValid)(inputName)) {
-                throw new Error('On stickRebindOnPress(\'' + inputName + '\', ...):\n                first argument contains invalid characters');
+                throw new Error('On stickBindOnPress(\'' + inputName + '\', ...):\n                    first argument contains invalid characters');
             }
 
-            player.listenAxis(function (index1, index2) {
-                var findCallback = function findCallback(_ref4) {
+            player.listenAxis(function (indexesResult) {
+                var c = function c(_ref4) {
                     var indexes = _ref4.indexes;
-                    return indexes.includes(index1) && indexes.includes(index2);
+                    return (0, _tools.arraysEqual)(indexes, indexesResult);
                 };
+                var bindingIndex = (0, _tools.findKey)(c, state.sticks);
 
-                var bindingIndex = (0, _tools.findKey)(findCallback, player.stickBindings);
-
-                if (bindingIndex) {
-                    if (inputName !== bindingIndex) {
-                        if (allowDuplication) {
-                            player.stickBindings[inputName] = (0, _utils.makeStickBinding)(index1, index2);
-                        } else {
-                            var _binding2 = player.stickBindings[bindingIndex];
-                            player.stickBindings[bindingIndex] = player.stickBindings[inputName];
-                            player.stickBindings[inputName] = _binding2;
-                        }
-                    }
+                if (!allowDuplication && bindingIndex && state.sticks[inputName]) {
+                    player.swapSticks(inputName, bindingIndex);
                 } else {
-                    player.stickBindings[inputName] = (0, _utils.makeStickBinding)(index1, index2);
+                    player.setStick(inputName, indexesResult);
                 }
 
                 callback(bindingIndex);
             });
-        },
-        setAggregator: function setAggregator(aggregatorName, callback) {
-            if (!(0, _utils.nameIsValid)(aggregatorName)) {
-                throw new Error('On setAggregator(\'' + aggregatorName + '\', ...):\n                first argument contains invalid characters');
-            }
-            player.aggregators[aggregatorName] = { callback: callback, value: null };
-        },
-        removeAggregator: function removeAggregator(aggregatorName) {
-            player.aggregators = (0, _tools.omit)([aggregatorName], player.aggregators);
-        },
-        cleanAggregators: function cleanAggregators() {
-            player.aggregators = {};
-        },
-        setAlias: function setAlias(aliasName, inputs) {
-            if (!(0, _utils.nameIsValid)(aliasName)) {
-                throw new Error('On setAlias(\'' + aliasName + '\', ...): first argument contains invalid characters');
-            }
-            var inputList = typeof inputs === 'string' ? [inputs] : inputs;
-
-            if ((0, _tools.difference)(inputList, (0, _keys2.default)(player.buttons)).length === 0) {
-                player.buttonAliases[aliasName] = (0, _utils.addButtonAlias)(player.buttonAliases[aliasName], inputList);
-            } else if ((0, _tools.difference)(inputList, (0, _keys2.default)(player.sticks)).length === 0) {
-                var lengths = inputList.map(function (inputName) {
-                    return player.sticks[inputName].value.length;
-                });
-
-                if ((0, _tools.unique)(lengths).length === 1) {
-                    player.stickAliases[aliasName] = (0, _utils.addStickAlias)(player.stickAliases[aliasName], inputList);
-                } else {
-                    throw new Error('On setAlias(' + aliasName + ', [' + inputList.join(', ') + ']):\n                        all sticks specified did not have the same number of axes');
-                }
-            } else {
-                throw new Error('On setAlias(' + aliasName + ', [' + inputList.join(', ') + ']):\n                    either one of the inputs is void or it wasn\'t all a collection of just buttons or just sticks');
-            }
-        },
-        removeAlias: function removeAlias(aliasName) {
-            if ((0, _tools.includes)(aliasName, (0, _keys2.default)(player.buttonAliases))) {
-                player.buttonAliases = (0, _tools.omit)([aliasName], player.buttonAliases);
-            } else if ((0, _tools.includes)(aliasName, (0, _keys2.default)(player.stickAliases))) {
-                player.stickAliases = (0, _tools.omit)([aliasName], player.stickAliases);
-            } else {
-                throw new Error('On removeAlias(\'' + aliasName + '\'): Specified alias does not exist');
-            }
-        },
-        cleanAliases: function cleanAliases() {
-            player.buttonAliases = {};
-            player.stickAliases = {};
         },
         destroy: function destroy() {
             player.disconnect();
-            player.cleanBindings();
-            player.cleanAliases();
-            player.cleanAggregators();
-        },
-        parseGamepad: function parseGamepad(gamepad) {
-            var prevGamepad = player.parsedGamepad;
-
-            return {
-                buttons: gamepad.buttons.map(function (_ref5, index) {
-                    var value = _ref5.value;
-
-                    var previous = prevGamepad.buttons[index];
-                    var pressed = player.isButtonSignificant(value);
-
-                    return {
-                        pressed: pressed,
-                        justChanged: pressed !== (previous ? player.isButtonSignificant(previous.value) : false),
-                        value: value
-                    };
-                }),
-                axes: gamepad.axes
+            state.pad = {
+                buttons: [],
+                axes: []
             };
+            state.prevPad = {
+                buttons: [],
+                axes: []
+            };
+            player.clearMappers();
         },
         update: function update(gamepad) {
-            player.parsedGamepad = player.parseGamepad(gamepad);
-            player.updateButtons(player.parsedGamepad);
-            player.updateStick(player.parsedGamepad);
-            player.updateAliases();
-            player.updateAggregators(gamepad);
+            state.prevPad = state.pad;
+            state.pad = (0, _utils.parseGamepad)(gamepad, state.prevPad, threshold, clampThreshold);
+            state.mappersOnPoll = (0, _utils.updateMappers)(state.pad, state.prevPad, state.mappersOnPoll, player);
 
-            listenOptions = (0, _utils.updateListenOptions)(listenOptions, player.parsedGamepad, threshold);
-        },
-        getButtonValue: function getButtonValue() {
-            var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-            if (!clampThreshold) {
-                return value;
-            }
-
-            return !player.isButtonSignificant(value) ? 0 : value;
-        },
-        isButtonSignificant: function isButtonSignificant() {
-            var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-            return Math.abs(value) > threshold;
-        },
-        updateButtons: function updateButtons(gamepad) {
-            player.buttons = (0, _tools.mapValues)(function (binding) {
-                return binding.mapper(gamepad);
-            }, player.buttonBindings);
-        },
-        getStickValue: function getStickValue(stickValues) {
-            if (clampThreshold && !player.isStickSignificant(stickValues)) {
-                return stickValues.map(function () {
-                    return 0;
-                });
-            }
-
-            return stickValues;
-        },
-        isStickSignificant: function isStickSignificant(stickValues) {
-            return stickValues.findIndex(function (value) {
-                return Math.abs(value) >= threshold;
-            }) !== -1;
-        },
-        updateStick: function updateStick(gamepad) {
-            var prevStick = player.sticks;
-
-            player.sticks = (0, _tools.mapValues)(function (binding, inputName) {
-                var previous = prevStick[inputName];
-                var value = binding.mapper(gamepad, previous.inverts);
-                var pressed = player.isStickSignificant(value);
-
-                return {
-                    pressed: pressed,
-                    justChanged: pressed !== player.isStickSignificant(previous.value),
-                    value: player.getStickValue(value),
-                    inverts: previous.inverts
-                };
-            }, player.stickBindings);
-        },
-        updateAliases: function updateAliases() {
-            player.buttonAliases = (0, _tools.mapValues)(function (alias) {
-                var value = 0;
-
-                alias.inputs.forEach(function (aliasName) {
-                    if (player.buttons[aliasName].value > value) {
-                        value = player.buttons[aliasName].value;
-                    }
-                });
-
-                value = player.getButtonValue(value);
-                var pressed = player.isButtonSignificant(value);
-
-                return {
-                    pressed: pressed,
-                    justChanged: pressed !== player.isButtonSignificant(alias.value),
-                    value: value,
-                    inputs: alias.inputs
-                };
-            }, player.buttonAliases);
-
-            player.stickAliases = (0, _tools.mapValues)(function (alias) {
-                var counts = [];
-                var count = 0;
-
-                alias.inputs.forEach(function (aliasName) {
-                    if (player.sticks[aliasName].pressed) {
-                        counts = player.sticks[aliasName].value.map(function (v, i) {
-                            return v + (counts[i] || 0);
-                        });
-                        count += 1;
-                    }
-                });
-
-                var value = count === 0 ? player.sticks[alias.inputs[0]].value.map(function () {
-                    return 0;
-                }) : counts.map(function (v) {
-                    return v / count;
-                });
-                var pressed = player.isStickSignificant(value);
-
-                return {
-                    pressed: pressed,
-                    justChanged: pressed !== player.isStickSignificant(alias.value),
-                    value: value,
-                    inputs: alias.inputs
-                };
-            }, player.stickAliases);
-        },
-        updateAggregators: function updateAggregators(gamepad) {
-            var _this = this;
-
-            player.aggregators = (0, _tools.mapValues)(function (_ref6) {
-                var callback = _ref6.callback,
-                    value = _ref6.value;
-                return {
-                    callback: callback,
-                    value: callback(_this, value, gamepad)
-                };
-            }, player.aggregators);
+            listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, threshold);
         }
-    });
+    };
 
     return player;
 }
