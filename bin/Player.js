@@ -3,24 +3,31 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 exports.default = createPlayer;
 
 var _utils = require('./lib/utils');
 
 var _tools = require('./lib/tools');
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function createPlayer() {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        name = _ref.name,
-        _ref$threshold = _ref.threshold,
-        threshold = _ref$threshold === undefined ? 0.3 : _ref$threshold,
-        _ref$clampThreshold = _ref.clampThreshold,
-        clampThreshold = _ref$clampThreshold === undefined ? true : _ref$clampThreshold;
+    var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var listenOptions = null;
 
     var state = {
-        name: name,
+        connected: false,
+        gamepadId: null,
+
+        name: params.name || '',
+        threshold: params.threshold || 0.2,
+        clampThreshold: params.clampThreshold !== false,
         pad: {
             buttons: [],
             axes: []
@@ -29,19 +36,17 @@ function createPlayer() {
             buttons: [],
             axes: []
         },
-        mappers: {},
-        mappersOnPoll: {},
-        gamepadId: null,
-        connected: false,
+
         buttons: (0, _utils.getDefaultButtons)(),
-        sticks: (0, _utils.getDefaultSticks)()
+        sticks: (0, _utils.getDefaultSticks)(),
+        mappers: {}
     };
 
     var player = {
         getName: function getName() {
             return state.name;
         },
-        getGamepadId: function getGamepadId() {
+        getPadId: function getPadId() {
             return state.gamepadId;
         },
         isConnected: function isConnected() {
@@ -52,46 +57,130 @@ function createPlayer() {
             return state.pad;
         },
 
-        setMapper: function setMapper(mapperName, callback) {
-            var mapOnPoll = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-            if (!(0, _utils.nameIsValid)(mapperName)) {
-                throw new Error('On setMapper(\'' + mapperName + '\', ...):\n                    first argument contains invalid characters');
-            }
-            if (!mapOnPoll) {
-                state.mappers[mapperName] = callback;
-            } else {
-                state.mappersOnPoll[mapperName] = { callback: callback, value: null };
-            }
-        },
-        removeMapper: function removeMapper(mapperName) {
-            state.mappersOnPoll = (0, _tools.omit)([mapperName], state.mappersOnPoll);
-            state.mappers = (0, _tools.omit)([mapperName], state.mappers);
-        },
         clearMappers: function clearMappers() {
-            state.mappersOnPoll = {};
             state.mappers = {};
         },
-        mapper: function mapper(mapperName) {
-            if (state.mappersOnPoll[mapperName]) {
-                return state.mappersOnPoll[mapperName].value;
+        removeMapper: function removeMapper(mapperName) {
+            state.mappers = (0, _tools.omit)([mapperName], state.mappers);
+        },
+        update: function update(gamepad) {
+            state.prevPad = state.pad;
+            state.pad = (0, _utils.parseGamepad)(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+
+            listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, state.threshold);
+        },
+        getButtons: function getButtons() {
+            for (var _len = arguments.length, inputNames = Array(_len), _key = 0; _key < _len; _key++) {
+                inputNames[_key] = arguments[_key];
             }
 
-            return state.mappers[mapperName]({
-                pad: state.pad,
-                prevPad: state.prevPad,
-                player: player
-            });
-        },
-        button: function button(inputName) {
-            return (0, _utils.buttonMap)(state.pad, state.prevPad, state.buttons[inputName]);
-        },
-        stick: function stick(inputName) {
-            var _state$sticks$inputNa = state.sticks[inputName],
-                indexes = _state$sticks$inputNa.indexes,
-                inverts = _state$sticks$inputNa.inverts;
+            if (inputNames.length === 0) {
+                return (0, _tools.mapValues)(function (button) {
+                    return (0, _utils.buttonMap)(state.pad, state.prevPad, button);
+                }, state.buttons);
+            }
 
-            return (0, _utils.stickMap)(state.pad, state.prevPad, indexes, inverts, threshold);
+            if (inputNames.length === 1) {
+                return (0, _utils.buttonMap)(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+            }
+
+            var result = {};
+            inputNames.forEach(function (inputName) {
+                result[inputName] = (0, _utils.buttonMap)(state.pad, state.prevPad, state.buttons[inputName]);
+            });
+
+            return result;
+        },
+        getSticks: function getSticks() {
+            for (var _len2 = arguments.length, inputNames = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                inputNames[_key2] = arguments[_key2];
+            }
+
+            if (inputNames.length === 0) {
+                return (0, _tools.mapValues)(function (stick) {
+                    var indexes = stick.indexes,
+                        inverts = stick.inverts;
+
+                    return (0, _utils.stickMap)(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                }, state.sticks);
+            }
+
+            if (inputNames.length === 0) {
+                var _state$sticks$inputNa = state.sticks[inputNames[0]],
+                    _indexes = _state$sticks$inputNa.indexes,
+                    inverts = _state$sticks$inputNa.inverts;
+
+                return (0, _utils.stickMap)(state.pad, state.prevPad, _indexes, inverts, state.threshold);
+            }
+
+            var result = {};
+            inputNames.forEach(function (inputName) {
+                var _state$sticks$inputNa2 = state.sticks[inputName],
+                    indexes = _state$sticks$inputNa2.indexes,
+                    inverts = _state$sticks$inputNa2.inverts;
+
+                result[inputName] = (0, _utils.stickMap)(state.pad, state.prevPad, indexes, inverts, state.threshold);
+            });
+
+            return result;
+        },
+        getMappers: function getMappers() {
+            for (var _len3 = arguments.length, mapperNames = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                mapperNames[_key3] = arguments[_key3];
+            }
+
+            if (mapperNames.length === 0) {
+                return (0, _tools.mapValues)(function (mapper) {
+                    return mapper({
+                        pad: state.pad,
+                        prevPad: state.prevPad,
+                        player: player
+                    });
+                }, state.mappers);
+            }
+
+            if (mapperNames.length === 1) {
+                return state.mappers[mapperNames[0]]({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player: player
+                });
+            }
+
+            var result = {};
+            mapperNames.forEach(function (mapperName) {
+                result[mapperName] = state.mappers[mapperName]({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player: player
+                });
+            });
+
+            return result;
+        },
+        getButtonIndexes: function getButtonIndexes() {
+            var indexes = [];
+
+            for (var _len4 = arguments.length, inputNames = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+                inputNames[_key4] = arguments[_key4];
+            }
+
+            inputNames.forEach(function (inputName) {
+                return indexes.push.apply(indexes, (0, _toConsumableArray3.default)(state.buttons[inputName]));
+            });
+            return indexes;
+        },
+        getStickIndexes: function getStickIndexes() {
+            var indexes = [];
+
+            for (var _len5 = arguments.length, inputNames = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+                inputNames[_key5] = arguments[_key5];
+            }
+
+            inputNames.forEach(function (inputName) {
+                return indexes.push.apply(indexes, (0, _toConsumableArray3.default)(state.sticks[inputName].indexes));
+            });
+            return indexes;
         },
         setButton: function setButton(inputName, indexes) {
             if (!(0, _utils.nameIsValid)(inputName)) {
@@ -124,6 +213,29 @@ function createPlayer() {
                         return false;
                     })
                 };
+            }
+        },
+        setMapper: function setMapper(mapperName, callback) {
+            if (!(0, _utils.nameIsValid)(mapperName)) {
+                throw new Error('On setMapper(\'' + mapperName + '\', ...):\n                    first argument contains invalid characters');
+            }
+
+            state.mappers[mapperName] = callback;
+        },
+        invertSticks: function invertSticks(inverts) {
+            for (var _len6 = arguments.length, inputNames = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+                inputNames[_key6 - 1] = arguments[_key6];
+            }
+
+            if (inputNames.length > 0) {
+                inputNames.forEach(function (inputName) {
+                    var stick = state.sticks[inputName];
+                    if (stick.inverts.length === inverts.length) {
+                        stick.inverts = inverts;
+                    } else {
+                        throw new Error('On invertStick(inverts, [..., ' + inputName + ', ...]):\n                            given argument inverts\' length does not match \'' + inputName + '\' axis\' length');
+                    }
+                });
             }
         },
         swapButtons: function swapButtons(btn1, btn2) {
@@ -163,13 +275,13 @@ function createPlayer() {
         listenButton: function listenButton(callback) {
             var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
-            var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-                _ref2$waitFor = _ref2.waitFor,
-                waitFor = _ref2$waitFor === undefined ? [1, 'polls'] : _ref2$waitFor,
-                _ref2$consecutive = _ref2.consecutive,
-                consecutive = _ref2$consecutive === undefined ? false : _ref2$consecutive,
-                _ref2$allowOffset = _ref2.allowOffset,
-                allowOffset = _ref2$allowOffset === undefined ? true : _ref2$allowOffset;
+            var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+                _ref$waitFor = _ref.waitFor,
+                waitFor = _ref$waitFor === undefined ? [1, 'polls'] : _ref$waitFor,
+                _ref$consecutive = _ref.consecutive,
+                consecutive = _ref$consecutive === undefined ? false : _ref$consecutive,
+                _ref$allowOffset = _ref.allowOffset,
+                allowOffset = _ref$allowOffset === undefined ? true : _ref$allowOffset;
 
             listenOptions = {
                 callback: callback,
@@ -185,13 +297,13 @@ function createPlayer() {
         listenAxis: function listenAxis(callback) {
             var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
-            var _ref3 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-                _ref3$waitFor = _ref3.waitFor,
-                waitFor = _ref3$waitFor === undefined ? [100, 'ms'] : _ref3$waitFor,
-                _ref3$consecutive = _ref3.consecutive,
-                consecutive = _ref3$consecutive === undefined ? true : _ref3$consecutive,
-                _ref3$allowOffset = _ref3.allowOffset,
-                allowOffset = _ref3$allowOffset === undefined ? true : _ref3$allowOffset;
+            var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+                _ref2$waitFor = _ref2.waitFor,
+                waitFor = _ref2$waitFor === undefined ? [100, 'ms'] : _ref2$waitFor,
+                _ref2$consecutive = _ref2.consecutive,
+                consecutive = _ref2$consecutive === undefined ? true : _ref2$consecutive,
+                _ref2$allowOffset = _ref2.allowOffset,
+                allowOffset = _ref2$allowOffset === undefined ? true : _ref2$allowOffset;
 
             listenOptions = {
                 callback: callback,
@@ -231,8 +343,8 @@ function createPlayer() {
             }
 
             player.listenAxis(function (indexesResult) {
-                var c = function c(_ref4) {
-                    var indexes = _ref4.indexes;
+                var c = function c(_ref3) {
+                    var indexes = _ref3.indexes;
                     return (0, _tools.arraysEqual)(indexes, indexesResult);
                 };
                 var bindingIndex = (0, _tools.findKey)(c, state.sticks);
@@ -257,13 +369,6 @@ function createPlayer() {
                 axes: []
             };
             player.clearMappers();
-        },
-        update: function update(gamepad) {
-            state.prevPad = state.pad;
-            state.pad = (0, _utils.parseGamepad)(gamepad, state.prevPad, threshold, clampThreshold);
-            state.mappersOnPoll = (0, _utils.updateMappers)(state.pad, state.prevPad, state.mappersOnPoll, player);
-
-            listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, threshold);
         }
     };
 

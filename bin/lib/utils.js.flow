@@ -2,11 +2,11 @@
 import type {
     IParsedGamepad, IListenOptions,
     IButtonValue, IStickValue, IStickInverts,
-    IButtonState, IStickState, IMapperOnPoll, IPlayer
+    IButtonState, IStickState
 } from '../types';
 
 import {
-    findIndexes, isConsecutive, mapValues
+    findIndexes, isConsecutive
 } from './tools';
 
 export function getRawGamepads(): Gamepad[] {
@@ -199,20 +199,4 @@ export function stickMap(
         justChanged: pressed !== prevPressed,
         inverts
     };
-}
-
-export function updateMappers(
-    pad: IParsedGamepad,
-    prevPad: IParsedGamepad,
-    mappersOnPoll: { [key: string]: IMapperOnPoll },
-    player: IPlayer
-): { [key: string]: IMapperOnPoll } {
-    return mapValues((mapper, name) => {
-        const { callback } = mapper;
-
-        return {
-            value: callback({ pad, prevPad, prevValue: mappersOnPoll[name].value, player }),
-            callback
-        };
-    }, mappersOnPoll);
 }

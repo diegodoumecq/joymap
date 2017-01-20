@@ -23,7 +23,6 @@ exports.getStickValue = getStickValue;
 exports.parseGamepad = parseGamepad;
 exports.buttonMap = buttonMap;
 exports.stickMap = stickMap;
-exports.updateMappers = updateMappers;
 
 var _tools = require('./tools');
 
@@ -220,16 +219,4 @@ function stickMap(pad, prevPad, indexMaps, inverts, threshold) {
         justChanged: pressed !== prevPressed,
         inverts: inverts
     };
-}
-
-function updateMappers(pad, prevPad, mappersOnPoll, player) {
-    return (0, _tools.mapValues)(function (mapper, name) {
-        var callback = mapper.callback;
-
-
-        return {
-            value: callback({ pad: pad, prevPad: prevPad, prevValue: mappersOnPoll[name].value, player: player }),
-            callback: callback
-        };
-    }, mappersOnPoll);
 }

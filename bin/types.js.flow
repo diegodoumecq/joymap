@@ -3,6 +3,7 @@ export type IButtonValue = number;
 export type IButtonIndexes = number[];
 
 export type IStickValue = number[];
+// #FlowExpectError Array of array of numbers IS a valid type ... no idea why it fails spectacularly
 export type IStickIndexes = number[][];
 export type IStickInverts = boolean[];
 
@@ -22,10 +23,6 @@ export type IButton = IButtonIndexes;
 export type IStick = {
     indexes: IStickIndexes,
     inverts: IStickInverts
-};
-export type IMapperOnPoll = {
-    callback: Function,
-    value: any
 };
 
 export type IParsedGamepad = {
@@ -51,35 +48,42 @@ export type IListenOptions = {
 };
 
 export type IPlayerState = {
+    gamepadId: ?string,
+    connected: boolean,
+
     name: string,
+    threshold: number,
+    clampThreshold: boolean,
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
 
-    sticks: { [key: string]: IStick },
     buttons: { [key: string]: IButton },
-    mappers: { [key: string]: Function },
-    mappersOnPoll: { [key: string]: IMapperOnPoll },
-
-    gamepadId: ?string,
-    connected: boolean
+    sticks: { [key: string]: IStick },
+    mappers: { [key: string]: Function }
 };
 
 export type IPlayer = {
     isConnected: () => boolean,
     getName: () => string,
-    getGamepadId: () => ?string,
+    getPadId: () => ?string,
     getParsedGamepad: () => IParsedGamepad,
 
-    setMapper: (mapperName: string, callback: Function, mapOnPoll?: boolean) => void,
     removeMapper: (mapperName: string) => void,
     clearMappers: () => void,
+    update: (gamepad: Gamepad) => void,
 
-    button: (name: string) => IButtonState,
-    stick: (name: string) => IStickState,
-    mapper: (name: string) => any,
+    getButtons: (...names: string[]) => IButtonState | { [index: string]: IButtonState },
+    getSticks: (...names: string[]) => IStickState | { [index: string]: IStickState },
+    getMappers: (...names: string[]) => { [index: string]: any} | any,
+
+    getButtonIndexes: (...inputNames: string[]) => IButtonIndexes,
+    getStickIndexes: (...inputNames: string[]) => IStickIndexes,
+
     setButton: (inputName: string, indexes: number | IButtonIndexes) => void,
     setStick: (inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void,
+    setMapper: (mapperName: string, callback: Function) => void,
 
+    invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
     swapButtons: (btn1: string, btn2: string) => void,
     swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
 
@@ -87,26 +91,43 @@ export type IPlayer = {
     reconnect: () => void,
     connect: (gamepadId: string) => void,
 
+    cancelListen: () => void,
     listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
     listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    cancelListen: () => void,
     buttonBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
     stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
 
-    destroy: () => void,
-    update: (gamepad: Gamepad) => void
+    destroy: () => void
+};
+
+export type IJoyMapState = {
+    threshold: number,
+    clampThreshold: boolean,
+    onPoll: () => void,
+    autoConnect: 'manual' | 'auto',
+    isSupported: boolean,
+    gamepads: Gamepad[],
+    players: IPlayer[]
 };
 
 export type IJoyMap = {
     isSupported: () => boolean,
-    getGamepads: () => Gamepad[],
-    getPlayers: () => IPlayer[],
     start: () => void,
     stop: () => void,
-    getUnusedGamepadIds: () => string[],
+
+    setThreshold: (threshold: number) => void,
+    setClampThreshold: (clampThreshold: boolean) => void,
+    setOnPoll: (onPoll: Function) => void,
+    setAutoConnect: (autoConnect: 'auto' | 'manual') => void,
+
+    getGamepads: () => Gamepad[],
+    getPlayers: () => IPlayer[],
+    getUnusedPadIds: () => string[],
+    getUnusedPadId: () => string | null,
+
     setPlayers: (jsonString: string) => void,
     addPlayer: (name: string) => IPlayer,
     removePlayer: (player: IPlayer) => void,
-    cleanPlayers: () => void,
+    clearPlayers: () => void,
     poll: () => void
 };
