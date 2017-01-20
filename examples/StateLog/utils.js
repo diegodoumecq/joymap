@@ -39,16 +39,3 @@ export function stringifyInputs(inputs) {
         return result;
     }, '', Object.keys(inputs)).slice(0, -1);
 }
-
-// Utility function to print the state of all inputs of a type
-export function stringifyAggregators(aggregators) {
-    return reduce((result, aggregatorName) => {
-        const stuff = aggregators[aggregatorName];
-
-        if (!!stuff && !!stuff.value) {
-            return `${result} ${aggregatorName}: ${stuff.value},`;
-        }
-
-        return result;
-    }, '', Object.keys(aggregators)).slice(0, -1);
-}

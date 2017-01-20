@@ -34,7 +34,7 @@ gamepadImage.src = 'gamepad.png';
 function drawCharacter(ctx, character) {
     const { x, y } = character;
 
-    const angle = !character.player.getAggregators().AnyButton.value ? character.angle : character.angle + Math.PI;
+    const angle = !character.player.getMappers('AnyButton') ? character.angle : character.angle + Math.PI;
 
     // Rotate whole canvas
     ctx.translate(x, y);
@@ -53,7 +53,7 @@ function drawCharacter(ctx, character) {
 }
 
 function updateCharacter(character) {
-    const { L, R } = character.player.getSticks();
+    const { L, R } = character.player.getSticks('L', 'R');
 
     // Move the character itself
     character.x += L.value[0] * 5;
@@ -86,7 +86,7 @@ const joyMap = createJoyMap({
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI
                 };
-                c.player.setAggregator('AnyButton', ({ buttons }) => some('pressed', buttons));
+                c.player.setMapper('AnyButton', ({ pad }) => some('pressed', pad.buttons));
                 characters.push(c);
             }, unusedIds);
         }

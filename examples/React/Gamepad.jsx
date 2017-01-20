@@ -34,9 +34,8 @@ class Gamepad extends React.Component {
 
     renderStick(inputName) {
         const { pressedColor } = this.props;
-        const sticks = this.props.player.getSticks();
-        const buttons = this.props.player.getButtons();
-        const [x, y] = sticks[inputName].value;
+        const [x, y] = this.props.player.getSticks(inputName).value;
+        const { pressed } = this.props.player.getButtons(`${inputName}3`);
 
         return (
             <div
@@ -55,13 +54,13 @@ class Gamepad extends React.Component {
                 }}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
-                    backgroundColor: buttons[`${inputName}3`].pressed ? pressedColor : ''
+                    backgroundColor: pressed ? pressedColor : ''
                 }} />);
     }
 
     renderDigital(inputName) {
         const { pressedColor } = this.props;
-        const { pressed } = this.props.player.getButtons()[inputName];
+        const { pressed } = this.props.player.getButtons(inputName);
 
         return (
             <div
@@ -84,7 +83,7 @@ class Gamepad extends React.Component {
     }
 
     renderShoulder(inputName) {
-        const { value } = this.props.player.getButtons()[inputName];
+        const { value } = this.props.player.getButtons(inputName);
 
         return (
             <div

@@ -1,7 +1,6 @@
 import { join, compact } from 'lodash/fp';
 import {
-    stringifyInputs, stringifyAggregators,
-    countPressed, renderRows
+    stringifyInputs, countPressed, renderRows
 } from './utils';
 
 import '../main.styl';
@@ -25,23 +24,19 @@ document.getElementById('app').innerHTML = `
 
 // Flags used to show/hide output separated by input type
 const showButtons = true;
-const showButtonAliases = true;
 const showSticks = true;
-const showStickAliases = true;
-const showAggregators = true;
+const showMappers = true;
 
 // Initial joyMap setup
 const joyMap = createJoyMap({
     threshold: 0.2,
     onPoll() {
         const jo = joyMap.getPlayers()[0];
-        // On each frame render to HTML and console.log the state of buttons, sticks, aliases and aggregators
+        // On each frame render to HTML and console.log the state of buttons, sticks and mappers
         const compilation = [
             !showButtons ? '' : stringifyInputs(jo.getButtons()),
-            !showButtonAliases ? '' : stringifyInputs(jo.getButtonAliases()),
             !showSticks ? '' : stringifyInputs(jo.getSticks()),
-            !showStickAliases ? '' : stringifyInputs(jo.getStickAliases()),
-            !showAggregators ? '' : stringifyAggregators(jo.getAggregators())
+            !showMappers ? '' : stringifyInputs(jo.getMappers())
         ];
 
         const stringOutput = join(', ', compact(compilation));
@@ -57,25 +52,15 @@ const joyMap = createJoyMap({
                     compilation: compilation[0],
                     displayName: 'Buttons'
                 },
-                !showButtonAliases ? null : {
-                    inputType: 'button-aliases',
-                    compilation: compilation[1],
-                    displayName: 'ButtonAliases'
-                },
                 !showSticks ? null : {
                     inputType: 'sticks',
-                    compilation: compilation[2],
+                    compilation: compilation[1],
                     displayName: 'Sticks'
                 },
-                !showStickAliases ? null : {
-                    inputType: 'stick-aliases',
-                    compilation: compilation[3],
-                    displayName: 'StickAliases'
-                },
-                !showAggregators ? null : {
-                    inputType: 'aggregators',
-                    compilation: compilation[4],
-                    displayName: 'Aggregators'
+                !showMappers ? null : {
+                    inputType: 'mappers',
+                    compilation: compilation[2],
+                    displayName: 'Mappers'
                 }
             ]));
         }
@@ -84,33 +69,26 @@ const joyMap = createJoyMap({
 
 const jo = joyMap.addPlayer('Joustine');
 
-// Set aliases
-jo.setAlias('Jump', ['A', 'X', 'Y', 'L2', 'R2']);
-jo.setAlias('Shoot', 'B');
-jo.setAlias('LookUp', 'dpadUp');
-jo.setAlias('LookDown', 'dpadDown');
-jo.setAlias('LookLeft', 'dpadLeft');
-jo.setAlias('LookRight', 'dpadRight');
-jo.setAlias('StickAverage', ['L', 'R']);
+// Set custom buttons
+jo.setButton('Jump', jo.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
+jo.setButton('Shoot', jo.getButtonIndexes('B'));
+jo.setButton('LookUp', jo.getButtonIndexes('dpadUp'));
+jo.setButton('LookDown', jo.getButtonIndexes('dpadDown'));
+jo.setButton('LookLeft', jo.getButtonIndexes('dpadLeft'));
+jo.setButton('LookRight', jo.getButtonIndexes('dpadRight'));
+jo.setButton('StickAverage', jo.getStickIndexes('L', 'R'));
 
-// Set aggregators
-jo.setAggregator('Point', player => player.sticks.R.pressed);
-jo.setAggregator('MovePoint', (player, previousValue, rawGamepad) => { // eslint-disable-line
-    return countPressed(player.sticks);
-});
-jo.setAggregator('CountFace', (player, previousValue, rawGamepad) => { // eslint-disable-line
-    const { A, B, X, Y } = player.buttons;
-    return countPressed([A, B, X, Y]);
-});
-jo.setAggregator('CountAll', (player, previousValue, rawGamepad) => { // eslint-disable-line
-    const buttonCount = countPressed(player.buttons);
-    const buttonAliasCount = countPressed(player.buttonAliases);
-    const stickCount = countPressed(player.sticks);
-    const stickAliasCount = countPressed(player.stickAliases);
-    const total = buttonCount + stickCount + buttonAliasCount + stickAliasCount;
+// Set mappers
+jo.setMapper('Point', ({ player }) => player.getSticks('R').pressed);
+jo.setMapper('MovePoint', ({ player }) => countPressed(player.getSticks()));
+jo.setMapper('CountFace', ({ player }) => countPressed(player.getButtons('A', 'B', 'X', 'Y')));
+jo.setMapper('CountAll', ({ pad, player }) => {
+    const buttonCount = countPressed(pad.buttons);
+    const stickCount = countPressed(player.getSticks());
+    const total = buttonCount + stickCount;
 
     if (total > 0) {
-        return `${total}(Btn:${buttonCount} Sticks:${stickCount} Aliases:${buttonAliasCount + stickAliasCount})`;
+        return `${total}(Btn:${buttonCount} Sticks:${stickCount})`;
     }
 
     return null;
