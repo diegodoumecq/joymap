@@ -56,7 +56,7 @@ class ReactExample extends React.Component {
                                 backgroundColor={color}
                                 pressedColor={`#${tinycolor(color).darken(20).toHex()}`}
                                 player={player}>
-                                <h2>{player.getGamepadId() || 'Player has no gamepad associated'}</h2>
+                                <h2>{player.getPadId() || 'Player has no gamepad associated'}</h2>
                             </Gamepad>);
                     }, this.joyMap.getPlayers())}
                 </section>

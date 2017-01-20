@@ -35,11 +35,11 @@ Run **yarn add joymap**
   * **start() => void**: calls **poll()** using requestAnimationFrame
   * **stop() => void**: Stops calling **poll()**
   * **poll() => void**: Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
-  * **getUnusedGamepadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
+  * **getUnusedPadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
   * **setPlayers(jsonString) => void**: [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
   * **addPlayer(name) => player**: Create a new Player, add it to joymap.players[name] and return it
   * **removePlayer(player) => void**: Remove a Player
-  * **cleanPlayers() => void**: Remove all the players
+  * **clearPlayers() => void**: Remove all the players
 
 ### Initialization and usage
 

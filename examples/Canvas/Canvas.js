@@ -76,7 +76,7 @@ const joyMap = createJoyMap({
         // Draw background color, clearing the canvas
         ctx.fillStyle = '#EEE';
         ctx.fillRect(0, 0, SIZE.width, SIZE.height);
-        const unusedIds = joyMap.getUnusedGamepadIds();
+        const unusedIds = joyMap.getUnusedPadIds();
 
         if (unusedIds.length > 0) {
             forEach(() => {
@@ -92,10 +92,7 @@ const joyMap = createJoyMap({
         }
 
         forEach(c => {
-            if (!c.player.isConnected()) {
-                pull(c, characters);
-                joyMap.removePlayer(c.player);
-            } else {
+            if (c.player.isConnected()) {
                 updateCharacter(c);
                 drawCharacter(ctx, c);
             }
