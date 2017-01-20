@@ -5,21 +5,7 @@ import {
 } from './lib/tools';
 
 import createPlayer from './Player';
-import type { IPlayer } from './Player';
-
-export type IJoyMap = {
-    isSupported: () => boolean,
-    getGamepads: () => Gamepad[],
-    getPlayers: () => IPlayer[],
-    start: () => void,
-    stop: () => void,
-    getUnusedGamepadIds: () => string[],
-    setPlayers: (jsonString: string) => void,
-    addPlayer: (name: string) => IPlayer,
-    removePlayer: (player: IPlayer) => void,
-    cleanPlayers: () => void,
-    poll: () => void
-};
+import type { IPlayer, IJoyMap } from './types';
 
 type IParams = {
     threshold: number,

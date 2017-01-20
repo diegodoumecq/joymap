@@ -10,41 +10,10 @@ import {
 } from './lib/tools';
 
 import type {
-    IParsedGamepad, IStickState, IButtonState, IButtonIndexes, IStickIndexes, IStickInverts,
-    IListenOptions, IListenParams, IPlayerState
+    IStickState, IButtonState, IButtonIndexes,
+    IStickIndexes, IStickInverts, IListenOptions,
+    IListenParams, IPlayerState, IPlayer
 } from './types';
-
-export type IPlayer = {
-    isConnected: () => boolean,
-    getName: () => string,
-    getGamepadId: () => ?string,
-    getParsedGamepad: () => IParsedGamepad,
-
-    setMapper: (mapperName: string, callback: Function, automatic?: boolean) => void,
-    removeMapper: (mapperName: string) => void,
-    clearMappers: () => void,
-
-    button: (name: string) => IButtonState,
-    stick: (name: string) => IStickState,
-    setButton: (inputName: string, indexes: number | IButtonIndexes) => void,
-    setStick: (inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void,
-
-    swapButtons: (btn1: string, btn2: string) => void,
-    swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
-
-    disconnect: () => void,
-    reconnect: () => void,
-    connect: (gamepadId: string) => void,
-
-    listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    cancelListen: () => void,
-    buttonBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
-    stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
-
-    destroy: () => void,
-    update: (gamepad: Gamepad) => void
-};
 
 export default function createPlayer({
     name,
@@ -64,6 +33,7 @@ export default function createPlayer({
             axes: []
         },
         mappers: {},
+        mappersOnPoll: {},
         gamepadId: null,
         connected: false,
         buttons: getDefaultButtons(),
@@ -77,20 +47,38 @@ export default function createPlayer({
 
         getParsedGamepad: () => state.pad,
 
-        setMapper(mapperName: string, callback: Function, automatic: boolean = false) {
+        setMapper(mapperName: string, callback: Function, mapOnPoll: boolean = false) {
             if (!nameIsValid(mapperName)) {
                 throw new Error(`On setMapper('${mapperName}', ...):
-                first argument contains invalid characters`);
+                    first argument contains invalid characters`);
             }
-            state.mappers[mapperName] = { callback, value: null, automatic };
+            if (!mapOnPoll) {
+                state.mappers[mapperName] = callback;
+            } else {
+                state.mappersOnPoll[mapperName] = { callback, value: null };
+            }
         },
 
         removeMapper(mapperName: string) {
+            state.mappersOnPoll = omit([mapperName], state.mappersOnPoll);
             state.mappers = omit([mapperName], state.mappers);
         },
 
         clearMappers() {
+            state.mappersOnPoll = {};
             state.mappers = {};
+        },
+
+        mapper(mapperName: string) {
+            if (state.mappersOnPoll[mapperName]) {
+                return state.mappersOnPoll[mapperName].value;
+            }
+
+            return state.mappers[mapperName]({
+                pad: state.pad,
+                prevPad: state.prevPad,
+                player
+            });
         },
 
         button(inputName: string): IButtonState {
@@ -123,10 +111,12 @@ export default function createPlayer({
                     argument indexes is an empty array`);
             }
 
-            if (Array.isArray(indexes[0])) {
+            const firstValue: number | number[] = indexes[0];
+
+            if (Array.isArray(firstValue)) {
                 state.sticks[inputName] = {
                     indexes,
-                    inverts: inverts || indexes[0].map(() => false)
+                    inverts: inverts || firstValue.map(() => false)
                 };
             } else {
                 state.sticks[inputName] = {
@@ -151,10 +141,11 @@ export default function createPlayer({
                 const replacement = sticks[btn1];
                 sticks[btn1] = sticks[btn2];
                 sticks[btn2] = replacement;
+            } else {
+                const replacement = sticks[btn1].indexes;
+                sticks[btn1].indexes = sticks[btn2].indexes;
+                sticks[btn2].indexes = replacement;
             }
-            const replacement = sticks[btn1].indexes;
-            sticks[btn1].indexes = sticks[btn2].indexes;
-            sticks[btn2].indexes = replacement;
         },
 
         disconnect() {
@@ -241,7 +232,7 @@ export default function createPlayer({
                     first argument contains invalid characters`);
             }
 
-            player.listenAxis((indexesResult: number[]) => {
+            player.listenAxis((indexesResult: IStickIndexes) => {
                 const c: Function = ({ indexes }) => arraysEqual(indexes, indexesResult);
                 const bindingIndex: string | null = findKey(c, state.sticks);
 
@@ -271,7 +262,7 @@ export default function createPlayer({
         update(gamepad: Gamepad) {
             state.prevPad = state.pad;
             state.pad = parseGamepad(gamepad, state.prevPad, threshold, clampThreshold);
-            state.mappers = updateMappers(state.pad, state.prevPad, state.mappers);
+            state.mappersOnPoll = updateMappers(state.pad, state.prevPad, state.mappersOnPoll, player);
 
             listenOptions = updateListenOptions(listenOptions, state.pad, threshold);
         }
