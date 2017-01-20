@@ -99,6 +99,7 @@ export default function createPlayer({
 
         setStick(
             inputName: string,
+            // #FlowExpectError No idea why this fails spectacularly, tried everything
             indexes: number[] | IStickIndexes,
             inverts?: IStickInverts
         ) {

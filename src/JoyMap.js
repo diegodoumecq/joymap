@@ -7,19 +7,17 @@ import {
 import createPlayer from './Player';
 import type { IPlayer, IJoyMap } from './types';
 
-type IParams = {
-    threshold: number,
-    clampThreshold: boolean,
-    onPoll: () => void,
-    playerHandling: 'manual' | 'auto'
-};
-
 export default function createJoyMap({
     threshold = 0.2,
     clampThreshold = true,
     onPoll = noop,
     playerHandling = 'auto'
-}: IParams = {}) {
+}: {
+    threshold: number,
+    clampThreshold: boolean,
+    onPoll: () => void,
+    playerHandling: 'manual' | 'auto'
+} = {}) {
     const isSupported: boolean = navigator && isFunction(navigator.getGamepads);
 
     let animationFrameRequestId: number | null = null;

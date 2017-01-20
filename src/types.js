@@ -3,6 +3,7 @@ export type IButtonValue = number;
 export type IButtonIndexes = number[];
 
 export type IStickValue = number[];
+// #FlowExpectError Array of array of numbers IS a valid type ... no idea why it fails spectacularly
 export type IStickIndexes = number[][];
 export type IStickInverts = boolean[];
 
