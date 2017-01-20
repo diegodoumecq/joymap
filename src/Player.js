@@ -2,11 +2,11 @@
 import {
     updateListenOptions, nameIsValid,
     getDefaultButtons, getDefaultSticks, parseGamepad,
-    updateMappers, stickMap, buttonMap
+    stickMap, buttonMap
 } from './lib/utils';
 
 import {
-    findKey, omit, arraysEqual
+    findKey, omit, arraysEqual, mapValues
 } from './lib/tools';
 
 import type {
@@ -33,7 +33,6 @@ export default function createPlayer({
             axes: []
         },
         mappers: {},
-        mappersOnPoll: {},
         gamepadId: null,
         connected: false,
         buttons: getDefaultButtons(),
@@ -47,47 +46,99 @@ export default function createPlayer({
 
         getParsedGamepad: () => state.pad,
 
-        setMapper(mapperName: string, callback: Function, mapOnPoll: boolean = false) {
-            if (!nameIsValid(mapperName)) {
-                throw new Error(`On setMapper('${mapperName}', ...):
-                    first argument contains invalid characters`);
-            }
-            if (!mapOnPoll) {
-                state.mappers[mapperName] = callback;
-            } else {
-                state.mappersOnPoll[mapperName] = { callback, value: null };
-            }
-        },
-
-        removeMapper(mapperName: string) {
-            state.mappersOnPoll = omit([mapperName], state.mappersOnPoll);
-            state.mappers = omit([mapperName], state.mappers);
-        },
-
         clearMappers() {
-            state.mappersOnPoll = {};
             state.mappers = {};
         },
 
-        mapper(mapperName: string) {
-            if (state.mappersOnPoll[mapperName]) {
-                return state.mappersOnPoll[mapperName].value;
+        removeMapper(mapperName: string) {
+            state.mappers = omit([mapperName], state.mappers);
+        },
+
+        update(gamepad: Gamepad) {
+            state.prevPad = state.pad;
+            state.pad = parseGamepad(gamepad, state.prevPad, threshold, clampThreshold);
+
+            listenOptions = updateListenOptions(listenOptions, state.pad, threshold);
+        },
+
+        getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
+            if (inputNames.length === 0) {
+                return mapValues(button => buttonMap(state.pad, state.prevPad, button), state.buttons);
             }
 
-            return state.mappers[mapperName]({
-                pad: state.pad,
-                prevPad: state.prevPad,
-                player
+            if (inputNames.length === 1) {
+                return buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+            }
+
+            const result = {};
+            inputNames.forEach(inputName => {
+                result[inputName] = buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
             });
+
+            return result;
         },
 
-        button(inputName: string): IButtonState {
-            return buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
+        getSticks(...inputNames: string[]): IStickState | { [index: string]: IStickState } {
+            if (inputNames.length === 0) {
+                return mapValues(stick => {
+                    const { indexes, inverts } = stick;
+                    return stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+                }, state.sticks);
+            }
+
+            if (inputNames.length === 0) {
+                const { indexes, inverts } = state.sticks[inputNames[0]];
+                return stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+            }
+
+            const result = {};
+            inputNames.forEach(inputName => {
+                const { indexes, inverts } = state.sticks[inputName];
+                result[inputName] = stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+            });
+
+            return result;
         },
 
-        stick(inputName: string): IStickState {
-            const { indexes, inverts } = state.sticks[inputName];
-            return stickMap(state.pad, state.prevPad, indexes, inverts, threshold);
+        getMappers(...mapperNames: string[]): any | { [index: string]: any } {
+            if (mapperNames.length === 0) {
+                return mapValues(mapper => mapper({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player
+                }), state.mappers);
+            }
+
+            if (mapperNames.length === 1) {
+                return state.mappers[mapperNames[0]]({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player
+                });
+            }
+
+            const result = {};
+            mapperNames.forEach(mapperName => {
+                result[mapperName] = state.mappers[mapperName]({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player
+                });
+            });
+
+            return result;
+        },
+
+        getButtonIndexes(...inputNames: string[]): IButtonIndexes {
+            const indexes = [];
+            inputNames.forEach(inputName => indexes.push(...state.buttons[inputName]));
+            return indexes;
+        },
+
+        getStickIndexes(...inputNames: string[]): IStickIndexes {
+            const indexes = [];
+            inputNames.forEach(inputName => indexes.push(...state.sticks[inputName].indexes));
+            return indexes;
         },
 
         setButton(inputName: string, indexes: number | IButtonIndexes) {
@@ -124,6 +175,29 @@ export default function createPlayer({
                     indexes: [indexes],
                     inverts: inverts || indexes.map(() => false)
                 };
+            }
+        },
+
+        setMapper(mapperName: string, callback: Function) {
+            if (!nameIsValid(mapperName)) {
+                throw new Error(`On setMapper('${mapperName}', ...):
+                    first argument contains invalid characters`);
+            }
+
+            state.mappers[mapperName] = callback;
+        },
+
+        invertSticks(inverts: IStickInverts, ...inputNames: string[]) {
+            if (inputNames.length > 0) {
+                inputNames.forEach(inputName => {
+                    const stick = state.sticks[inputName];
+                    if (stick.inverts.length === inverts.length) {
+                        stick.inverts = inverts;
+                    } else {
+                        throw new Error(`On invertStick(inverts, [..., ${inputName}, ...]):
+                            given argument inverts' length does not match '${inputName}' axis' length`);
+                    }
+                });
             }
         },
 
@@ -258,14 +332,6 @@ export default function createPlayer({
                 axes: []
             };
             player.clearMappers();
-        },
-
-        update(gamepad: Gamepad) {
-            state.prevPad = state.pad;
-            state.pad = parseGamepad(gamepad, state.prevPad, threshold, clampThreshold);
-            state.mappersOnPoll = updateMappers(state.pad, state.prevPad, state.mappersOnPoll, player);
-
-            listenOptions = updateListenOptions(listenOptions, state.pad, threshold);
         }
     };
 

@@ -200,19 +200,3 @@ export function stickMap(
         inverts
     };
 }
-
-export function updateMappers(
-    pad: IParsedGamepad,
-    prevPad: IParsedGamepad,
-    mappersOnPoll: { [key: string]: IMapperOnPoll },
-    player: IPlayer
-): { [key: string]: IMapperOnPoll } {
-    return mapValues((mapper, name) => {
-        const { callback } = mapper;
-
-        return {
-            value: callback({ pad, prevPad, prevValue: mappersOnPoll[name].value, player }),
-            callback
-        };
-    }, mappersOnPoll);
-}

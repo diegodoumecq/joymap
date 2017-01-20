@@ -59,7 +59,6 @@ export type IPlayerState = {
     sticks: { [key: string]: IStick },
     buttons: { [key: string]: IButton },
     mappers: { [key: string]: Function },
-    mappersOnPoll: { [key: string]: IMapperOnPoll },
 
     gamepadId: ?string,
     connected: boolean
@@ -71,16 +70,22 @@ export type IPlayer = {
     getGamepadId: () => ?string,
     getParsedGamepad: () => IParsedGamepad,
 
-    setMapper: (mapperName: string, callback: Function, mapOnPoll?: boolean) => void,
     removeMapper: (mapperName: string) => void,
     clearMappers: () => void,
+    update: (gamepad: Gamepad) => void,
 
-    button: (name: string) => IButtonState,
-    stick: (name: string) => IStickState,
-    mapper: (name: string) => any,
+    getButtons: (...names: string[]) => IButtonState | { [index: string]: IButtonState },
+    getSticks: (...names: string[]) => IStickState | { [index: string]: IStickState },
+    getMappers: (...names: string[]) => { [index: string]: any} | any,
+
+    getButtonIndexes: (...inputNames: string[]) => IButtonIndexes,
+    getStickIndexes: (...inputNames: string[]) => IStickIndexes,
+
     setButton: (inputName: string, indexes: number | IButtonIndexes) => void,
     setStick: (inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void,
+    setMapper: (mapperName: string, callback: Function) => void,
 
+    invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
     swapButtons: (btn1: string, btn2: string) => void,
     swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
 
@@ -88,14 +93,13 @@ export type IPlayer = {
     reconnect: () => void,
     connect: (gamepadId: string) => void,
 
+    cancelListen: () => void,
     listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
     listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    cancelListen: () => void,
     buttonBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
     stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
 
-    destroy: () => void,
-    update: (gamepad: Gamepad) => void
+    destroy: () => void
 };
 
 export type IJoyMap = {
