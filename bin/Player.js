@@ -55,12 +55,11 @@ function createPlayer() {
         disconnect: function disconnect() {
             state.connected = false;
         },
-        reconnect: function reconnect() {
-            state.connected = true;
-        },
         connect: function connect(gamepadId) {
             state.connected = true;
-            state.gamepadId = gamepadId;
+            if (gamepadId) {
+                state.gamepadId = gamepadId;
+            }
         },
 
 

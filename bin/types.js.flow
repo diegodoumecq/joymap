@@ -63,9 +63,12 @@ export type IPlayerState = {
 };
 
 export type IPlayer = {
-    isConnected: () => boolean,
     getName: () => string,
     getPadId: () => ?string,
+    isConnected: () => boolean,
+    disconnect: () => void,
+    connect: (gamepadId?: string) => void,
+
     getParsedGamepad: () => IParsedGamepad,
 
     removeMapper: (mapperName: string) => void,
@@ -87,9 +90,6 @@ export type IPlayer = {
     swapButtons: (btn1: string, btn2: string) => void,
     swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
 
-    disconnect: () => void,
-    reconnect: () => void,
-    connect: (gamepadId: string) => void,
 
     cancelListen: () => void,
     listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,

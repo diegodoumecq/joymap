@@ -53,12 +53,11 @@ export default function createPlayer(params?: {
         disconnect() {
             state.connected = false;
         },
-        reconnect() {
+        connect(gamepadId?: string) {
             state.connected = true;
-        },
-        connect(gamepadId: string) {
-            state.connected = true;
-            state.gamepadId = gamepadId;
+            if (gamepadId) {
+                state.gamepadId = gamepadId;
+            }
         },
 
         getParsedGamepad: () => state.pad,
