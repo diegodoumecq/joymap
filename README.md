@@ -13,9 +13,8 @@ Run **yarn add joymap**
 * Wraps the bare-bones gamepad standard into a flexible and more powerful API
 * Organizes inputs and configurations by player instead of by gamepad
 * Supports stateful inputs for ease of use: Each input consists of at least { value, pressed, justChanged }
-* Supports easy button rebinding methods (stick rebinding is coming)
-* Supports simple aliases for ease of use
-* Supports functional aggregators that let the programmer combine any input and return any result
+* Supports easy button/stick binding and rebinding methods
+* Supports functional mappers that let the programmer combine any input and return any result
 * Button bindings are set by default to the XInput standard. All inputs supported by the Gamepad API itself are supported, they may just require some more elbow grease (meaning: set the bindings yourself somewhere)
 
 ### How to run all the things
@@ -29,40 +28,51 @@ Run **yarn add joymap**
 
 ### Exported API
 
-* **makeButtonBinding(index)** is a function to create a button binding function
-* **makeStickBinding(...indexes)** is a function to create a stick binding function
-* **createJoyMap** is the default export function and main point of usage. When called it returns an object with a bunch of functions:
-  * **start() => void**: calls **poll()** using requestAnimationFrame
-  * **stop() => void**: Stops calling **poll()**
-  * **poll() => void**: Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
-  * **getUnusedPadIds() => string[]**: Returns an array of Gamepad ids that are not currently assigned to a Player
-  * **setPlayers(jsonString) => void**: [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
-  * **addPlayer(name) => player**: Create a new Player, add it to joymap.players[name] and return it
-  * **removePlayer(player) => void**: Remove a Player
-  * **clearPlayers() => void**: Remove all the players
+* **createJoyMap** is the default export function and main point of usage.
+* It takes a single optional argument in the form of an object with the following possible values:
+  * **threshold** is a number bewteen 0 and 1 that is used for all inputs as the minimum value required to be considered as pressed
+  * **clampThreshold** is a boolean that if true, will set all not pressed inputs to 0
+  * **onPoll** is a function that will be called at the end of each polling
+  * **autoConnect** is a boolean that if true, will connect all newly created Players with an unused gamepad if present at the moment of player creation
+* When **createJoyMap** gets called, it returns an object with a bunch of functions:
+  * **isSupported() => boolean** returns if gamepads are supported by the browser
+  * **start() => void** repeatedly calls **poll()** using requestAnimationFrame
+  * **stop() => void** stops calling **poll()**
+  * **setThreshold(threshold: number) => void** modifies the **threshold**
+  * **setClampThreshold(clampThreshold: boolean) => void** modifies the **clampThreshold**
+  * **setOnPoll(onPoll: Function) => void** modifies **onPoll**
+  * **setAutoConnect(autoConnect: boolean) => void** modifies **autoConnect**
+  * **getGamepads() => Gamepad[]** returns all the available gamepads encountered since the last poll
+  * **getPlayers() => IPlayer[]** returns an array of Players (see the Player section for more details)
+  * **getUnusedPadIds() => string[]** Returns an array of Gamepad ids that are not currently assigned to a Player
+  * **getUnusedPadId() => string | null** Same as above but returns only one if present
+  * **setPlayers(jsonString: string) => void** [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
+  * **addPlayer(name: string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
+  * **removePlayer(player: IPlayer) => void** Remove a Player from JoyMap's Player array
+  * **clearPlayers() => void** Remove all players from JoyMap's array
+  * **poll() => void** Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
 
-### Initialization and usage
+### Simple example of usage
 
-JoyMap is not a singleton and so, must be initialized. You can pass three optional parameters:
-* **threshold** is the number between 0 and 1 that any given input must surpass to qualify as **pressed**
-* **clampThreshold** is a boolean that determines if all input values should be set to 0 if they don't qualify as **pressed**
-* **onPoll** is the callback that will be called after each poll of the gamepad object
-
-So, for example:
-
-    /... somewhere up here there's a declared stepFunction that does stuff on each step/
+    /... lets pretend there's a declared stepFunction that does stuff on each step/
     import createJoyMap from 'joymap';
 
-    const joyMap = createJoyMap({ threshold: 0.5, clampThreshold: true, onPoll: stepFunction });
+    const joyMap = createJoyMap({
+        threshold: 0.3,
+        clampThreshold: true,
+        onPoll: stepFunction,
+        autoConnect: true
+    });
     const player1 = joyMap.addPlayer('player1');
     const player2 = joyMap.addPlayer('player2');
     const player3 = joyMap.addPlayer('player3');
     joyMap.start();
     
-    /... later on in another file, probably a player-handling one: /
-
-    if (player1.buttons.A.pressed && player1.buttons.A.justChanged) {
-        this.jump();
+    /... later on in another file, probably a mario-handling one: /
+    
+    const A = player1.getButtons('A');
+    if (A.pressed && A.justChanged) {
+        mario.jump();
     }
 
 As you can see in the example above, you can create as many players as you'd like. Each of them will be automatically assigned a gamepad if available and each of them will stay assigned with that same gamepad even when plugged and unplugged multiple times.
@@ -75,103 +85,95 @@ The browser gamepad API works under the assumption that the programmer is going 
 
 Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joyMap.stop()** which just start and stop polling the browser gamepad API using **requestAnimationFrame()**. However, if more precision is needed as to when the polling is done, one can completely ignore both of these methods and directly call **joyMap.poll()** when one decides that such a thing would be nice and convenient.
 
-### The Player and their data structures
+### The Player's API
 
-* **joyMap.players** is an object that stores the players as you've named them
-* **player.buttonAliases**, **player.stickAliases**, **player.aggregators** are all detailed in their own section
-* **player.buttons** is an object with all of the buttons specified in the buttonBindings. For each button you have { value, pressed, justChanged }
-  * By default, it has these values: { dpadUp, dpadDown, dpadLeft, dpadRight, L1, L2, L3, R1, R2, R3, A, B, X, Y, start, select }
-  * **value** is the number given by the gamepad object itself for the specified button. Goes from 0 to 1
-  * **pressed** is a boolean that indicates if the value passes the threshold
-  * **justChanged** is a boolean  that indicates if pressed has changed since the last time the gamepad was polled (useful for those actions that need to be triggered only when a button is pressed for the first time, like a mario jump)
-* **player.sticks** is an object that normally consists of the left and right sticks, **L** and **R** respectively
-  * For each stick you have { value, pressed, justChanged, inverts }. They behave similarly to the buttons but the value itself is not a number but an array of numbers, the first number corresponding to the x axis typically and the second with the y axis. There is no restriction on the amount of axis per stick but the default is only 2, which is 99.9% of the use cases
-  * **value** Is an array of numbers between -1 and 1
-  * **inverts** Is an array of booleans that when true will invert the axis it corresponds to
-  * For example, if inverts is [true, false], then the x axis will be inverted but the y axis will not
-* **player.buttonBindings** is an object that stores each button binding
-  * Each button binding is an object of the format { index, mapper }
-  * See the binding section
-* **player.stickBindings** is an object that stores each stick binding
-  * Each stick binding is an object of the format { indexes, mapper }
-  * See the binding section
-* **player.parsedGamepad** is a parsed copy of the gamepad object. All inputs are parsed, not just the ones that have bindings
+* **getName() => string** Returns the name given to the Player
+* **getPadId() => ?string** Returns the gamepad id assigned to Player, may be connected or not
+* **isConnected() => boolean** Returns if the Player has assigned to it a currently connected gamepad
+* **disconnect() => void** Sets the Player as not connected
+* **connect(gamepadId?: string) => void** Sets the Player as connected and assigns a new gamepad id if given one
+* **getParsedGamepad() => IParsedGamepad** Returns a parsed copy of the gamepad object
   * It has two properties: { axes, buttons }
   * **axes** is a direct copy of the gamepad.axes array
   * **buttons** is an array of objects { pressed, justChanged, value }
-
-### Bindings
-
-JoyMap handles the raw gamepad inputs through the buttonBindings and stickBindings. They may look like aliases but they are not constrained by the classical XInput mappings and will allow either the developer or the player to change the bindings to suit their particular gamepad.
-
-The main interactions with these data structures are through these player functions:
-
-* **listenButton(callback, quantity = 1, options: { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }) => void**
-  * Once called, JoyMap will ask in each poll for a **quantity** of pressed buttons and once such a thing is found given the criteria specified by the options, it will call callback with the activated input indexes as arguments.
+  * **pressed** and **justChanged** both being booleans, and value being the value given by the browser API, typically between 0 and 1
+* **getButtons(...names: string[]) => IButtonState | { [index: string]: IButtonState }** Returns button objects depending on the format the arguments take
+  * Given only one button name as argument, the returned object will be { value, pressed, justChanged }
+  * Given more than one button name as arguments, the returned object will have the button names as keys and their values will be the same type of object already mentioned, meaning { value, pressed, justChanged }
+  * Given no arguments, the returned value will be an object with ALL the button names as keys and their values being the already mentioned objects
+  * So player.getButtons('A') will return { value, pressed, justChanged}, but player.getButtons('A', 'B') will return { A: { value, ... }, B: { value, ... } }
+* **getSticks(...names: string[]) => IStickState | { [index: string]: IStickState }** Functions the exact same way as getButtons save for the object format being { value, pressed, justChanged, inverts }
+  * In this case, **value** is an array of numbers, each one representing an axis of the stick. These numbers also go from -1 to 1
+* **getMappers(...names: string[]) => { [index: string]: any} | any** Again, functions the exact same way as getButtons except that mappers don't have a set object format in particular for each mapper result
+* **getButtonIndexes(...inputNames: string[]) => IButtonIndexes** Returns the combined indexes of the given button names, even if given only one name
+  * These indexes are the index number that a given button is bound to. For example, an Xbox360 X button's index is typically 0, so it is the first value found in the browser's Gamepad buttons array
+  * Combines very well with **setButton**
+* **getStickIndexes(...inputNames: string[]) => IStickIndexes** Returns the combined indexes of the given stick names, again, same thing as getButtonIndexes but applied to sticks and their axes
+* **setButton(inputName: string, indexes: number | IButtonIndexes) => void** Sets a button name to the given index / indexes. This function does not care about duplication and can even take multiple indexes
+ * When one single button is assigned to multiple indexes, the resulting value is the biggest of the specified indexes. The resulting object will still be { value, pressed, justChanged }
+* **setStick(inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void** Sets a stick name to the given index / indexes. Same thing as **setButton** except it also takes the optional argument **inverts**. This argument is an array of booleans that will be assigned to the resulting stick, each bool representing if the corresponding axis should be inverted
+* **setMapper(mapperName: string, callback: Function) => void** Sets a mapper name to the given callback function. The result given by getMapper depends entirely on what this callback returns
+  * This callback receives a single object as argument with the following values:
+  * **pad** is the parsed gamepad object
+  * **prevPad** is the parsed gamepad object from the previous poll
+  * **player** is a reference to this same player
+  * Note: do take into account that this callback will always be called by **getMapper** and at no other time
+* **invertSticks(inverts: IStickInverts, ...inputNames: string[]) => void** Sets an array of booleans as the inverts property of the given stick names
+* **swapButtons(btn1: string, btn2: string) => void** Swaps two buttons' indexes
+* **swapSticks(btn1: string, btn2: string, includeInverts?: boolean) => void** Swaps two sticks' indexes, and if **includeInverts** is true, also swaps the inverts of each stick
+* **removeMapper(mapperName: string) => void** Removes a single mapper
+* **clearMappers() => void** Clears all the mappers
+* **update(gamepad: Gamepad) => void** Typically called on each poll of JoyMap, updates the parsed gamepad and checks on for the status of **listenButton** and **listenAxis**
+* **cancelListen() => void** Will cancel the waiting process of **listenButton** or **listenAxis**
+  * Note: You can only wait for buttons or for axes, never both at the same time
+* **listenButton(callback: Function, quantity?: number, params?: IListenParams) => void** Once called, JoyMap will ask in each poll for a **quantity** of pressed buttons and once such a thing is found given the criteria specified by the options, it will call callback with the activated input indexes as arguments
+  * params: { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }
   * Note: The above mentioned "activated input index" is an index corresponding to the raw gamepad.buttons array
   * **callback(...indexes)** Gets called when the player fulfills the specified criteria below
   * **quantity** The number of buttons that need to be pressed at the same time
   * **options.waitFor** An array consisting of an amount and the type that amount corresponds to. The default [10, 'polls'] will trigger the callback only after 10 consecutive polls are made that fulfill the other criteria options and quantity
   * **options.consecutive** Boolean that specifies if only consecutive indexes are allowed (when quantity > 1, useful mostly for axis and not buttons)
   * **options.allowOffset** Boolean that specifies if the first index returned should comply with being divisible by quantity (again, useful mostly for axis)
-* **listenAxis(callback, quantity = 1, options: { waitFor = [100, 'ms'], consecutive = false, allowOffset = true }) => void**
-  * Functions the same way as **listenButton** except with a different default value for waitFor
-  * Note: Given that we have no true way of assuming what indexes correspond to which stick, under normal circumstances the player will only trigger the callback if the stick is pushed at an angle, activating both axis at the same time. Pushing the stick to the left, for example, would not trigger the callback.
-* **buttonBindOnPress(inputName, callback = noop, allowDuplication = false) => void**
-  * A helper function that uses **listenButton** with the default options and sets the correct bindings for you
+* **listenAxis(callback: Function, quantity?: number, params?: IListenParams) => void** Functions the same way as **listenButton** except with a different default value for waitFor
+  * params: { waitFor = [100, 'ms'], consecutive = false, allowOffset = true }
+  * Note: Given that we have no true way of assuming what indexes correspond to which stick, under normal circumstances the player will only trigger the callback if the stick is pushed at an angle, activating both axis at the same time. Pushing the stick to the left, for example, would not trigger the callback
+* **buttonBindOnPress(inputName: string, callback: Function, allowDuplication?: boolean) => void** A helper function that uses **listenButton** with the default options and sets the correct bindings for you
   * **inputName** is the name string of the button to be stored in this.buttons
   * **callback** is a callback that will be called (with argument index) when a pressed button is detected and the new input binding is set
   * **allowDuplication** is a flag that when false will swap bindings when one press would trigger more than one binding
-* **stickBindOnPress(inputName, callback = noop, allowDuplication = false) => void**
-  * Functions the same way as **buttonBindOnPress** except the callback will receive two indexes instead of just one due to the default settings of **listenAxis**
-* **cancelListen() => void**
-  * Will cancel the waiting process of **listenButton** or **listenAxis**
-  * Note: You can only wait for buttons or for axes, never both at the same time
-* **clearButtonBindings() => void**
-  * Will clear all of the button bindings, leaving player.buttons as an empty object
-* **clearStickBindings() => void**
-  * Will clear all of the stick bindings, leaving player.sticks as an empty object
-* **buttonRebind(inputName, binding) => void**
-  * Sets a button binding to inputName
-  * **binding** is an object of the format { index, mapper }
-    * **index** is the index number used in the rawGamepad
-    * **mapper** is the mapping function of the format **pad => pad.buttons[index]**
-* **stickRebind(inputName, binding) => void**
-  * Sets a stick binding to inputName
-  * **binding** is an object of the format { indexes, mapper }
-    * **indexes** is an array of the index numbers used in the rawGamepad
-    * **mapper** is the mapping function of the format **(pad, inverts) => [pad.axes[index1], pad.axes[index2]]**
-
-### Aliases
-
-Aliases are simple remappings of inputs. They take one or more binding names and associate them to an alias name.
-
-    player2.setAlias('Jump', 'A');
-    player2.setAlias('Shoot', ['B', 'X', 'Y']);
-    player2.setAlias('Move', 'R');
-
-Their results are stored inside either **player2.buttonAliases** or **player2.stickAliases**, depending on the type of input, as you've named them. 
-
-**player2.buttonAliases.Jump** would contain all of the data found in **player2.buttons.A** but with one value added: **inputs**, a list of originating inputs.
-
-**player2.buttonAliases.Shoot** is either **player2.buttons.B**, **X** or **Y**, depending on which one is currently pressed the most.
-
-**player2.stickAliases.Move** is again the same thing as before except that we are dealing with the stick data of **player2.sticks.R**. Stick aliases however differ from buttons in the sense that not all data is copied over (if the stick is inverted) and if more than one stick name is given, then the resulting alias is the combination of said sticks (Two opposing sticks result in an alias value of [0, 0]).
-
-### Aggregators
-
-The idea behind aggregators is to provide a simple way to combine different inputs into a single unrestricted output. To add one, all we need is a name and a callback.
-
-    player3.setAggregator('JumpNShoot', (player, previousValue, rawGamepad) => {
-        const { A, B } = player.buttons;
-        return A.pressed && B.pressed;
-    });
-
-The callback will be given three arguments: the player itself, the previous value returned by the aggregator and the raw gamepad object obtained from **navigator.getGamepads()**. The results are stored in **player.aggregators** as you've named them, just like with aliases, but this time the callback for each aggregator is the one that decides what is being stored.
+* **stickBindOnPress(inputName: string, callback: Function, allowDuplication?: boolean) => void** Functions the same way as **buttonBindOnPress** except the callback will receive two indexes instead of just one due to the default settings of **listenAxis**
+* **destroy() => void** Clears all the internal data structures
 
 ### Naming restrictions
 
 Throughout the library you're invited to name stuff. Like players, bindings, aliases and aggregators. For the sake of making things easier for everybody in the future, these values shall only be alphanumeric. Why? Well, the event handling system that is not developed yet would require a strict naming convention to avoid mixing up names of stuff with possible operators.
+
+### Advanced example of usage
+
+Taken from the StateLog example:
+
+    /... lets again pretend there's a declared stepFunction that does stuff on each step/
+    import createJoyMap from 'joymap';
+    
+    const joyMap = createJoyMap({
+        threshold: 0.3,
+        clampThreshold: true,
+        onPoll: stepFunction,
+        autoConnect: true
+    });
+    
+    const jo = joyMap.addPlayer('Joustine');
+    
+    jo.setButton('Jump', jo.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
+    jo.setButton('Shoot', jo.getButtonIndexes('B'));
+    jo.setButton('LookUp', jo.getButtonIndexes('dpadUp'));
+    jo.setButton('LookDown', jo.getButtonIndexes('dpadDown'));
+    jo.setButton('LookLeft', jo.getButtonIndexes('dpadLeft'));
+    jo.setButton('LookRight', jo.getButtonIndexes('dpadRight'));
+    jo.setButton('StickAverage', jo.getStickIndexes('L', 'R'));
+    
+    jo.setMapper('Point', ({ player }) => player.getSticks('R').pressed);
+
 
 ### Roadmap
 
