@@ -22,8 +22,8 @@ function createPlayer() {
     var listenOptions = null;
 
     var state = {
-        connected: false,
-        gamepadId: null,
+        connected: !!params.padId,
+        gamepadId: params.padId ? params.padId : null,
 
         name: params.name || '',
         threshold: params.threshold || 0.2,
@@ -52,6 +52,17 @@ function createPlayer() {
         isConnected: function isConnected() {
             return state.connected;
         },
+        disconnect: function disconnect() {
+            state.connected = false;
+        },
+        reconnect: function reconnect() {
+            state.connected = true;
+        },
+        connect: function connect(gamepadId) {
+            state.connected = true;
+            state.gamepadId = gamepadId;
+        },
+
 
         getParsedGamepad: function getParsedGamepad() {
             return state.pad;
@@ -72,6 +83,10 @@ function createPlayer() {
         getButtons: function getButtons() {
             for (var _len = arguments.length, inputNames = Array(_len), _key = 0; _key < _len; _key++) {
                 inputNames[_key] = arguments[_key];
+            }
+
+            if (!state.connected) {
+                return (0, _utils.getEmptyButtons)(state.buttons, inputNames);
             }
 
             if (inputNames.length === 0) {
@@ -96,6 +111,10 @@ function createPlayer() {
                 inputNames[_key2] = arguments[_key2];
             }
 
+            if (!state.connected) {
+                return (0, _utils.getEmptySticks)(state.sticks, inputNames);
+            }
+
             if (inputNames.length === 0) {
                 return (0, _tools.mapValues)(function (stick) {
                     var indexes = stick.indexes,
@@ -105,7 +124,7 @@ function createPlayer() {
                 }, state.sticks);
             }
 
-            if (inputNames.length === 0) {
+            if (inputNames.length === 1) {
                 var _state$sticks$inputNa = state.sticks[inputNames[0]],
                     _indexes = _state$sticks$inputNa.indexes,
                     inverts = _state$sticks$inputNa.inverts;
@@ -127,6 +146,10 @@ function createPlayer() {
         getMappers: function getMappers() {
             for (var _len3 = arguments.length, mapperNames = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
                 mapperNames[_key3] = arguments[_key3];
+            }
+
+            if (!state.connected) {
+                return (0, _utils.getEmptyMappers)(state.mappers, mapperNames);
             }
 
             if (mapperNames.length === 0) {
@@ -259,16 +282,6 @@ function createPlayer() {
                 sticks[btn2].indexes = _replacement;
             }
         },
-        disconnect: function disconnect() {
-            state.connected = false;
-        },
-        reconnect: function reconnect() {
-            state.connected = true;
-        },
-        connect: function connect(gamepadId) {
-            state.connected = true;
-            state.gamepadId = gamepadId;
-        },
         cancelListen: function cancelListen() {
             listenOptions = null;
         },
@@ -323,13 +336,15 @@ function createPlayer() {
                 throw new Error('On buttonBindOnPress(\'' + inputName + '\', ...):\n                    first argument contains invalid characters');
             }
             player.listenButton(function (indexes) {
-                var index = indexes[0];
-                var bindingIndex = (0, _tools.findKey)(index, state.buttons);
+                var findIterator = function findIterator(value) {
+                    return value[0] === indexes[0];
+                };
+                var bindingIndex = (0, _tools.findKey)(findIterator, state.buttons);
 
                 if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
                     player.swapButtons(inputName, bindingIndex);
                 } else {
-                    player.setButton(inputName, index);
+                    player.setButton(inputName, indexes);
                 }
 
                 callback(bindingIndex);
@@ -345,7 +360,7 @@ function createPlayer() {
             player.listenAxis(function (indexesResult) {
                 var c = function c(_ref3) {
                     var indexes = _ref3.indexes;
-                    return (0, _tools.arraysEqual)(indexes, indexesResult);
+                    return (0, _tools.arraysEqual)(indexes[0], indexesResult);
                 };
                 var bindingIndex = (0, _tools.findKey)(c, state.sticks);
 

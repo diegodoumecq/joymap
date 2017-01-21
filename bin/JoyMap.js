@@ -24,7 +24,7 @@ function createJoyMap() {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         onPoll: params.onPoll || _tools.noop,
-        autoConnect: params.autoConnect || 'auto',
+        autoConnect: params.autoConnect || true,
         isSupported: navigator && (0, _tools.isFunction)(navigator.getGamepads),
         gamepads: [],
         players: []
@@ -82,11 +82,13 @@ function createJoyMap() {
             var playerIds = state.players.map(function (p) {
                 return p.getPadId();
             });
-            var length = state.gamepads.length;
+            var gamepadIds = (0, _tools.map)('id', state.gamepads);
+
+            var length = gamepadIds.length;
             var i = 0;
             while (i < length) {
-                if (!playerIds.includes(state.gamepads[i].id)) {
-                    return state.gamepads[i].id;
+                if (!playerIds.includes(gamepadIds[i])) {
+                    return gamepadIds[i];
                 }
                 i += 1;
             }
@@ -99,25 +101,21 @@ function createJoyMap() {
             joyMap.clearPlayers();
             state.players = JSON.parse(jsonString);
         },
-        addPlayer: function addPlayer(name) {
+        addPlayer: function addPlayer(name, padId) {
             if (!(0, _utils.nameIsValid)(name)) {
                 throw new Error('On addPlayer(\'' + name + '\'): argument contains invalid characters');
+            }
+
+            if (state.autoConnect === 'auto' && !padId) {
+                padId = joyMap.getUnusedPadId();
             }
 
             var player = (0, _Player2.default)({
                 name: name,
                 threshold: state.threshold,
-                clampThreshold: state.clampThreshold
+                clampThreshold: state.clampThreshold,
+                padId: padId
             });
-
-            var gamepadIds = (0, _tools.map)('id', state.gamepads);
-            var unusedId = gamepadIds.find(function (gamepadId) {
-                return !(0, _tools.find)({ gamepadId: gamepadId }, state.players);
-            });
-
-            if (unusedId) {
-                player.connect(unusedId);
-            }
 
             state.players.push(player);
 
@@ -143,14 +141,6 @@ function createJoyMap() {
             });
 
             state.players.forEach(function (player) {
-                if (state.autoConnect === 'auto' && player.getPadId() === null) {
-                    var unusedGamepadId = joyMap.getUnusedPadId();
-
-                    if (unusedGamepadId) {
-                        player.connect(unusedGamepadId);
-                    }
-                }
-
                 var gamepad = (0, _tools.find)({ id: player.getPadId() }, state.gamepads);
 
                 if (gamepad) {

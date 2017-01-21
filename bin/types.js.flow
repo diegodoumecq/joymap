@@ -104,7 +104,7 @@ export type IJoyMapState = {
     threshold: number,
     clampThreshold: boolean,
     onPoll: () => void,
-    autoConnect: 'manual' | 'auto',
+    autoConnect: boolean,
     isSupported: boolean,
     gamepads: Gamepad[],
     players: IPlayer[]
@@ -118,7 +118,7 @@ export type IJoyMap = {
     setThreshold: (threshold: number) => void,
     setClampThreshold: (clampThreshold: boolean) => void,
     setOnPoll: (onPoll: Function) => void,
-    setAutoConnect: (autoConnect: 'auto' | 'manual') => void,
+    setAutoConnect: (autoConnect: boolean) => void,
 
     getGamepads: () => Gamepad[],
     getPlayers: () => IPlayer[],

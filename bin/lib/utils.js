@@ -20,6 +20,9 @@ exports.getDefaultSticks = getDefaultSticks;
 exports.isButtonSignificant = isButtonSignificant;
 exports.isStickSignificant = isStickSignificant;
 exports.getStickValue = getStickValue;
+exports.getEmptyMappers = getEmptyMappers;
+exports.getEmptyButtons = getEmptyButtons;
+exports.getEmptySticks = getEmptySticks;
 exports.parseGamepad = parseGamepad;
 exports.buttonMap = buttonMap;
 exports.stickMap = stickMap;
@@ -102,7 +105,8 @@ function getDefaultButtons() {
         X: [2],
         Y: [3],
         start: [9],
-        select: [8]
+        select: [8],
+        home: [16]
     };
 }
 
@@ -142,6 +146,78 @@ function getStickValue(stickValues, threshold) {
     return stickValues;
 }
 
+function getEmptyMappers(mappers, mapperNames) {
+    var emptyMapper = null;
+
+    if (mapperNames.length === 0) {
+        return (0, _tools.mapValues)(function () {
+            return emptyMapper;
+        }, mappers);
+    }
+
+    if (mapperNames.length === 1) {
+        return emptyMapper;
+    }
+
+    var result = {};
+    mapperNames.forEach(function (mapperName) {
+        result[mapperName] = emptyMapper;
+    });
+
+    return result;
+}
+
+function getEmptyButtons(buttons, inputNames) {
+    var emptyButton = {
+        value: 0,
+        pressed: false,
+        justChanged: false
+    };
+
+    if (inputNames.length === 0) {
+        return (0, _tools.mapValues)(function () {
+            return emptyButton;
+        }, buttons);
+    }
+
+    if (inputNames.length === 1) {
+        return emptyButton;
+    }
+
+    var result = {};
+    inputNames.forEach(function (mapperName) {
+        result[mapperName] = emptyButton;
+    });
+
+    return result;
+}
+
+function getEmptySticks(sticks, inputNames) {
+    var emptyStick = {
+        value: [0, 0],
+        pressed: false,
+        justChanged: false,
+        inverts: [false, false]
+    };
+
+    if (inputNames.length === 0) {
+        return (0, _tools.mapValues)(function () {
+            return emptyStick;
+        }, sticks);
+    }
+
+    if (inputNames.length === 1) {
+        return emptyStick;
+    }
+
+    var result = {};
+    inputNames.forEach(function (mapperName) {
+        result[mapperName] = emptyStick;
+    });
+
+    return result;
+}
+
 function parseGamepad(pad, prevPad, threshold, clampThreshold) {
     return {
         buttons: pad.buttons.map(function (button, index) {
@@ -167,11 +243,13 @@ function buttonMap(pad, prevPad, indexes) {
 
     var i = 0;
     while (i < length) {
+        var prevValue = prevPad.buttons[indexes[i]];
         if (!prevPressed) {
-            prevPressed = prevPad.buttons[indexes[i]].pressed;
+            prevPressed = !!prevValue && prevValue.pressed;
         }
-        value = Math.max(value, pad.buttons[indexes[i]].value);
-        pressed = pressed || pad.buttons[indexes[i]].pressed;
+        var padButton = pad.buttons[indexes[i]];
+        value = Math.max(value, !padButton ? 0 : padButton.value);
+        pressed = pressed || !!padButton && padButton.pressed;
         i += 1;
     }
 
@@ -199,7 +277,7 @@ function roundSticks(indexMaps, axes, threshold) {
         }
     });
 
-    return count === 0 ? counts.map(function () {
+    return count === 0 ? indexMaps[0].map(function () {
         return 0;
     }) : counts.map(function (v) {
         return v / count;
