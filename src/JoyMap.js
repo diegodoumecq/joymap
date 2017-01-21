@@ -138,7 +138,7 @@ export default function createJoyMap(params?: {
 
                 if (gamepad) {
                     if (!player.isConnected()) {
-                        player.reconnect();
+                        player.connect();
                     }
                     player.update(gamepad);
                 } else if (player.isConnected()) {
