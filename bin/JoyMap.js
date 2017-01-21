@@ -3,15 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
-var _values = require('babel-runtime/core-js/object/values');
-
-var _values2 = _interopRequireDefault(_values);
-
 exports.default = createJoyMap;
 
 var _utils = require('./lib/utils');
@@ -25,26 +16,27 @@ var _Player2 = _interopRequireDefault(_Player);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function createJoyMap() {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$threshold = _ref.threshold,
-        threshold = _ref$threshold === undefined ? 0.2 : _ref$threshold,
-        _ref$clampThreshold = _ref.clampThreshold,
-        clampThreshold = _ref$clampThreshold === undefined ? true : _ref$clampThreshold,
-        _ref$onPoll = _ref.onPoll,
-        onPoll = _ref$onPoll === undefined ? _tools.noop : _ref$onPoll,
-        _ref$playerHandling = _ref.playerHandling,
-        playerHandling = _ref$playerHandling === undefined ? 'auto' : _ref$playerHandling;
+    var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    var isSupported = navigator && (0, _tools.isFunction)(navigator.getGamepads);
     var animationFrameRequestId = null;
 
-    var joyMap = {
-        isSupported: isSupported,
+    var state = {
+        threshold: params.threshold || 0.2,
+        clampThreshold: params.clampThreshold !== false,
+        onPoll: params.onPoll || _tools.noop,
+        autoConnect: params.autoConnect || true,
+        isSupported: navigator && (0, _tools.isFunction)(navigator.getGamepads),
         gamepads: [],
-        players: {},
+        players: []
+    };
+
+    var joyMap = {
+        isSupported: function isSupported() {
+            return state.isSupported;
+        },
 
         start: function start() {
-            if (isSupported && animationFrameRequestId === null) {
+            if (state.isSupported && animationFrameRequestId === null) {
                 (function () {
                     var step = function step() {
                         joyMap.poll();
@@ -60,72 +52,108 @@ function createJoyMap() {
                 animationFrameRequestId = null;
             }
         },
-        getUnusedGamepadIds: function getUnusedGamepadIds() {
-            return (0, _tools.difference)((0, _tools.map)('id', joyMap.gamepads), (0, _tools.map)('gamepadId', joyMap.players));
+        setThreshold: function setThreshold(threshold) {
+            state.threshold = threshold;
+        },
+        setClampThreshold: function setClampThreshold(clampThreshold) {
+            state.clampThreshold = clampThreshold;
+        },
+        setOnPoll: function setOnPoll(onPoll) {
+            state.onPoll = onPoll;
+        },
+        setAutoConnect: function setAutoConnect(autoConnect) {
+            state.autoConnect = autoConnect;
+        },
+
+
+        getGamepads: function getGamepads() {
+            return state.gamepads;
+        },
+        getPlayers: function getPlayers() {
+            return state.players;
+        },
+
+        getUnusedPadIds: function getUnusedPadIds() {
+            return (0, _tools.difference)((0, _tools.map)('id', state.gamepads), state.players.map(function (p) {
+                return p.getPadId();
+            }));
+        },
+        getUnusedPadId: function getUnusedPadId() {
+            var playerIds = state.players.map(function (p) {
+                return p.getPadId();
+            });
+            var gamepadIds = (0, _tools.map)('id', state.gamepads);
+
+            var length = gamepadIds.length;
+            var i = 0;
+            while (i < length) {
+                if (!playerIds.includes(gamepadIds[i])) {
+                    return gamepadIds[i];
+                }
+                i += 1;
+            }
+
+            return null;
         },
         setPlayers: function setPlayers() {
-            var jsonString = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '{}';
+            var jsonString = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '[]';
 
-            joyMap.cleanPlayers();
-            joyMap.players = JSON.parse(jsonString);
+            joyMap.clearPlayers();
+            state.players = JSON.parse(jsonString);
         },
-        addPlayer: function addPlayer(name) {
+        addPlayer: function addPlayer(name, padId) {
             if (!(0, _utils.nameIsValid)(name)) {
                 throw new Error('On addPlayer(\'' + name + '\'): argument contains invalid characters');
             }
 
-            var player = (0, _Player2.default)({ name: name, threshold: threshold, clampThreshold: clampThreshold });
-
-            var gamepadIds = (0, _tools.map)('id', joyMap.gamepads);
-            var unusedId = gamepadIds.find(function (gamepadId) {
-                return !(0, _tools.findKey)({ gamepadId: gamepadId }, joyMap.players);
-            });
-
-            if (unusedId) {
-                player.connect(unusedId);
+            if (state.autoConnect === 'auto' && !padId) {
+                padId = joyMap.getUnusedPadId();
             }
 
-            joyMap.players[name] = player;
+            var player = (0, _Player2.default)({
+                name: name,
+                threshold: state.threshold,
+                clampThreshold: state.clampThreshold,
+                padId: padId
+            });
+
+            state.players.push(player);
 
             return player;
         },
         removePlayer: function removePlayer(player) {
-            joyMap.players = (0, _tools.omit)([player.name], joyMap.players);
-            player.destroy();
+            var index = state.players.indexOf(player);
+            if (index !== -1) {
+                state.players.splice(index, 1);
+                player.destroy();
+            } else {
+                throw new Error('removePlayer(player.name: ' + player.getName() + '), could not find such player');
+            }
         },
-        cleanPlayers: function cleanPlayers() {
-            (0, _values2.default)(joyMap.players).forEach(function (player) {
+        clearPlayers: function clearPlayers() {
+            state.players.forEach(function (player) {
                 return joyMap.removePlayer(player);
             });
         },
         poll: function poll() {
-            joyMap.gamepads = (0, _utils.getRawGamepads)().filter(function (rawGamepad) {
+            state.gamepads = (0, _utils.getRawGamepads)().filter(function (rawGamepad) {
                 return rawGamepad && rawGamepad.connected && rawGamepad.buttons.length && rawGamepad.axes.length && (!!rawGamepad.id || rawGamepad.id === 0);
             });
 
-            (0, _keys2.default)(joyMap.players).forEach(function (name) {
-                var player = joyMap.players[name];
-                var unusedGamepadIds = joyMap.getUnusedGamepadIds();
+            state.players.forEach(function (player) {
+                var gamepad = (0, _tools.find)({ id: player.getPadId() }, state.gamepads);
 
-                if (playerHandling === 'auto' && player.gamepadId === null && unusedGamepadIds.length > 0) {
-                    player.connect(unusedGamepadIds[0]);
-                }
-
-                var gamepad = (0, _tools.find)({ id: player.gamepadId }, joyMap.gamepads);
-
-                if (!player.connected) {
-                    if (gamepad) {
-                        player.reconnect();
-                        player.update(gamepad);
+                if (gamepad) {
+                    if (!player.isConnected()) {
+                        player.connect();
                     }
-                } else if (gamepad) {
                     player.update(gamepad);
-                } else {
+                } else if (player.isConnected()) {
                     player.disconnect();
                 }
             });
 
-            onPoll();
+            state.onPoll();
         }
     };
 

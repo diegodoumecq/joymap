@@ -1,145 +1,258 @@
 /* @flow */
 import {
-    buttonBindings, stickBindings,
-    addButtonAlias, addStickAlias,
-    makeButtonBinding, makeStickBinding,
-    updateListenOptions, nameIsValid
+    updateListenOptions, nameIsValid,
+    getDefaultButtons, getDefaultSticks, parseGamepad,
+    stickMap, buttonMap, getEmptyMappers,
+    getEmptyButtons, getEmptySticks
 } from './lib/utils';
 
 import {
-    includes, mapValues, findKey,
-    omit, difference, noop, unique
+    findKey, omit, arraysEqual, mapValues
 } from './lib/tools';
 
 import type {
-    IStickValue, IButtonValue, IParsedGamepad, IStick, IButton,
-    IStickAlias, IButtonAlias, IAggregator,
-    IStickBinding, IButtonBinding, IListenOptions, IListenParams
+    IStickState, IButtonState, IButtonIndexes,
+    IStickIndexes, IStickInverts, IListenOptions,
+    IListenParams, IPlayerState, IPlayer
 } from './types';
 
-export type IPlayer = {
-    name: string,
-    parsedGamepad: IParsedGamepad,
 
-    sticks: { [key: string]: IStick },
-    buttons: { [key: string]: IButton },
-    buttonBindings: { [key: string]: IButtonBinding },
-    stickBindings: { [key: string]: IStickBinding },
-
-    gamepadId: ?string,
-    connected: boolean,
-    buttonAliases: { [key: string]: IButtonAlias },
-    stickAliases: { [key: string]: IStickAlias },
-    aggregators: { [key: string]: IAggregator },
-
-    cleanBindings: () => void,
-    disconnect: () => void,
-    reconnect: () => void,
-    connect: (gamepadId: string) => void,
-    clearButtonBindings: () => void,
-    clearStickBindings: () => void,
-
-    buttonRebind: (inputName: string, binding: IButtonBinding) => void,
-    stickRebind: (inputName: string, binding: IStickBinding) => void,
-    cancelListen: () => void,
-    listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    buttonRebindOnPress: (inputName: string, callback: Function, allowDuplication: boolean) => void,
-    stickRebindOnPress: (inputName: string, callback: Function, allowDuplication: boolean) => void,
-    setAggregator: (aggregatorName: string, callback: Function) => void,
-    removeAggregator: (aggregatorName: string) => void,
-    cleanAggregators: () => void,
-    setAlias: (aliasName: string, inputs: string | string[]) => void,
-    removeAlias: (aliasName: string) => void,
-    cleanAliases: () => void,
-    destroy: () => void,
-    parseGamepad: (gamepad: Gamepad) => IParsedGamepad,
-    update: (gamepad: Gamepad) => void,
-    getButtonValue: (value: IButtonValue) => IButtonValue,
-    isButtonSignificant: (value: IButtonValue) => boolean,
-    updateButtons: (gamepad: IParsedGamepad) => void,
-    getStickValue: (stickValues: IStickValue) => IStickValue,
-    isStickSignificant: (stickValues: IStickValue) => boolean,
-    updateStick: (gamepad: IParsedGamepad) => void,
-    updateAliases: () => void,
-    updateAggregators: (gamepad: Gamepad) => void
-};
-
-function cleanBindings() {
-    return {
-        buttonBindings,
-        stickBindings,
-        buttons: mapValues(() => ({
-            value: 0,
-            pressed: false,
-            justChanged: false
-        }), buttonBindings),
-        sticks: mapValues(() => ({
-            value: [0, 0],
-            pressed: false,
-            justChanged: false,
-            inverts: [false, false]
-        }), stickBindings)
-    };
-}
-
-export default function createPlayer({
-    name,
-    threshold = 0.3,
-    clampThreshold = true
-}: { name: string, threshold: number, clampThreshold: boolean } = {}): IPlayer {
+export default function createPlayer(params?: {
+    name?: string,
+    threshold?: number,
+    clampThreshold?: boolean,
+    padId?: ?string
+} = {}): IPlayer {
     let listenOptions: null | IListenOptions = null;
 
-    const player: IPlayer = {
-        name,
-        parsedGamepad: {
+    const state: IPlayerState = {
+        connected: !!params.padId,
+        gamepadId: params.padId ? params.padId : null,
+
+        name: params.name || '',
+        threshold: params.threshold || 0.2,
+        clampThreshold: params.clampThreshold !== false,
+        pad: {
             buttons: [],
             axes: []
         },
-        buttonAliases: {},
-        stickAliases: {},
-        aggregators: {},
-        gamepadId: null,
-        connected: false,
-        ...cleanBindings(),
-
-        cleanBindings() {
-            Object.assign(player, cleanBindings());
+        prevPad: {
+            buttons: [],
+            axes: []
         },
 
+        buttons: getDefaultButtons(),
+        sticks: getDefaultSticks(),
+        mappers: {}
+    };
+
+    const player: IPlayer = {
+        getName: () => state.name,
+        getPadId: () => state.gamepadId,
+        isConnected: () => state.connected,
         disconnect() {
-            player.connected = false;
+            state.connected = false;
         },
-
-        reconnect() {
-            player.connected = true;
-        },
-
-        connect(gamepadId: string) {
-            player.connected = true;
-            player.gamepadId = gamepadId;
-        },
-
-        clearButtonBindings() {
-            player.buttonBindings = {};
-        },
-
-        clearStickBindings() {
-            player.stickBindings = {};
-        },
-
-        buttonRebind(inputName: string, binding: IButtonBinding) {
-            if (!nameIsValid(inputName)) {
-                throw new Error(`On buttonRebind('${inputName}'): argument contains invalid characters`);
+        connect(gamepadId?: string) {
+            state.connected = true;
+            if (gamepadId) {
+                state.gamepadId = gamepadId;
             }
-            player.buttonBindings[inputName] = binding;
         },
 
-        stickRebind(inputName: string, binding: IStickBinding) {
-            if (!nameIsValid(inputName)) {
-                throw new Error(`On stickRebind('${inputName}'): argument contains invalid characters`);
+        getParsedGamepad: () => state.pad,
+
+        clearMappers() {
+            state.mappers = {};
+        },
+
+        removeMapper(mapperName: string) {
+            state.mappers = omit([mapperName], state.mappers);
+        },
+
+        update(gamepad: Gamepad) {
+            // TODO Store the buttons, sticks and mappers that have already been queried
+            // and clear those structures at the start of update
+            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
+            // Maybe add a memoizeMappers flag (default true) to Player construction
+            state.prevPad = state.pad;
+            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+
+            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
+        },
+
+        getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
+            if (!state.connected) {
+                return getEmptyButtons(state.buttons, inputNames);
             }
-            player.stickBindings[inputName] = binding;
+
+            if (inputNames.length === 0) {
+                return mapValues(button => buttonMap(state.pad, state.prevPad, button), state.buttons);
+            }
+
+            if (inputNames.length === 1) {
+                return buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+            }
+
+            const result = {};
+            inputNames.forEach(inputName => {
+                result[inputName] = buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
+            });
+
+            return result;
+        },
+
+        getSticks(...inputNames: string[]): IStickState | { [index: string]: IStickState } {
+            if (!state.connected) {
+                return getEmptySticks(state.sticks, inputNames);
+            }
+
+            if (inputNames.length === 0) {
+                return mapValues(stick => {
+                    const { indexes, inverts } = stick;
+                    return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                }, state.sticks);
+            }
+
+            if (inputNames.length === 1) {
+                const { indexes, inverts } = state.sticks[inputNames[0]];
+                return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
+            }
+
+            const result = {};
+            inputNames.forEach(inputName => {
+                const { indexes, inverts } = state.sticks[inputName];
+                result[inputName] = stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
+            });
+
+            return result;
+        },
+
+        getMappers(...mapperNames: string[]): any | { [index: string]: any } {
+            if (!state.connected) {
+                return getEmptyMappers(state.mappers, mapperNames);
+            }
+
+            if (mapperNames.length === 0) {
+                return mapValues(mapper => mapper({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player
+                }), state.mappers);
+            }
+
+            if (mapperNames.length === 1) {
+                return state.mappers[mapperNames[0]]({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player
+                });
+            }
+
+            const result = {};
+            mapperNames.forEach(mapperName => {
+                result[mapperName] = state.mappers[mapperName]({
+                    pad: state.pad,
+                    prevPad: state.prevPad,
+                    player
+                });
+            });
+
+            return result;
+        },
+
+        getButtonIndexes(...inputNames: string[]): IButtonIndexes {
+            const indexes = [];
+            inputNames.forEach(inputName => indexes.push(...state.buttons[inputName]));
+            return indexes;
+        },
+
+        getStickIndexes(...inputNames: string[]): IStickIndexes {
+            const indexes = [];
+            inputNames.forEach(inputName => indexes.push(...state.sticks[inputName].indexes));
+            return indexes;
+        },
+
+        setButton(inputName: string, indexes: number | IButtonIndexes) {
+            if (!nameIsValid(inputName)) {
+                throw new Error(`On setButton('${inputName}'): argument contains invalid characters`);
+            }
+            state.buttons[inputName] = (typeof indexes === 'number') ? [indexes] : indexes;
+        },
+
+        setStick(
+            inputName: string,
+            // #FlowExpectError No idea why this fails spectacularly, tried everything
+            indexes: number[] | IStickIndexes,
+            inverts?: IStickInverts
+        ) {
+            if (!nameIsValid(inputName)) {
+                throw new Error(`On setStick('${inputName}'): argument contains invalid characters`);
+            }
+
+            if (indexes.length === 0) {
+                throw new Error(`On setStick('${inputName}', indexes):
+                    argument indexes is an empty array`);
+            }
+
+            const firstValue: number | number[] = indexes[0];
+
+            if (Array.isArray(firstValue)) {
+                state.sticks[inputName] = {
+                    indexes,
+                    inverts: inverts || firstValue.map(() => false)
+                };
+            } else {
+                state.sticks[inputName] = {
+                    indexes: [indexes],
+                    inverts: inverts || indexes.map(() => false)
+                };
+            }
+        },
+
+        setMapper(mapperName: string, callback: Function) {
+            if (!nameIsValid(mapperName)) {
+                throw new Error(`On setMapper('${mapperName}', ...):
+                    first argument contains invalid characters`);
+            }
+
+            state.mappers[mapperName] = callback;
+        },
+
+        invertSticks(inverts: IStickInverts, ...inputNames: string[]) {
+            if (inputNames.length > 0) {
+                inputNames.forEach(inputName => {
+                    const stick = state.sticks[inputName];
+                    if (stick.inverts.length === inverts.length) {
+                        stick.inverts = inverts;
+                    } else {
+                        throw new Error(`On invertStick(inverts, [..., ${inputName}, ...]):
+                            given argument inverts' length does not match '${inputName}' axis' length`);
+                    }
+                });
+            }
+        },
+
+        swapButtons(btn1: string, btn2: string) {
+            const { buttons } = state;
+            // For some reason I can't do:
+            // [buttons[btn1], buttons[btn2]] = [buttons[btn2], buttons[btn1]];
+            const replacement = buttons[btn1];
+            buttons[btn1] = buttons[btn2];
+            buttons[btn2] = replacement;
+        },
+
+        swapSticks(btn1: string, btn2: string, includeInverts?: boolean = false) {
+            const { sticks } = state;
+            if (includeInverts) {
+                const replacement = sticks[btn1];
+                sticks[btn1] = sticks[btn2];
+                sticks[btn2] = replacement;
+            } else {
+                const replacement = sticks[btn1].indexes;
+                sticks[btn1].indexes = sticks[btn2].indexes;
+                sticks[btn2].indexes = replacement;
+            }
         },
 
         cancelListen() {
@@ -147,7 +260,7 @@ export default function createPlayer({
         },
 
         listenButton(
-            callback: (...indexes: number[]) => void,
+            callback: (indexes: number[]) => void,
             quantity?: number = 1,
             { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }: IListenParams = {}
         ) {
@@ -164,7 +277,7 @@ export default function createPlayer({
         },
 
         listenAxis(
-            callback: (...indexes: number[]) => void,
+            callback: (indexes: number[]) => void,
             quantity: number = 2,
             { waitFor = [100, 'ms'], consecutive = true, allowOffset = true }: IListenParams = {}
         ) {
@@ -180,264 +293,64 @@ export default function createPlayer({
             };
         },
 
-        buttonRebindOnPress(
+        buttonBindOnPress(
             inputName: string,
-            callback: () => void = noop,
-            allowDuplication: boolean = false
+            callback: () => void,
+            allowDuplication?: boolean = false
         ) {
             if (!nameIsValid(inputName)) {
-                throw new Error(`On buttonRebindOnPress('${inputName}', ...):
-                first argument contains invalid characters`);
+                throw new Error(`On buttonBindOnPress('${inputName}', ...):
+                    first argument contains invalid characters`);
             }
-            player.listenButton(index => {
-                const bindingIndex = findKey({ index }, player.buttonBindings);
+            player.listenButton((indexes: IButtonIndexes) => {
+                const findIterator: Function = value => value[0] === indexes[0];
+                const bindingIndex = findKey(findIterator, state.buttons);
 
-                if (bindingIndex) {
-                    if (inputName !== bindingIndex) {
-                        if (allowDuplication) {
-                            player.buttonBindings[inputName] = makeButtonBinding(index);
-                        } else {
-                            const binding = player.buttonBindings[bindingIndex];
-                            player.buttonBindings[bindingIndex] = player.buttonBindings[inputName];
-                            player.buttonBindings[inputName] = binding;
-                        }
-                    }
+                if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
+                    player.swapButtons(inputName, bindingIndex);
                 } else {
-                    player.buttonBindings[inputName] = makeButtonBinding(index);
+                    player.setButton(inputName, indexes);
                 }
 
                 callback(bindingIndex);
             });
         },
 
-        stickRebindOnPress(
+        stickBindOnPress(
             inputName: string,
-            callback: () => void = noop,
-            allowDuplication: boolean = false
+            callback: () => void,
+            allowDuplication?: boolean = false
         ) {
             if (!nameIsValid(inputName)) {
-                throw new Error(`On stickRebindOnPress('${inputName}', ...):
-                first argument contains invalid characters`);
+                throw new Error(`On stickBindOnPress('${inputName}', ...):
+                    first argument contains invalid characters`);
             }
 
-            player.listenAxis((index1, index2) => {
-                // REVIEW Needed to define the callback as a function
-                // because of https://github.com/facebook/flow/issues/1948
-                const findCallback: Function = ({ indexes }) => (
-                    indexes.includes(index1) && indexes.includes(index2)
-                );
+            player.listenAxis((indexesResult: IStickIndexes) => {
+                const c: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
+                const bindingIndex: string | null = findKey(c, state.sticks);
 
-                const bindingIndex: string | null = findKey(findCallback, player.stickBindings);
-
-                if (bindingIndex) {
-                    if (inputName !== bindingIndex) {
-                        if (allowDuplication) {
-                            player.stickBindings[inputName] = makeStickBinding(index1, index2);
-                        } else {
-                            const binding = player.stickBindings[bindingIndex];
-                            player.stickBindings[bindingIndex] = player.stickBindings[inputName];
-                            player.stickBindings[inputName] = binding;
-                        }
-                    }
+                if (!allowDuplication && bindingIndex && state.sticks[inputName]) {
+                    player.swapSticks(inputName, bindingIndex);
                 } else {
-                    player.stickBindings[inputName] = makeStickBinding(index1, index2);
+                    player.setStick(inputName, indexesResult);
                 }
 
                 callback(bindingIndex);
             });
-        },
-
-        setAggregator(aggregatorName: string, callback: Function) {
-            if (!nameIsValid(aggregatorName)) {
-                throw new Error(`On setAggregator('${aggregatorName}', ...):
-                first argument contains invalid characters`);
-            }
-            player.aggregators[aggregatorName] = { callback, value: null };
-        },
-
-        removeAggregator(aggregatorName: string) {
-            player.aggregators = omit([aggregatorName], player.aggregators);
-        },
-
-        cleanAggregators() {
-            player.aggregators = {};
-        },
-
-        setAlias(aliasName: string, inputs: string | string[]) {
-            if (!nameIsValid(aliasName)) {
-                throw new Error(`On setAlias('${aliasName}', ...): first argument contains invalid characters`);
-            }
-            const inputList: string[] = typeof inputs === 'string' ? [inputs] : inputs;
-
-            if (difference(inputList, Object.keys(player.buttons)).length === 0) {
-                player.buttonAliases[aliasName] = addButtonAlias(player.buttonAliases[aliasName], inputList);
-            } else if (difference(inputList, Object.keys(player.sticks)).length === 0) {
-                const lengths: number[] = inputList.map(inputName => player.sticks[inputName].value.length);
-
-                if (unique(lengths).length === 1) {
-                    player.stickAliases[aliasName] = addStickAlias(player.stickAliases[aliasName], inputList);
-                } else {
-                    throw new Error(
-                        `On setAlias(${aliasName}, [${inputList.join(', ')}]):
-                        all sticks specified did not have the same number of axes`
-                    );
-                }
-            } else {
-                throw new Error(
-                    `On setAlias(${aliasName}, [${inputList.join(', ')}]):
-                    either one of the inputs is void or it wasn't all a collection of just buttons or just sticks`
-                );
-            }
-        },
-
-        removeAlias(aliasName: string) {
-            if (includes(aliasName, Object.keys(player.buttonAliases))) {
-                player.buttonAliases = omit([aliasName], player.buttonAliases);
-            } else if (includes(aliasName, Object.keys(player.stickAliases))) {
-                player.stickAliases = omit([aliasName], player.stickAliases);
-            } else {
-                throw new Error(`On removeAlias('${aliasName}'): Specified alias does not exist`);
-            }
-        },
-
-        cleanAliases() {
-            player.buttonAliases = {};
-            player.stickAliases = {};
         },
 
         destroy() {
             player.disconnect();
-            player.cleanBindings();
-            player.cleanAliases();
-            player.cleanAggregators();
-        },
-
-        parseGamepad(gamepad: Gamepad): IParsedGamepad {
-            const prevGamepad = player.parsedGamepad;
-
-            return {
-                buttons: gamepad.buttons.map(({ value }: { value: number }, index: number) => {
-                    const previous: IButton = prevGamepad.buttons[index];
-                    const pressed = player.isButtonSignificant(value);
-
-                    return {
-                        pressed,
-                        justChanged: pressed !== (previous ? player.isButtonSignificant(previous.value) : false),
-                        value
-                    };
-                }),
-                axes: gamepad.axes
+            state.pad = {
+                buttons: [],
+                axes: []
             };
-        },
-
-        update(gamepad: Gamepad) {
-            player.parsedGamepad = player.parseGamepad(gamepad);
-            player.updateButtons(player.parsedGamepad);
-            player.updateStick(player.parsedGamepad);
-            player.updateAliases();
-            player.updateAggregators(gamepad); // REVIEW: Shouldn't this use parsedGamepad too?
-
-            listenOptions = updateListenOptions(listenOptions, player.parsedGamepad, threshold);
-        },
-
-        getButtonValue(value: IButtonValue = 0): IButtonValue {
-            if (!clampThreshold) {
-                return value;
-            }
-
-            return !player.isButtonSignificant(value) ? 0 : value;
-        },
-
-        isButtonSignificant(value: IButtonValue = 0): boolean {
-            return Math.abs(value) > threshold;
-        },
-
-        updateButtons(gamepad: IParsedGamepad) {
-            player.buttons = mapValues((binding: IButtonBinding) => binding.mapper(gamepad), player.buttonBindings);
-        },
-
-        getStickValue(stickValues: IStickValue): IStickValue {
-            if (clampThreshold && !player.isStickSignificant(stickValues)) {
-                return stickValues.map(() => 0);
-            }
-
-            return stickValues;
-        },
-
-        isStickSignificant(stickValues: IStickValue): boolean {
-            return stickValues.findIndex(value => Math.abs(value) >= threshold) !== -1;
-        },
-
-        updateStick(gamepad: IParsedGamepad) {
-            const prevStick = player.sticks;
-
-            player.sticks = mapValues((binding: IStickBinding, inputName: string) => {
-                const previous: IStick = prevStick[inputName];
-                const value: IStickValue = binding.mapper(gamepad, previous.inverts);
-                const pressed = player.isStickSignificant(value);
-
-                return {
-                    pressed,
-                    justChanged: pressed !== player.isStickSignificant(previous.value),
-                    value: player.getStickValue(value),
-                    inverts: previous.inverts
-                };
-            }, player.stickBindings);
-        },
-
-        updateAliases() {
-            // When an alias has more than 1 button assigned to it, use for reference the one that's pressed the most
-            player.buttonAliases = mapValues((alias: IButtonAlias) => {
-                let value = 0;
-
-                alias.inputs.forEach(aliasName => {
-                    if (player.buttons[aliasName].value > value) {
-                        value = player.buttons[aliasName].value;
-                    }
-                });
-
-                value = player.getButtonValue(value);
-                const pressed = player.isButtonSignificant(value);
-
-                return {
-                    pressed,
-                    justChanged: pressed !== player.isButtonSignificant(alias.value),
-                    value,
-                    inputs: alias.inputs
-                };
-            }, player.buttonAliases);
-
-            // When an alias has more than 1 stick assigned to it, do an average
-            player.stickAliases = mapValues((alias: IStickAlias) => {
-                let counts = [];
-                let count = 0;
-
-                alias.inputs.forEach(aliasName => {
-                    if (player.sticks[aliasName].pressed) {
-                        counts = player.sticks[aliasName].value.map((v, i) => v + (counts[i] || 0));
-                        count += 1;
-                    }
-                });
-
-                const value = count === 0 ?
-                    player.sticks[alias.inputs[0]].value.map(() => 0) :
-                    counts.map(v => v / count);
-                const pressed = player.isStickSignificant(value);
-
-                return {
-                    pressed,
-                    justChanged: pressed !== player.isStickSignificant(alias.value),
-                    value,
-                    inputs: alias.inputs
-                };
-            }, player.stickAliases);
-        },
-
-        updateAggregators(gamepad: Gamepad) {
-            player.aggregators = mapValues(({ callback, value }: IAggregator) => ({
-                callback,
-                value: callback(this, value, gamepad)
-            }), player.aggregators);
+            state.prevPad = {
+                buttons: [],
+                axes: []
+            };
+            player.clearMappers();
         }
     };
 

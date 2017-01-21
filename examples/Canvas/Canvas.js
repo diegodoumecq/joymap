@@ -1,6 +1,6 @@
-import { some, forEach, pull, uniqueId } from 'lodash/fp';
+import { some, forEach, uniqueId } from 'lodash/fp';
 
-import JoyMap from '../../src/JoyMap';
+import createJoyMap from '../../src/JoyMap';
 
 import '../main.styl';
 import './Canvas.styl';
@@ -34,7 +34,7 @@ gamepadImage.src = 'gamepad.png';
 function drawCharacter(ctx, character) {
     const { x, y } = character;
 
-    const angle = !character.player.aggregators.AnyButton.value ? character.angle : character.angle + Math.PI;
+    const angle = !character.player.getMappers('AnyButton') ? character.angle : character.angle + Math.PI;
 
     // Rotate whole canvas
     ctx.translate(x, y);
@@ -44,7 +44,7 @@ function drawCharacter(ctx, character) {
     // Draw straight image onto the rotated canvas
     ctx.drawImage(gamepadImage, x - 121, y - 75, 242, 150);
     ctx.font = '48px serif';
-    ctx.strokeText(character.player.name, x - 15, y);
+    ctx.strokeText(character.player.getName(), x - 15, y);
 
     // Unrotate canvas to straighten it and leave the image rotated instead
     ctx.translate(x, y);
@@ -53,7 +53,7 @@ function drawCharacter(ctx, character) {
 }
 
 function updateCharacter(character) {
-    const { L, R } = character.player.sticks;
+    const { L, R } = character.player.getSticks('L', 'R');
 
     // Move the character itself
     character.x += L.value[0] * 5;
@@ -67,8 +67,9 @@ function updateCharacter(character) {
 
 const characters = [];
 
-const joyMap = JoyMap({
+const joyMap = createJoyMap({
     threshold: 0.2,
+    autoConnect: 'manual',
     onPoll() {
         // Get the canvas context so we can draw on it
         const ctx = document.getElementById('canvas').getContext('2d');
@@ -76,26 +77,23 @@ const joyMap = JoyMap({
         // Draw background color, clearing the canvas
         ctx.fillStyle = '#EEE';
         ctx.fillRect(0, 0, SIZE.width, SIZE.height);
-        const unusedIds = joyMap.getUnusedGamepadIds();
+        const unusedIds = joyMap.getUnusedPadIds();
 
         if (unusedIds.length > 0) {
-            forEach(() => {
+            forEach(padId => {
                 const c = {
-                    player: joyMap.addPlayer(uniqueId()),
+                    player: joyMap.addPlayer(uniqueId(), padId),
                     x: Math.random() * SIZE.width,
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI
                 };
-                c.player.setAggregator('AnyButton', ({ buttons }) => some('pressed', buttons));
+                c.player.setMapper('AnyButton', ({ pad }) => some('pressed', pad.buttons));
                 characters.push(c);
             }, unusedIds);
         }
 
         forEach(c => {
-            if (!c.player.connected) {
-                pull(c, characters);
-                joyMap.removePlayer(c.player);
-            } else {
+            if (c.player.isConnected()) {
                 updateCharacter(c);
                 drawCharacter(ctx, c);
             }

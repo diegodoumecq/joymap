@@ -4,6 +4,26 @@
 
 export function noop() {}
 
+export function arraysEqual(a: any[], b: any[]): boolean {
+    if (a === b) {
+        return true;
+    }
+
+    const length = a.length;
+    if (length !== b.length) {
+        return false;
+    }
+
+    let i = 0;
+    while (i < length) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+        i += 1;
+    }
+    return true;
+}
+
 export function map(attr: string = '', target: Object[] | Object): any[] {
     if (Array.isArray(target)) {
         return target.map(value => value[attr]);
@@ -136,7 +156,7 @@ export function matches(comparison: Object, source: Object) {
     return true;
 }
 
-export function find(search: Object, target: any[]): any | null {
+export function find(search: Object, target: Object[]): any | null {
     const length = target.length;
     let i = 0;
 

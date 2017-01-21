@@ -1,51 +1,35 @@
 /* @flow */
 import { getRawGamepads, nameIsValid } from './lib/utils';
 import {
-    noop, map, isFunction, find, omit, difference, findKey
+    noop, map, isFunction, find, difference
 } from './lib/tools';
 
 import createPlayer from './Player';
-import type { IPlayer } from './Player';
+import type { IPlayer, IJoyMap, IJoyMapState } from './types';
 
-export type IJoyMap = {
-    isSupported: boolean,
-
-    gamepads: Gamepad[],
-    players: { [key: string]: IPlayer },
-
-    start: () => void,
-    stop: () => void,
-    getUnusedGamepadIds: () => string[],
-    setPlayers: (jsonString: string) => void,
-    addPlayer: (name: string) => IPlayer,
-    removePlayer: (player: IPlayer) => void,
-    cleanPlayers: () => void,
-    poll: () => void
-};
-
-type IParams = {
-    threshold: number,
-    clampThreshold: boolean,
-    onPoll: () => void,
-    playerHandling: 'manual' | 'auto'
-};
-
-export default function createJoyMap({
-    threshold = 0.2,
-    clampThreshold = true,
-    onPoll = noop,
-    playerHandling = 'auto'
-}: IParams = {}) {
-    const isSupported = navigator && isFunction(navigator.getGamepads);
+export default function createJoyMap(params?: {
+    threshold?: number,
+    clampThreshold?: boolean,
+    onPoll?: () => void,
+    autoConnect?: boolean
+} = {}) {
     let animationFrameRequestId: number | null = null;
 
-    const joyMap: IJoyMap = {
-        isSupported,
+    const state: IJoyMapState = {
+        threshold: params.threshold || 0.2,
+        clampThreshold: params.clampThreshold !== false,
+        onPoll: params.onPoll || noop,
+        autoConnect: params.autoConnect || true,
+        isSupported: navigator && isFunction(navigator.getGamepads),
         gamepads: [],
-        players: {},
+        players: []
+    };
+
+    const joyMap: IJoyMap = {
+        isSupported: () => state.isSupported,
 
         start() {
-            if (isSupported && animationFrameRequestId === null) {
+            if (state.isSupported && animationFrameRequestId === null) {
                 const step = () => {
                     joyMap.poll();
                     animationFrameRequestId = window.requestAnimationFrame(step);
@@ -61,79 +45,108 @@ export default function createJoyMap({
             }
         },
 
-        getUnusedGamepadIds(): string[] {
-            return difference(map('id', joyMap.gamepads), map('gamepadId', joyMap.players));
+        setThreshold(threshold: number) {
+            state.threshold = threshold;
         },
 
-        setPlayers(jsonString: string = '{}') {
-            joyMap.cleanPlayers();
-            joyMap.players = JSON.parse(jsonString);
+        setClampThreshold(clampThreshold: boolean) {
+            state.clampThreshold = clampThreshold;
         },
 
-        addPlayer(name: string): IPlayer {
+        setOnPoll(onPoll: Function) {
+            state.onPoll = onPoll;
+        },
+
+        setAutoConnect(autoConnect: boolean) {
+            state.autoConnect = autoConnect;
+        },
+
+        getGamepads: () => state.gamepads,
+        getPlayers: () => state.players,
+
+        getUnusedPadIds(): string[] {
+            return difference(map('id', state.gamepads), state.players.map(p => p.getPadId()));
+        },
+
+        getUnusedPadId(): string | null {
+            const playerIds = state.players.map(p => p.getPadId());
+            const gamepadIds = map('id', state.gamepads);
+
+            const length = gamepadIds.length;
+            let i = 0;
+            while (i < length) {
+                if (!playerIds.includes(gamepadIds[i])) {
+                    return gamepadIds[i];
+                }
+                i += 1;
+            }
+
+            return null;
+        },
+
+        setPlayers(jsonString: string = '[]') {
+            joyMap.clearPlayers();
+            state.players = JSON.parse(jsonString);
+        },
+
+        addPlayer(name: string, padId?: ?string): IPlayer {
             if (!nameIsValid(name)) {
                 throw new Error(`On addPlayer('${name}'): argument contains invalid characters`);
             }
 
-            const player: IPlayer = createPlayer({ name, threshold, clampThreshold });
-
-            const gamepadIds: string[] = map('id', joyMap.gamepads);
-            const unusedId: ?string = gamepadIds.find((gamepadId: string) => !findKey({ gamepadId }, joyMap.players));
-
-            if (unusedId) {
-                player.connect(unusedId);
+            // Given unassigned players and unused gamepads, automatically assign them
+            if (state.autoConnect === 'auto' && !padId) {
+                padId = joyMap.getUnusedPadId();
             }
 
-            joyMap.players[name] = player;
+            const player: IPlayer = createPlayer({
+                name,
+                threshold: state.threshold,
+                clampThreshold: state.clampThreshold,
+                padId
+            });
+
+            state.players.push(player);
 
             return player;
         },
 
         removePlayer(player: IPlayer) {
-            joyMap.players = omit([player.name], joyMap.players);
-            player.destroy();
+            const index = state.players.indexOf(player);
+            if (index !== -1) {
+                state.players.splice(index, 1);
+                player.destroy();
+            } else {
+                throw new Error(`removePlayer(player.name: ${player.getName()}), could not find such player`);
+            }
         },
 
-        cleanPlayers() {
-            // REVIEW: Had to use "any" type because flow thinks Object.values return mixed
-            // and fails to notice that joyMap.players is { [key: string]: IPlayer }
-            Object.values(joyMap.players).forEach((player: any) => joyMap.removePlayer(player));
+        clearPlayers() {
+            state.players.forEach(player => joyMap.removePlayer(player));
         },
 
         poll() {
-            joyMap.gamepads = getRawGamepads().filter((rawGamepad: ?Gamepad) =>
+            state.gamepads = getRawGamepads().filter((rawGamepad: ?Gamepad) =>
                 rawGamepad
                 && rawGamepad.connected
                 && rawGamepad.buttons.length
                 && rawGamepad.axes.length
                 && (!!rawGamepad.id || rawGamepad.id === 0));
 
-            Object.keys(joyMap.players).forEach((name: string) => {
-                const player: IPlayer = joyMap.players[name];
-                const unusedGamepadIds = joyMap.getUnusedGamepadIds();
+            state.players.forEach((player: IPlayer) => {
+                const gamepad: ?Gamepad = find({ id: player.getPadId() }, state.gamepads);
 
-                // Given unassigned players and unusued gamepads, automatically assign them
-                if (playerHandling === 'auto'
-                && player.gamepadId === null
-                && unusedGamepadIds.length > 0) {
-                    player.connect(unusedGamepadIds[0]);
-                }
-
-                const gamepad: ?Gamepad = find({ id: player.gamepadId }, joyMap.gamepads);
-
-                if (!player.connected) {
-                    if (gamepad) {
-                        player.reconnect();
-                        player.update(gamepad);
+                if (gamepad) {
+                    if (!player.isConnected()) {
+                        player.connect();
                     }
-                } else if (gamepad) {
                     player.update(gamepad);
-                } else {
+                } else if (player.isConnected()) {
                     player.disconnect();
                 }
             });
 
-            onPoll();
+            state.onPoll();
         }
     };
 

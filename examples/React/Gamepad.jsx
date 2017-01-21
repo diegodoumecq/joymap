@@ -34,8 +34,8 @@ class Gamepad extends React.Component {
 
     renderStick(inputName) {
         const { pressedColor } = this.props;
-        const { sticks, buttons } = this.props.player;
-        const [x, y] = sticks[inputName].value;
+        const [x, y] = this.props.player.getSticks(inputName).value;
+        const { pressed } = this.props.player.getButtons(`${inputName}3`);
 
         return (
             <div
@@ -44,8 +44,8 @@ class Gamepad extends React.Component {
                 onClick={() => {
                     const { player } = this.props;
 
-                    if (player.connected) {
-                        player.stickRebindOnPress(
+                    if (player.isConnected()) {
+                        player.stickBindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
                         );
@@ -54,13 +54,13 @@ class Gamepad extends React.Component {
                 }}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
-                    backgroundColor: buttons[`${inputName}3`].pressed ? pressedColor : ''
+                    backgroundColor: pressed ? pressedColor : ''
                 }} />);
     }
 
     renderDigital(inputName) {
         const { pressedColor } = this.props;
-        const { pressed } = this.props.player.buttons[inputName];
+        const { pressed } = this.props.player.getButtons(inputName);
 
         return (
             <div
@@ -69,8 +69,8 @@ class Gamepad extends React.Component {
                 onClick={() => {
                     const { player } = this.props;
 
-                    if (player.connected) {
-                        player.buttonRebindOnPress(
+                    if (player.isConnected()) {
+                        player.buttonBindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
                         );
@@ -83,7 +83,7 @@ class Gamepad extends React.Component {
     }
 
     renderShoulder(inputName) {
-        const { value } = this.props.player.buttons[inputName];
+        const { value } = this.props.player.getButtons(inputName);
 
         return (
             <div
@@ -103,10 +103,10 @@ class Gamepad extends React.Component {
 
         return (
             <div
-                styleName={classnames('gamepad', { disconnected: !player.connected, waiting: !!waiting })}
+                styleName={classnames('gamepad', { disconnected: !player.isConnected(), waiting: !!waiting })}
                 style={{ backgroundColor }}>
                 <div styleName="react-inputs">
-                    <span styleName="player-name" style={{ color: pressedColor }}>{player.name}</span>
+                    <span styleName="player-name" style={{ color: pressedColor }}>{player.getName()}</span>
                     <div styleName="back" />
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                     {map(inputName => this.renderStick(inputName), analogInputs)}

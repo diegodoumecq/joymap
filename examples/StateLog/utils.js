@@ -23,9 +23,9 @@ export function renderRows(params) {
 }
 
 // Utility function to print the state of all activated inputs of a type
-export function stringifyInputs(player, inputType) {
+export function stringifyInputs(inputs) {
     return reduce((result, inputName) => {
-        const input = player[inputType][inputName];
+        const input = inputs[inputName];
 
         if (input.pressed || input.justChanged) {
             if (isNumber(input.value)) {
@@ -37,18 +37,17 @@ export function stringifyInputs(player, inputType) {
         }
 
         return result;
-    }, '', Object.keys(player[inputType])).slice(0, -1);
+    }, '', Object.keys(inputs)).slice(0, -1);
 }
 
-// Utility function to print the state of all inputs of a type
-export function stringifyAggregators(player) {
-    return reduce((result, aggregatorName) => {
-        const stuff = player.aggregators[aggregatorName];
+export function stringifyMappers(mappers) {
+    return reduce((result, inputName) => {
+        const mapper = mappers[inputName];
 
-        if (!!stuff && !!stuff.value) {
-            return `${result} ${aggregatorName}: ${stuff.value},`;
+        if (mapper) {
+            return `${result} ${inputName}: (${mapper}),`;
         }
 
         return result;
-    }, '', Object.keys(player.aggregators)).slice(0, -1);
+    }, '', Object.keys(mappers)).slice(0, -1);
 }

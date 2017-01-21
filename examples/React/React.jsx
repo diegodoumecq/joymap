@@ -8,21 +8,20 @@ import tinycolor from 'tinycolor2';
 
 import styles from './React.mstyl';
 
-import JoyMap from '../../src/JoyMap';
+import createJoyMap from '../../src/JoyMap';
 import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });
 
 function joyMapSetup(params) {
-    const joyMap = JoyMap({ threshold: 0.2, ...params });
+    const joyMap = createJoyMap({ threshold: 0.2, ...params });
 
-    joyMap.addPlayer('James');
+    const James = joyMap.addPlayer('James');
     joyMap.addPlayer('Juan');
     joyMap.addPlayer('John');
     joyMap.addPlayer('Jim');
 
-    const { L } = joyMap.players.James.sticks;
-    L.inverts = [true, true];
+    James.invertSticks([true, true], 'L', 'R');
 
     return joyMap;
 }
@@ -31,8 +30,7 @@ class ReactExample extends React.Component {
 
     // Setup joymap
     componentWillMount() {
-        // Force React to rerender after each joymap.poll
-        // poll is called roughly 60 times a second, using requestAnimationFrame
+        // setSTate is called to force React to rerender after each poll
         this.joyMap = joyMapSetup({ onPoll: () => this.setState({}) });
     }
 
@@ -51,16 +49,16 @@ class ReactExample extends React.Component {
                 </header>
                 <section styleName="react-example">
                     {map(player => {
-                        const color = colorHash.hex(player.name);
+                        const color = colorHash.hex(player.getName());
                         return (
                             <Gamepad
-                                key={player.name}
+                                key={player.getName()}
                                 backgroundColor={color}
                                 pressedColor={`#${tinycolor(color).darken(20).toHex()}`}
                                 player={player}>
-                                <h2>{player.gamepadId || 'Player has no gamepad associated'}</h2>
+                                <h2>{player.getPadId() || 'Player has no gamepad associated'}</h2>
                             </Gamepad>);
-                    }, this.joyMap.players)}
+                    }, this.joyMap.getPlayers())}
                 </section>
             </article>
         );

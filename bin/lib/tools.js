@@ -17,6 +17,7 @@ var _keys = require('babel-runtime/core-js/object/keys');
 var _keys2 = _interopRequireDefault(_keys);
 
 exports.noop = noop;
+exports.arraysEqual = arraysEqual;
 exports.map = map;
 exports.isFunction = isFunction;
 exports.includes = includes;
@@ -34,6 +35,26 @@ exports.findKey = findKey;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function noop() {}
+
+function arraysEqual(a, b) {
+    if (a === b) {
+        return true;
+    }
+
+    var length = a.length;
+    if (length !== b.length) {
+        return false;
+    }
+
+    var i = 0;
+    while (i < length) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+        i += 1;
+    }
+    return true;
+}
 
 function map() {
     var attr = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
