@@ -117,13 +117,13 @@ The main interactions with these data structures are through these player functi
 * **listenAxis(callback, quantity = 1, options: { waitFor = [100, 'ms'], consecutive = false, allowOffset = true }) => void**
   * Functions the same way as **listenButton** except with a different default value for waitFor
   * Note: Given that we have no true way of assuming what indexes correspond to which stick, under normal circumstances the player will only trigger the callback if the stick is pushed at an angle, activating both axis at the same time. Pushing the stick to the left, for example, would not trigger the callback.
-* **buttonRebindOnPress(inputName, callback = noop, allowDuplication = false) => void**
+* **buttonBindOnPress(inputName, callback = noop, allowDuplication = false) => void**
   * A helper function that uses **listenButton** with the default options and sets the correct bindings for you
   * **inputName** is the name string of the button to be stored in this.buttons
   * **callback** is a callback that will be called (with argument index) when a pressed button is detected and the new input binding is set
   * **allowDuplication** is a flag that when false will swap bindings when one press would trigger more than one binding
-* **stickRebindOnPress(inputName, callback = noop, allowDuplication = false) => void**
-  * Functions the same way as **buttonRebindOnPress** except the callback will receive two indexes instead of just one due to the default settings of **listenAxis**
+* **stickBindOnPress(inputName, callback = noop, allowDuplication = false) => void**
+  * Functions the same way as **buttonBindOnPress** except the callback will receive two indexes instead of just one due to the default settings of **listenAxis**
 * **cancelListen() => void**
   * Will cancel the waiting process of **listenButton** or **listenAxis**
   * Note: You can only wait for buttons or for axes, never both at the same time

@@ -44,8 +44,8 @@ class Gamepad extends React.Component {
                 onClick={() => {
                     const { player } = this.props;
 
-                    if (player.connected) {
-                        player.stickRebindOnPress(
+                    if (player.isConnected()) {
+                        player.stickBindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
                         );
@@ -70,7 +70,7 @@ class Gamepad extends React.Component {
                     const { player } = this.props;
 
                     if (player.isConnected()) {
-                        player.buttonRebindOnPress(
+                        player.buttonBindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
                         );

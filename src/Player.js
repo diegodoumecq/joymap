@@ -2,7 +2,8 @@
 import {
     updateListenOptions, nameIsValid,
     getDefaultButtons, getDefaultSticks, parseGamepad,
-    stickMap, buttonMap
+    stickMap, buttonMap, getEmptyMappers,
+    getEmptyButtons, getEmptySticks
 } from './lib/utils';
 
 import {
@@ -15,16 +16,18 @@ import type {
     IListenParams, IPlayerState, IPlayer
 } from './types';
 
+
 export default function createPlayer(params?: {
     name?: string,
     threshold?: number,
-    clampThreshold?: boolean
+    clampThreshold?: boolean,
+    padId?: ?string
 } = {}): IPlayer {
     let listenOptions: null | IListenOptions = null;
 
     const state: IPlayerState = {
-        connected: false,
-        gamepadId: null,
+        connected: !!params.padId,
+        gamepadId: params.padId ? params.padId : null,
 
         name: params.name || '',
         threshold: params.threshold || 0.2,
@@ -47,6 +50,16 @@ export default function createPlayer(params?: {
         getName: () => state.name,
         getPadId: () => state.gamepadId,
         isConnected: () => state.connected,
+        disconnect() {
+            state.connected = false;
+        },
+        reconnect() {
+            state.connected = true;
+        },
+        connect(gamepadId: string) {
+            state.connected = true;
+            state.gamepadId = gamepadId;
+        },
 
         getParsedGamepad: () => state.pad,
 
@@ -70,6 +83,10 @@ export default function createPlayer(params?: {
         },
 
         getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
+            if (!state.connected) {
+                return getEmptyButtons(state.buttons, inputNames);
+            }
+
             if (inputNames.length === 0) {
                 return mapValues(button => buttonMap(state.pad, state.prevPad, button), state.buttons);
             }
@@ -87,6 +104,10 @@ export default function createPlayer(params?: {
         },
 
         getSticks(...inputNames: string[]): IStickState | { [index: string]: IStickState } {
+            if (!state.connected) {
+                return getEmptySticks(state.sticks, inputNames);
+            }
+
             if (inputNames.length === 0) {
                 return mapValues(stick => {
                     const { indexes, inverts } = stick;
@@ -94,7 +115,7 @@ export default function createPlayer(params?: {
                 }, state.sticks);
             }
 
-            if (inputNames.length === 0) {
+            if (inputNames.length === 1) {
                 const { indexes, inverts } = state.sticks[inputNames[0]];
                 return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
             }
@@ -109,6 +130,10 @@ export default function createPlayer(params?: {
         },
 
         getMappers(...mapperNames: string[]): any | { [index: string]: any } {
+            if (!state.connected) {
+                return getEmptyMappers(state.mappers, mapperNames);
+            }
+
             if (mapperNames.length === 0) {
                 return mapValues(mapper => mapper({
                     pad: state.pad,
@@ -231,19 +256,6 @@ export default function createPlayer(params?: {
             }
         },
 
-        disconnect() {
-            state.connected = false;
-        },
-
-        reconnect() {
-            state.connected = true;
-        },
-
-        connect(gamepadId: string) {
-            state.connected = true;
-            state.gamepadId = gamepadId;
-        },
-
         cancelListen() {
             listenOptions = null;
         },
@@ -291,14 +303,14 @@ export default function createPlayer(params?: {
                 throw new Error(`On buttonBindOnPress('${inputName}', ...):
                     first argument contains invalid characters`);
             }
-            player.listenButton(indexes => {
-                const index = indexes[0];
-                const bindingIndex = findKey(index, state.buttons);
+            player.listenButton((indexes: IButtonIndexes) => {
+                const findIterator: Function = value => value[0] === indexes[0];
+                const bindingIndex = findKey(findIterator, state.buttons);
 
                 if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
                     player.swapButtons(inputName, bindingIndex);
                 } else {
-                    player.setButton(inputName, index);
+                    player.setButton(inputName, indexes);
                 }
 
                 callback(bindingIndex);
@@ -316,7 +328,7 @@ export default function createPlayer(params?: {
             }
 
             player.listenAxis((indexesResult: IStickIndexes) => {
-                const c: Function = ({ indexes }) => arraysEqual(indexes, indexesResult);
+                const c: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
                 const bindingIndex: string | null = findKey(c, state.sticks);
 
                 if (!allowDuplication && bindingIndex && state.sticks[inputName]) {

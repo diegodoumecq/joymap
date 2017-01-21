@@ -2,11 +2,11 @@
 import type {
     IParsedGamepad, IListenOptions,
     IButtonValue, IStickValue, IStickInverts,
-    IButtonState, IStickState
+    IButtonState, IStickState, IButton, IStick
 } from '../types';
 
 import {
-    findIndexes, isConsecutive
+    findIndexes, isConsecutive, mapValues
 } from './tools';
 
 export function getRawGamepads(): Gamepad[] {
@@ -84,7 +84,8 @@ export function getDefaultButtons() {
         X: [2],
         Y: [3],
         start: [9],
-        select: [8]
+        select: [8],
+        home: [16]
     };
 }
 
@@ -115,6 +116,81 @@ export function getStickValue(stickValues: IStickValue, threshold: number): ISti
     }
 
     return stickValues;
+}
+
+export function getEmptyMappers(
+    mappers: { [key: string]: Function },
+    mapperNames: string[]
+): null | { [index: string]: null } {
+    const emptyMapper = null;
+
+    if (mapperNames.length === 0) {
+        return mapValues(() => emptyMapper, mappers);
+    }
+
+    if (mapperNames.length === 1) {
+        return emptyMapper;
+    }
+
+    const result = {};
+    mapperNames.forEach(mapperName => {
+        result[mapperName] = emptyMapper;
+    });
+
+    return result;
+}
+
+export function getEmptyButtons(
+    buttons: { [key: string]: IButton },
+    inputNames: string[]
+): IButtonState | { [index: string]: IButtonState } {
+    const emptyButton: IButtonState = {
+        value: 0,
+        pressed: false,
+        justChanged: false
+    };
+
+    if (inputNames.length === 0) {
+        return mapValues(() => emptyButton, buttons);
+    }
+
+    if (inputNames.length === 1) {
+        return emptyButton;
+    }
+
+    const result = {};
+    inputNames.forEach(mapperName => {
+        result[mapperName] = emptyButton;
+    });
+
+    return result;
+}
+
+export function getEmptySticks(
+    sticks: { [key: string]: IStick },
+    inputNames: string[]
+): IStickState | { [index: string]: IStickState } {
+    const emptyStick: IStickState = {
+        value: [0, 0],
+        pressed: false,
+        justChanged: false,
+        inverts: [false, false]
+    };
+
+    if (inputNames.length === 0) {
+        return mapValues(() => emptyStick, sticks);
+    }
+
+    if (inputNames.length === 1) {
+        return emptyStick;
+    }
+
+    const result = {};
+    inputNames.forEach(mapperName => {
+        result[mapperName] = emptyStick;
+    });
+
+    return result;
 }
 
 export function parseGamepad(
@@ -151,11 +227,13 @@ export function buttonMap(
 
     let i = 0;
     while (i < length) {
+        const prevValue = prevPad.buttons[indexes[i]];
         if (!prevPressed) {
-            prevPressed = prevPad.buttons[indexes[i]].pressed;
+            prevPressed = !!prevValue && prevValue.pressed;
         }
-        value = Math.max(value, pad.buttons[indexes[i]].value);
-        pressed = pressed || pad.buttons[indexes[i]].pressed;
+        const padButton = pad.buttons[indexes[i]];
+        value = Math.max(value, !padButton ? 0 : padButton.value);
+        pressed = pressed || (!!padButton && padButton.pressed);
         i += 1;
     }
 
@@ -179,7 +257,7 @@ function roundSticks(indexMaps: IStickValue[], axes: number[], threshold: number
         }
     });
 
-    return count === 0 ? counts.map(() => 0) : counts.map(v => v / count);
+    return count === 0 ? indexMaps[0].map(() => 0) : counts.map(v => v / count);
 }
 
 export function stickMap(

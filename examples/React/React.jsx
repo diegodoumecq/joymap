@@ -21,7 +21,7 @@ function joyMapSetup(params) {
     joyMap.addPlayer('John');
     joyMap.addPlayer('Jim');
 
-    James.invertStick([true, true], 'L', 'R');
+    James.invertSticks([true, true], 'L', 'R');
 
     return joyMap;
 }

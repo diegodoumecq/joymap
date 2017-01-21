@@ -11,7 +11,7 @@ export default function createJoyMap(params?: {
     threshold?: number,
     clampThreshold?: boolean,
     onPoll?: () => void,
-    autoConnect?: 'manual' | 'auto'
+    autoConnect?: boolean
 } = {}) {
     let animationFrameRequestId: number | null = null;
 
@@ -19,7 +19,7 @@ export default function createJoyMap(params?: {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         onPoll: params.onPoll || noop,
-        autoConnect: params.autoConnect || 'auto',
+        autoConnect: params.autoConnect || true,
         isSupported: navigator && isFunction(navigator.getGamepads),
         gamepads: [],
         players: []
@@ -57,7 +57,7 @@ export default function createJoyMap(params?: {
             state.onPoll = onPoll;
         },
 
-        setAutoConnect(autoConnect: 'auto' | 'manual') {
+        setAutoConnect(autoConnect: boolean) {
             state.autoConnect = autoConnect;
         },
 
@@ -70,11 +70,13 @@ export default function createJoyMap(params?: {
 
         getUnusedPadId(): string | null {
             const playerIds = state.players.map(p => p.getPadId());
-            const length = state.gamepads.length;
+            const gamepadIds = map('id', state.gamepads);
+
+            const length = gamepadIds.length;
             let i = 0;
             while (i < length) {
-                if (!playerIds.includes(state.gamepads[i].id)) {
-                    return state.gamepads[i].id;
+                if (!playerIds.includes(gamepadIds[i])) {
+                    return gamepadIds[i];
                 }
                 i += 1;
             }
@@ -87,23 +89,22 @@ export default function createJoyMap(params?: {
             state.players = JSON.parse(jsonString);
         },
 
-        addPlayer(name: string): IPlayer {
+        addPlayer(name: string, padId?: ?string): IPlayer {
             if (!nameIsValid(name)) {
                 throw new Error(`On addPlayer('${name}'): argument contains invalid characters`);
+            }
+
+            // Given unassigned players and unused gamepads, automatically assign them
+            if (state.autoConnect === 'auto' && !padId) {
+                padId = joyMap.getUnusedPadId();
             }
 
             const player: IPlayer = createPlayer({
                 name,
                 threshold: state.threshold,
-                clampThreshold: state.clampThreshold
+                clampThreshold: state.clampThreshold,
+                padId
             });
-
-            const gamepadIds: string[] = map('id', state.gamepads);
-            const unusedId: ?string = gamepadIds.find((gamepadId: string) => !find({ gamepadId }, state.players));
-
-            if (unusedId) {
-                player.connect(unusedId);
-            }
 
             state.players.push(player);
 
@@ -133,16 +134,6 @@ export default function createJoyMap(params?: {
                 && (!!rawGamepad.id || rawGamepad.id === 0));
 
             state.players.forEach((player: IPlayer) => {
-                // Given unassigned players and unused gamepads, automatically assign them
-                if (state.autoConnect === 'auto'
-                && player.getPadId() === null) {
-                    const unusedGamepadId = joyMap.getUnusedPadId();
-
-                    if (unusedGamepadId) {
-                        player.connect(unusedGamepadId);
-                    }
-                }
-
                 const gamepad: ?Gamepad = find({ id: player.getPadId() }, state.gamepads);
 
                 if (gamepad) {

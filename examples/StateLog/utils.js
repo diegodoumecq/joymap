@@ -39,3 +39,15 @@ export function stringifyInputs(inputs) {
         return result;
     }, '', Object.keys(inputs)).slice(0, -1);
 }
+
+export function stringifyMappers(mappers) {
+    return reduce((result, inputName) => {
+        const mapper = mappers[inputName];
+
+        if (mapper) {
+            return `${result} ${inputName}: (${mapper}),`;
+        }
+
+        return result;
+    }, '', Object.keys(mappers)).slice(0, -1);
+}

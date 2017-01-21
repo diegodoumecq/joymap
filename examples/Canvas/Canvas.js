@@ -1,4 +1,4 @@
-import { some, forEach, pull, uniqueId } from 'lodash/fp';
+import { some, forEach, uniqueId } from 'lodash/fp';
 
 import createJoyMap from '../../src/JoyMap';
 
@@ -69,6 +69,7 @@ const characters = [];
 
 const joyMap = createJoyMap({
     threshold: 0.2,
+    autoConnect: 'manual',
     onPoll() {
         // Get the canvas context so we can draw on it
         const ctx = document.getElementById('canvas').getContext('2d');
@@ -79,9 +80,9 @@ const joyMap = createJoyMap({
         const unusedIds = joyMap.getUnusedPadIds();
 
         if (unusedIds.length > 0) {
-            forEach(() => {
+            forEach(padId => {
                 const c = {
-                    player: joyMap.addPlayer(uniqueId()),
+                    player: joyMap.addPlayer(uniqueId(), padId),
                     x: Math.random() * SIZE.width,
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI

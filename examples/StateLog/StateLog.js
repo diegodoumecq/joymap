@@ -1,6 +1,6 @@
 import { join, compact } from 'lodash/fp';
 import {
-    stringifyInputs, countPressed, renderRows
+    stringifyInputs, countPressed, renderRows, stringifyMappers
 } from './utils';
 
 import '../main.styl';
@@ -36,7 +36,7 @@ const joyMap = createJoyMap({
         const compilation = [
             !showButtons ? '' : stringifyInputs(jo.getButtons()),
             !showSticks ? '' : stringifyInputs(jo.getSticks()),
-            !showMappers ? '' : stringifyInputs(jo.getMappers())
+            !showMappers ? '' : stringifyMappers(jo.getMappers())
         ];
 
         const stringOutput = join(', ', compact(compilation));
@@ -85,10 +85,9 @@ jo.setMapper('CountFace', ({ player }) => countPressed(player.getButtons('A', 'B
 jo.setMapper('CountAll', ({ pad, player }) => {
     const buttonCount = countPressed(pad.buttons);
     const stickCount = countPressed(player.getSticks());
-    const total = buttonCount + stickCount;
 
-    if (total > 0) {
-        return `${total}(Btn:${buttonCount} Sticks:${stickCount})`;
+    if (buttonCount || stickCount) {
+        return `Btn:${buttonCount} Sticks:${stickCount}`;
     }
 
     return null;
