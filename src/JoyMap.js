@@ -14,22 +14,32 @@ export default function createJoyMap(params?: {
     autoConnect?: boolean
 } = {}) {
     let animationFrameRequestId: number | null = null;
+    const isSupported = navigator && isFunction(navigator.getGamepads);
 
     const state: IJoyMapState = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         onPoll: params.onPoll || noop,
         autoConnect: params.autoConnect || true,
-        isSupported: navigator && isFunction(navigator.getGamepads),
         gamepads: [],
         players: []
     };
 
     const joyMap: IJoyMap = {
-        isSupported: () => state.isSupported,
+        isSupported: () => isSupported,
+
+        getPlayerConfigs(): string {
+            return `[${state.players.map(player => player.getConfig).join(',')}]`;
+        },
+
+        setPlayerConfigs(jsonString: string = '[]') {
+            joyMap.clearPlayers();
+            const parsedList = JSON.parse(jsonString);
+            parsedList.forEach(playerConfig => joyMap.addPlayer().setConfig(playerConfig));
+        },
 
         start() {
-            if (state.isSupported && animationFrameRequestId === null) {
+            if (isSupported && animationFrameRequestId === null) {
                 const step = () => {
                     joyMap.poll();
                     animationFrameRequestId = window.requestAnimationFrame(step);
@@ -84,13 +94,8 @@ export default function createJoyMap(params?: {
             return null;
         },
 
-        setPlayers(jsonString: string = '[]') {
-            joyMap.clearPlayers();
-            state.players = JSON.parse(jsonString);
-        },
-
-        addPlayer(name: string, padId?: ?string): IPlayer {
-            if (!nameIsValid(name)) {
+        addPlayer(name?: string, padId?: ?string): IPlayer {
+            if (!!name && !nameIsValid(name)) {
                 throw new Error(`On addPlayer('${name}'): argument contains invalid characters`);
             }
 

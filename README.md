@@ -46,8 +46,9 @@ Run **yarn add joymap**
   * **getPlayers() => IPlayer[]** returns an array of Players (see the Player section for more details)
   * **getUnusedPadIds() => string[]** Returns an array of Gamepad ids that are not currently assigned to a Player
   * **getUnusedPadId() => string | null** Same as above but returns only one if present
-  * **setPlayers(jsonString: string) => void** [Experimental] Given a serialized string, initialize the players object. Used for saving and later restoring the current player configurations
-  * **addPlayer(name: string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
+  * **getPlayerConfigs: () => string** Returns a serialized string representing an array of whatever each **player.getConfig()** returns; used for saving the current player configs for later
+  * **setPlayerConfigs: (jsonString: string) => void** calls **clearPlayers()** first and then creates a player for each config given in the serialized string's main array; this is intended to be used a restoration mechanism, for example **getPlayerConfigs** could be used to store the current player config in localStorage and later on restoring it with **setPlayerConfigs**
+  * **addPlayer(name: string, padId?: ?string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
   * **removePlayer(player: IPlayer) => void** Remove a Player from JoyMap's Player array
   * **clearPlayers() => void** Remove all players from JoyMap's array
   * **poll() => void** Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
@@ -91,7 +92,9 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
 * **getPadId() => ?string** Returns the gamepad id assigned to Player, may be connected or not
 * **isConnected() => boolean** Returns if the Player has assigned to it a currently connected gamepad
 * **disconnect() => void** Sets the Player as not connected
-* **connect(gamepadId?: string) => void** Sets the Player as connected and assigns a new gamepad id if given one
+* **connect(padId?: string) => void** Sets the Player as connected and assigns a new gamepad id if given one
+* **getConfig: () => string** Returns a serialized version of the internal structures that represent buttons, sticks, name, threshold and clampThreshold. Notice that mappers are missing from this since they are functions and there's no easy, clean way to store functions. Gamepad assignement is also missing but that's more to do with not wanting to store information that will not be consistent between play sessions (different browsers give different Ids for the same gamepad, for instance)
+* **setConfig: (serializedString: string) => void** Parses the given string and assigns the player's internal state to whatever the parse results in
 * **getParsedGamepad() => IParsedGamepad** Returns a parsed copy of the gamepad object
   * It has two properties: { axes, buttons }
   * **axes** is a direct copy of the gamepad.axes array
@@ -104,7 +107,7 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
   * So player.getButtons('A') will return { value, pressed, justChanged}, but player.getButtons('A', 'B') will return { A: { value, ... }, B: { value, ... } }
 * **getSticks(...names: string[]) => IStickState | { [index: string]: IStickState }** Functions the exact same way as getButtons save for the object format being { value, pressed, justChanged, inverts }
   * In this case, **value** is an array of numbers, each one representing an axis of the stick. These numbers also go from -1 to 1
-* **getMappers(...names: string[]) => { [index: string]: any} | any** Again, functions the exact same way as getButtons except that mappers don't have a set object format in particular for each mapper result
+* **getMappers(...names: string[]) => any | { [index: string]: any}** Again, functions the exact same way as getButtons except that mappers don't have a set object format in particular for each mapper result
 * **getButtonIndexes(...inputNames: string[]) => IButtonIndexes** Returns the combined indexes of the given button names, even if given only one name
   * These indexes are the index number that a given button is bound to. For example, an Xbox360 X button's index is typically 0, so it is the first value found in the browser's Gamepad buttons array
   * Combines very well with **setButton**
@@ -173,7 +176,6 @@ Taken from the StateLog example:
     jo.setButton('StickAverage', jo.getStickIndexes('L', 'R'));
     
     jo.setMapper('Point', ({ player }) => player.getSticks('R').pressed);
-
 
 ### Roadmap
 

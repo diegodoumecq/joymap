@@ -16,7 +16,6 @@ import type {
     IListenParams, IPlayerState, IPlayer
 } from './types';
 
-
 export default function createPlayer(params?: {
     name?: string,
     threshold?: number,
@@ -24,11 +23,10 @@ export default function createPlayer(params?: {
     padId?: ?string
 } = {}): IPlayer {
     let listenOptions: null | IListenOptions = null;
+    let gamepadId: ?string = params.padId ? params.padId : null;
+    let connected: boolean = !!params.padId;
 
     const state: IPlayerState = {
-        connected: !!params.padId,
-        gamepadId: params.padId ? params.padId : null,
-
         name: params.name || '',
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
@@ -48,16 +46,28 @@ export default function createPlayer(params?: {
 
     const player: IPlayer = {
         getName: () => state.name,
-        getPadId: () => state.gamepadId,
-        isConnected: () => state.connected,
+        getPadId: () => gamepadId,
+        isConnected: () => connected,
         disconnect() {
-            state.connected = false;
+            connected = false;
         },
-        connect(gamepadId?: string) {
-            state.connected = true;
+        connect(padId?: string) {
+            connected = true;
             if (gamepadId) {
-                state.gamepadId = gamepadId;
+                gamepadId = padId;
             }
+        },
+        getConfig(): string {
+            return JSON.stringify({
+                name: state.name,
+                threshold: state.threshold,
+                clampThreshold: state.clampThreshold,
+                buttons: state.buttons,
+                sticks: state.sticks
+            });
+        },
+        setConfig(serializedString: string) {
+            Object.assign(state, JSON.parse(serializedString));
         },
 
         getParsedGamepad: () => state.pad,
@@ -82,7 +92,7 @@ export default function createPlayer(params?: {
         },
 
         getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
-            if (!state.connected) {
+            if (!connected) {
                 return getEmptyButtons(state.buttons, inputNames);
             }
 
@@ -103,7 +113,7 @@ export default function createPlayer(params?: {
         },
 
         getSticks(...inputNames: string[]): IStickState | { [index: string]: IStickState } {
-            if (!state.connected) {
+            if (!connected) {
                 return getEmptySticks(state.sticks, inputNames);
             }
 
@@ -129,7 +139,7 @@ export default function createPlayer(params?: {
         },
 
         getMappers(...mapperNames: string[]): any | { [index: string]: any } {
-            if (!state.connected) {
+            if (!connected) {
                 return getEmptyMappers(state.mappers, mapperNames);
             }
 

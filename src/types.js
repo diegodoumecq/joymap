@@ -48,9 +48,6 @@ export type IListenOptions = {
 };
 
 export type IPlayerState = {
-    gamepadId: ?string,
-    connected: boolean,
-
     name: string,
     threshold: number,
     clampThreshold: boolean,
@@ -67,17 +64,19 @@ export type IPlayer = {
     getPadId: () => ?string,
     isConnected: () => boolean,
     disconnect: () => void,
-    connect: (gamepadId?: string) => void,
+    connect: (padId?: string) => void,
+    getConfig: () => string,
+    setConfig: (serializedString: string) => void,
 
     getParsedGamepad: () => IParsedGamepad,
 
-    removeMapper: (mapperName: string) => void,
     clearMappers: () => void,
+    removeMapper: (mapperName: string) => void,
     update: (gamepad: Gamepad) => void,
 
     getButtons: (...names: string[]) => IButtonState | { [index: string]: IButtonState },
     getSticks: (...names: string[]) => IStickState | { [index: string]: IStickState },
-    getMappers: (...names: string[]) => { [index: string]: any} | any,
+    getMappers: (...names: string[]) => any | { [index: string]: any},
 
     getButtonIndexes: (...inputNames: string[]) => IButtonIndexes,
     getStickIndexes: (...inputNames: string[]) => IStickIndexes,
@@ -89,7 +88,6 @@ export type IPlayer = {
     invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
     swapButtons: (btn1: string, btn2: string) => void,
     swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
-
 
     cancelListen: () => void,
     listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
@@ -105,7 +103,6 @@ export type IJoyMapState = {
     clampThreshold: boolean,
     onPoll: () => void,
     autoConnect: boolean,
-    isSupported: boolean,
     gamepads: Gamepad[],
     players: IPlayer[]
 };
@@ -125,8 +122,9 @@ export type IJoyMap = {
     getUnusedPadIds: () => string[],
     getUnusedPadId: () => string | null,
 
-    setPlayers: (jsonString: string) => void,
-    addPlayer: (name: string) => IPlayer,
+    getPlayerConfigs: () => string,
+    setPlayerConfigs: (jsonString: string) => void,
+    addPlayer: (name?: string, padId?: ?string) => IPlayer,
     removePlayer: (player: IPlayer) => void,
     clearPlayers: () => void,
     poll: () => void
