@@ -26,6 +26,12 @@ Run **yarn add joymap**
   * For the HTML state log example, run **yarn log**
 * Build only the minified library to /bin folder with **yarn build**
 
+## Technologies
+
+JoyMap is developed using [webpack 2](https://webpack.js.org/) for the dev environment/bundling and [Babel](https://babeljs.io/) as a transpiler to support ES6 ([and beyond](https://babeljs.io/docs/plugins/preset-es2017/)) as well as [flow type handling](https://flowtype.org/).
+
+There are three examples of usage, each of them showcasing the different ways to interact and use JoyMap while using different technologies.
+
 ### Exported API
 
 * **createJoyMap** is the default export function and main point of usage.
