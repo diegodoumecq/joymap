@@ -5,7 +5,7 @@ import createJoyMap from '../../src/JoyMap';
 import '../main.styl';
 import './Canvas.styl';
 
-const SIZE = {
+var SIZE = {
     width: 800,
     height: 600,
     centerX: 400,
@@ -28,13 +28,13 @@ document.getElementById('app').innerHTML = `
         </div>
     </article>`;
 
-const gamepadImage = new Image();
+var gamepadImage = new Image();
 gamepadImage.src = 'gamepad.png';
 
 function drawCharacter(ctx, character) {
-    const { x, y } = character;
-
-    const angle = !character.player.getMappers('AnyButton') ? character.angle : character.angle + Math.PI;
+    var x = character.x;
+    var y = character.y;
+    var angle = !character.player.getMappers('AnyButton') ? character.angle : character.angle + Math.PI;
 
     // Rotate whole canvas
     ctx.translate(x, y);
@@ -53,7 +53,9 @@ function drawCharacter(ctx, character) {
 }
 
 function updateCharacter(character) {
-    const { L, R } = character.player.getSticks('L', 'R');
+    var sticks = character.player.getSticks('L', 'R');
+    var L = sticks.L;
+    var R = sticks.R;
 
     // Move the character itself
     character.x += L.value[0] * 5;
@@ -65,34 +67,36 @@ function updateCharacter(character) {
     }
 }
 
-const characters = [];
+var characters = [];
 
-const joyMap = createJoyMap({
+var joyMap = createJoyMap({
     threshold: 0.2,
     autoConnect: 'manual',
-    onPoll() {
+    onPoll: function onPoll() {
         // Get the canvas context so we can draw on it
-        const ctx = document.getElementById('canvas').getContext('2d');
+        var ctx = document.getElementById('canvas').getContext('2d');
 
         // Draw background color, clearing the canvas
         ctx.fillStyle = '#EEE';
         ctx.fillRect(0, 0, SIZE.width, SIZE.height);
-        const unusedIds = joyMap.getUnusedPadIds();
+        var unusedIds = joyMap.getUnusedPadIds();
 
         if (unusedIds.length > 0) {
-            forEach(padId => {
-                const c = {
+            forEach(function (padId) {
+                var c = {
                     player: joyMap.addPlayer(uniqueId(), padId),
                     x: Math.random() * SIZE.width,
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI
                 };
-                c.player.setMapper('AnyButton', ({ pad }) => some('pressed', pad.buttons));
+                c.player.setMapper('AnyButton', function (params) {
+                    return some('pressed', params.pad.buttons);
+                });
                 characters.push(c);
             }, unusedIds);
         }
 
-        forEach(c => {
+        forEach(function (c) {
             if (c.player.isConnected()) {
                 updateCharacter(c);
                 drawCharacter(ctx, c);
