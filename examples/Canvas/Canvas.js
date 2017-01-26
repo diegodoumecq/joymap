@@ -1,9 +1,8 @@
-import { some, forEach, uniqueId } from 'lodash/fp';
+/*eslint-disable */
+var createJoyMap = require('../../src/JoyMap').default;
 
-import createJoyMap from '../../src/JoyMap';
-
-import '../main.styl';
-import './Canvas.styl';
+require('../main.styl');
+require('./Canvas.styl');
 
 var SIZE = {
     width: 800,
@@ -12,21 +11,23 @@ var SIZE = {
     centerY: 300
 };
 
+var lastId = 0;
+function uniqueId(prefix) {
+    lastId += 1;
+    return (prefix || '') + lastId;
+}
+
 // Populate the app div with a canvas
-document.getElementById('app').innerHTML = `
-    <article class="examples-container">
-        <header>
-            <h1 className="title">JoyMap Canvas example</h1>
-            <h2>We create player characters whenever you connect a gamepad</h2>
-            <h3>We also DESTROY them when the gamepad gets unplugged</h3>
-        </header>
-        <div class="canvas-example">
-            <canvas
-                id="canvas"
-                width="${SIZE.width}"
-                height="${SIZE.height}" />
-        </div>
-    </article>`;
+document.getElementById('app').innerHTML = '<article class="examples-container">' +
+        '<header>' +
+            '<h1 className="title">JoyMap Canvas example</h1>' +
+            '<h2>We create player characters whenever you connect a gamepad</h2>' +
+            '<h3>We also DESTROY them when the gamepad gets unplugged</h3>' +
+        '</header>' +
+        '<div class="canvas-example">' +
+            '<canvas id="canvas" width="' + SIZE.width + '" height="' + SIZE.height + '" />' +
+        '</div>' +
+    '</article>';
 
 var gamepadImage = new Image();
 gamepadImage.src = 'gamepad.png';
@@ -82,7 +83,7 @@ var joyMap = createJoyMap({
         var unusedIds = joyMap.getUnusedPadIds();
 
         if (unusedIds.length > 0) {
-            forEach(function (padId) {
+            unusedIds.forEach(function (padId) {
                 var c = {
                     player: joyMap.addPlayer(uniqueId(), padId),
                     x: Math.random() * SIZE.width,
@@ -90,19 +91,23 @@ var joyMap = createJoyMap({
                     angle: Math.random() * 2 * Math.PI
                 };
                 c.player.setMapper('AnyButton', function (params) {
-                    return some('pressed', params.pad.buttons);
+                    return params.pad.buttons.some(function (button) {
+                        return button.pressed;
+                    });
                 });
                 characters.push(c);
-            }, unusedIds);
+            });
         }
 
-        forEach(function (c) {
+        characters.forEach(function (c) {
             if (c.player.isConnected()) {
                 updateCharacter(c);
                 drawCharacter(ctx, c);
             }
-        }, characters);
+        });
     }
 });
 
 joyMap.start();
+
+/* eslint-enable */
