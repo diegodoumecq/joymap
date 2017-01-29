@@ -72,7 +72,7 @@ var characters = [];
 
 var joyMap = createJoyMap({
     threshold: 0.2,
-    autoConnect: 'manual',
+    autoConnect: false,
     onPoll: function onPoll() {
         // Get the canvas context so we can draw on it
         var ctx = document.getElementById('canvas').getContext('2d');

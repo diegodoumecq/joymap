@@ -1,4 +1,6 @@
 /* @flow */
+import memoize from 'fast-memoize';
+
 import {
     updateListenOptions, nameIsValid,
     getDefaultButtons, getDefaultSticks, parseGamepad,
@@ -20,6 +22,7 @@ export default function createPlayer(params?: {
     name?: string,
     threshold?: number,
     clampThreshold?: boolean,
+    memoize?: ?boolean,
     padId?: ?string
 } = {}): IPlayer {
     let listenOptions: null | IListenOptions = null;
@@ -30,6 +33,7 @@ export default function createPlayer(params?: {
         name: params.name || '',
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
+        memoize: params.memoize !== false,
         pad: {
             buttons: [],
             axes: []
@@ -38,6 +42,9 @@ export default function createPlayer(params?: {
             buttons: [],
             axes: []
         },
+
+        buttonMap: params.memoize ? memoize(buttonMap) : buttonMap,
+        stickMap: params.memoize ? memoize(stickMap) : stickMap,
 
         buttons: getDefaultButtons(),
         sticks: getDefaultSticks(),
@@ -53,7 +60,7 @@ export default function createPlayer(params?: {
         },
         connect(padId?: string) {
             connected = true;
-            if (gamepadId) {
+            if (padId) {
                 gamepadId = padId;
             }
         },
@@ -97,16 +104,16 @@ export default function createPlayer(params?: {
             }
 
             if (inputNames.length === 0) {
-                return mapValues(button => buttonMap(state.pad, state.prevPad, button), state.buttons);
+                return mapValues(button => state.buttonMap(state.pad, state.prevPad, button), state.buttons);
             }
 
             if (inputNames.length === 1) {
-                return buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
             }
 
             const result = {};
             inputNames.forEach(inputName => {
-                result[inputName] = buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
+                result[inputName] = state.buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
             });
 
             return result;
@@ -120,19 +127,19 @@ export default function createPlayer(params?: {
             if (inputNames.length === 0) {
                 return mapValues(stick => {
                     const { indexes, inverts } = stick;
-                    return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                    return state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
                 }, state.sticks);
             }
 
             if (inputNames.length === 1) {
                 const { indexes, inverts } = state.sticks[inputNames[0]];
-                return stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                return state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
             }
 
             const result = {};
             inputNames.forEach(inputName => {
                 const { indexes, inverts } = state.sticks[inputName];
-                result[inputName] = stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                result[inputName] = state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
             });
 
             return result;
@@ -225,8 +232,7 @@ export default function createPlayer(params?: {
                 throw new Error(`On setMapper('${mapperName}', ...):
                     first argument contains invalid characters`);
             }
-
-            state.mappers[mapperName] = callback;
+            state.mappers[mapperName] = state.memoize ? memoize(callback) : callback;
         },
 
         invertSticks(inverts: IStickInverts, ...inputNames: string[]) {

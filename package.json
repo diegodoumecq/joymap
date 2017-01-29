@@ -55,7 +55,8 @@
   "license": "MIT",
   "dependencies": {
     "babel-polyfill": "^6.20.0",
-    "babel-runtime": "^6.20.0"
+    "babel-runtime": "^6.20.0",
+    "fast-memoize": "^2.1.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.7",

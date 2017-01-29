@@ -2445,6 +2445,10 @@ fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
+fast-memoize:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fast-memoize/-/fast-memoize-2.1.1.tgz#a2e90dff099dc2883651c724dc2820e390d9238e"
+
 fastparse@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.1.tgz#d1e2643b38a94d7583b479060e6c4affc94071f8"

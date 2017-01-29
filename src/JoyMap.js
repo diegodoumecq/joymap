@@ -20,7 +20,7 @@ export default function createJoyMap(params?: {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         onPoll: params.onPoll || noop,
-        autoConnect: params.autoConnect || true,
+        autoConnect: params.autoConnect !== false,
         gamepads: [],
         players: []
     };
@@ -40,6 +40,17 @@ export default function createJoyMap(params?: {
 
         start() {
             if (isSupported && animationFrameRequestId === null) {
+                joyMap.poll();
+                if (state.autoConnect) {
+                    state.players.forEach(p => {
+                        if (!p.isConnected()) {
+                            const padId = joyMap.getUnusedPadId();
+                            if (padId) {
+                                p.connect(padId);
+                            }
+                        }
+                    });
+                }
                 const step = () => {
                     joyMap.poll();
                     animationFrameRequestId = window.requestAnimationFrame(step);
@@ -100,7 +111,7 @@ export default function createJoyMap(params?: {
             }
 
             // Given unassigned players and unused gamepads, automatically assign them
-            if (state.autoConnect === 'auto' && !padId) {
+            if (state.autoConnect && !padId) {
                 padId = joyMap.getUnusedPadId();
             }
 

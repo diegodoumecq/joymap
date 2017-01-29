@@ -51,8 +51,18 @@ export type IPlayerState = {
     name: string,
     threshold: number,
     clampThreshold: boolean,
+    memoize: boolean,
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
+
+    buttonMap: (pad: IParsedGamepad, prevPad: IParsedGamepad, indexes: number[]) => IButtonState,
+    stickMap: (
+        pad: IParsedGamepad,
+        prevPad: IParsedGamepad,
+        indexMaps: IStickValue[],
+        inverts: IStickInverts,
+        threshold: number
+    ) => IStickState,
 
     buttons: { [key: string]: IButton },
     sticks: { [key: string]: IStick },
