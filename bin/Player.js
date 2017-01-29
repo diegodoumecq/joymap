@@ -8,7 +8,19 @@ var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
 
+var _assign = require('babel-runtime/core-js/object/assign');
+
+var _assign2 = _interopRequireDefault(_assign);
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 exports.default = createPlayer;
+
+var _fastMemoize = require('fast-memoize');
+
+var _fastMemoize2 = _interopRequireDefault(_fastMemoize);
 
 var _utils = require('./lib/utils');
 
@@ -20,14 +32,14 @@ function createPlayer() {
     var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var listenOptions = null;
+    var gamepadId = params.padId ? params.padId : null;
+    var connected = !!params.padId;
 
     var state = {
-        connected: !!params.padId,
-        gamepadId: params.padId ? params.padId : null,
-
         name: params.name || '',
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
+        memoize: params.memoize !== false,
         pad: {
             buttons: [],
             axes: []
@@ -36,6 +48,9 @@ function createPlayer() {
             buttons: [],
             axes: []
         },
+
+        buttonMap: params.memoize ? (0, _fastMemoize2.default)(_utils.buttonMap) : _utils.buttonMap,
+        stickMap: params.memoize ? (0, _fastMemoize2.default)(_utils.stickMap) : _utils.stickMap,
 
         buttons: (0, _utils.getDefaultButtons)(),
         sticks: (0, _utils.getDefaultSticks)(),
@@ -47,19 +62,31 @@ function createPlayer() {
             return state.name;
         },
         getPadId: function getPadId() {
-            return state.gamepadId;
+            return gamepadId;
         },
         isConnected: function isConnected() {
-            return state.connected;
+            return connected;
         },
         disconnect: function disconnect() {
-            state.connected = false;
+            connected = false;
         },
-        connect: function connect(gamepadId) {
-            state.connected = true;
-            if (gamepadId) {
-                state.gamepadId = gamepadId;
+        connect: function connect(padId) {
+            connected = true;
+            if (padId) {
+                gamepadId = padId;
             }
+        },
+        getConfig: function getConfig() {
+            return (0, _stringify2.default)({
+                name: state.name,
+                threshold: state.threshold,
+                clampThreshold: state.clampThreshold,
+                buttons: state.buttons,
+                sticks: state.sticks
+            });
+        },
+        setConfig: function setConfig(serializedString) {
+            (0, _assign2.default)(state, JSON.parse(serializedString));
         },
 
 
@@ -84,23 +111,23 @@ function createPlayer() {
                 inputNames[_key] = arguments[_key];
             }
 
-            if (!state.connected) {
+            if (!connected) {
                 return (0, _utils.getEmptyButtons)(state.buttons, inputNames);
             }
 
             if (inputNames.length === 0) {
                 return (0, _tools.mapValues)(function (button) {
-                    return (0, _utils.buttonMap)(state.pad, state.prevPad, button);
+                    return state.buttonMap(state.pad, state.prevPad, button);
                 }, state.buttons);
             }
 
             if (inputNames.length === 1) {
-                return (0, _utils.buttonMap)(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
             }
 
             var result = {};
             inputNames.forEach(function (inputName) {
-                result[inputName] = (0, _utils.buttonMap)(state.pad, state.prevPad, state.buttons[inputName]);
+                result[inputName] = state.buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
             });
 
             return result;
@@ -110,7 +137,7 @@ function createPlayer() {
                 inputNames[_key2] = arguments[_key2];
             }
 
-            if (!state.connected) {
+            if (!connected) {
                 return (0, _utils.getEmptySticks)(state.sticks, inputNames);
             }
 
@@ -119,7 +146,7 @@ function createPlayer() {
                     var indexes = stick.indexes,
                         inverts = stick.inverts;
 
-                    return (0, _utils.stickMap)(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                    return state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
                 }, state.sticks);
             }
 
@@ -128,7 +155,7 @@ function createPlayer() {
                     _indexes = _state$sticks$inputNa.indexes,
                     inverts = _state$sticks$inputNa.inverts;
 
-                return (0, _utils.stickMap)(state.pad, state.prevPad, _indexes, inverts, state.threshold);
+                return state.stickMap(state.pad, state.prevPad, _indexes, inverts, state.threshold);
             }
 
             var result = {};
@@ -137,7 +164,7 @@ function createPlayer() {
                     indexes = _state$sticks$inputNa2.indexes,
                     inverts = _state$sticks$inputNa2.inverts;
 
-                result[inputName] = (0, _utils.stickMap)(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                result[inputName] = state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
             });
 
             return result;
@@ -147,7 +174,7 @@ function createPlayer() {
                 mapperNames[_key3] = arguments[_key3];
             }
 
-            if (!state.connected) {
+            if (!connected) {
                 return (0, _utils.getEmptyMappers)(state.mappers, mapperNames);
             }
 
@@ -241,8 +268,7 @@ function createPlayer() {
             if (!(0, _utils.nameIsValid)(mapperName)) {
                 throw new Error('On setMapper(\'' + mapperName + '\', ...):\n                    first argument contains invalid characters');
             }
-
-            state.mappers[mapperName] = callback;
+            state.mappers[mapperName] = state.memoize ? (0, _fastMemoize2.default)(callback) : callback;
         },
         invertSticks: function invertSticks(inverts) {
             for (var _len6 = arguments.length, inputNames = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {

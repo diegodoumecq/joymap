@@ -19,25 +19,50 @@ function createJoyMap() {
     var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var animationFrameRequestId = null;
+    var _isSupported = navigator && (0, _tools.isFunction)(navigator.getGamepads);
 
     var state = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         onPoll: params.onPoll || _tools.noop,
-        autoConnect: params.autoConnect || true,
-        isSupported: navigator && (0, _tools.isFunction)(navigator.getGamepads),
+        autoConnect: params.autoConnect !== false,
         gamepads: [],
         players: []
     };
 
     var joyMap = {
         isSupported: function isSupported() {
-            return state.isSupported;
+            return _isSupported;
         },
 
+        getPlayerConfigs: function getPlayerConfigs() {
+            return '[' + state.players.map(function (player) {
+                return player.getConfig;
+            }).join(',') + ']';
+        },
+        setPlayerConfigs: function setPlayerConfigs() {
+            var jsonString = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '[]';
+
+            joyMap.clearPlayers();
+            var parsedList = JSON.parse(jsonString);
+            parsedList.forEach(function (playerConfig) {
+                return joyMap.addPlayer().setConfig(playerConfig);
+            });
+        },
         start: function start() {
-            if (state.isSupported && animationFrameRequestId === null) {
+            if (_isSupported && animationFrameRequestId === null) {
                 (function () {
+                    joyMap.poll();
+                    if (state.autoConnect) {
+                        state.players.forEach(function (p) {
+                            if (!p.isConnected()) {
+                                var padId = joyMap.getUnusedPadId();
+                                if (padId) {
+                                    p.connect(padId);
+                                }
+                            }
+                        });
+                    }
                     var step = function step() {
                         joyMap.poll();
                         animationFrameRequestId = window.requestAnimationFrame(step);
@@ -95,18 +120,12 @@ function createJoyMap() {
 
             return null;
         },
-        setPlayers: function setPlayers() {
-            var jsonString = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '[]';
-
-            joyMap.clearPlayers();
-            state.players = JSON.parse(jsonString);
-        },
         addPlayer: function addPlayer(name, padId) {
-            if (!(0, _utils.nameIsValid)(name)) {
+            if (!!name && !(0, _utils.nameIsValid)(name)) {
                 throw new Error('On addPlayer(\'' + name + '\'): argument contains invalid characters');
             }
 
-            if (state.autoConnect === 'auto' && !padId) {
+            if (state.autoConnect && !padId) {
                 padId = joyMap.getUnusedPadId();
             }
 
