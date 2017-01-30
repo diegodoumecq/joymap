@@ -191,9 +191,7 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the player config and on refresh restore it using joymap.setPlayers
   * It should also offer a "RESET" button for these player configs
-* Overall optimizations
-  * Memoize buttons sticks and mappers so the mapping functions don't need to be called every time either getButtons, getSticks or getmappers get called
-  * Implement most of this library inside a web-worker [when/if that becomes a possibility](https://github.com/w3c/gamepad/issues/37)
+* Consider the use of web-workers and whether or not they would be worth it in this context
 * Implement rumble when it gets supported
   * [We do have vibration support but only for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
   * There's an [open issue](https://github.com/w3c/gamepad/issues/19) about this
