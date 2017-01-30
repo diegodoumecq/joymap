@@ -80,10 +80,6 @@ export type IPlayer = {
 
     getParsedGamepad: () => IParsedGamepad,
 
-    clearMappers: () => void,
-    removeMapper: (mapperName: string) => void,
-    update: (gamepad: Gamepad) => void,
-
     getButtons: (...names: string[]) => IButtonState | { [index: string]: IButtonState },
     getSticks: (...names: string[]) => IStickState | { [index: string]: IStickState },
     getMappers: (...names: string[]) => any | { [index: string]: any},
@@ -99,6 +95,10 @@ export type IPlayer = {
     swapButtons: (btn1: string, btn2: string) => void,
     swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
 
+    removeMapper: (mapperName: string) => void,
+    clearMappers: () => void,
+    update: (gamepad: Gamepad) => void,
+
     cancelListen: () => void,
     listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
     listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
@@ -111,6 +111,7 @@ export type IPlayer = {
 export type IJoyMapState = {
     threshold: number,
     clampThreshold: boolean,
+    memoize: boolean,
     onPoll: () => void,
     autoConnect: boolean,
     gamepads: Gamepad[],
@@ -119,6 +120,9 @@ export type IJoyMapState = {
 
 export type IJoyMap = {
     isSupported: () => boolean,
+    getPlayerConfigs: () => string,
+    setPlayerConfigs: (jsonString: string) => void,
+
     start: () => void,
     stop: () => void,
 
@@ -132,8 +136,6 @@ export type IJoyMap = {
     getUnusedPadIds: () => string[],
     getUnusedPadId: () => string | null,
 
-    getPlayerConfigs: () => string,
-    setPlayerConfigs: (jsonString: string) => void,
     addPlayer: (name?: string, padId?: ?string) => IPlayer,
     removePlayer: (player: IPlayer) => void,
     clearPlayers: () => void,

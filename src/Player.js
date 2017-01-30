@@ -79,25 +79,6 @@ export default function createPlayer(params?: {
 
         getParsedGamepad: () => state.pad,
 
-        clearMappers() {
-            state.mappers = {};
-        },
-
-        removeMapper(mapperName: string) {
-            state.mappers = omit([mapperName], state.mappers);
-        },
-
-        update(gamepad: Gamepad) {
-            // TODO Store the buttons, sticks and mappers that have already been queried
-            // and clear those structures at the start of update
-            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
-            // Maybe add a memoizeMappers flag (default true) to Player construction
-            state.prevPad = state.pad;
-            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
-
-            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
-        },
-
         getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
             if (!connected) {
                 return getEmptyButtons(state.buttons, inputNames);
@@ -269,6 +250,25 @@ export default function createPlayer(params?: {
                 sticks[btn1].indexes = sticks[btn2].indexes;
                 sticks[btn2].indexes = replacement;
             }
+        },
+
+        removeMapper(mapperName: string) {
+            state.mappers = omit([mapperName], state.mappers);
+        },
+
+        clearMappers() {
+            state.mappers = {};
+        },
+
+        update(gamepad: Gamepad) {
+            // TODO Store the buttons, sticks and mappers that have already been queried
+            // and clear those structures at the start of update
+            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
+            // Maybe add a memoizeMappers flag (default true) to Player construction
+            state.prevPad = state.pad;
+            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+
+            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
         },
 
         cancelListen() {

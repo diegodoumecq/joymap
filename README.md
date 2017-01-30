@@ -38,10 +38,13 @@ There are three examples of usage, each of them showcasing the different ways to
 * It takes a single optional argument in the form of an object with the following possible values:
   * **threshold** is a number bewteen 0 and 1 that is used for all inputs as the minimum value required to be considered as pressed
   * **clampThreshold** is a boolean that if true, will set all not pressed inputs to 0
+  * **memoize** is a boolean that if true will use [fast-memoize](https://github.com/caiogondim/fast-memoize.js) on the mapping functions for buttons, sticks and mappers
   * **onPoll** is a function that will be called at the end of each polling
   * **autoConnect** is a boolean that if true, will connect all newly created Players with an unused gamepad if present at the moment of player creation
 * When **createJoyMap** gets called, it returns an object with a bunch of functions:
   * **isSupported() => boolean** returns if gamepads are supported by the browser
+  * **getPlayerConfigs() => string** Returns a serialized string representing an array of whatever each **player.getConfig()** returns; used for saving the current player configs for later
+  * **setPlayerConfigs(jsonString: string) => void** calls **clearPlayers()** first and then creates a player for each config given in the serialized string's main array; this is intended to be used a restoration mechanism, for example **getPlayerConfigs** could be used to store the current player config in localStorage and later on restoring it with **setPlayerConfigs**
   * **start() => void** repeatedly calls **poll()** using requestAnimationFrame
   * **stop() => void** stops calling **poll()**
   * **setThreshold(threshold: number) => void** modifies the **threshold**
@@ -52,8 +55,6 @@ There are three examples of usage, each of them showcasing the different ways to
   * **getPlayers() => IPlayer[]** returns an array of Players (see the Player section for more details)
   * **getUnusedPadIds() => string[]** Returns an array of Gamepad ids that are not currently assigned to a Player
   * **getUnusedPadId() => string | null** Same as above but returns only one if present
-  * **getPlayerConfigs: () => string** Returns a serialized string representing an array of whatever each **player.getConfig()** returns; used for saving the current player configs for later
-  * **setPlayerConfigs: (jsonString: string) => void** calls **clearPlayers()** first and then creates a player for each config given in the serialized string's main array; this is intended to be used a restoration mechanism, for example **getPlayerConfigs** could be used to store the current player config in localStorage and later on restoring it with **setPlayerConfigs**
   * **addPlayer(name: string, padId?: ?string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
   * **removePlayer(player: IPlayer) => void** Remove a Player from JoyMap's Player array
   * **clearPlayers() => void** Remove all players from JoyMap's array
@@ -99,8 +100,8 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
 * **isConnected() => boolean** Returns if the Player has assigned to it a currently connected gamepad
 * **disconnect() => void** Sets the Player as not connected
 * **connect(padId?: string) => void** Sets the Player as connected and assigns a new gamepad id if given one
-* **getConfig: () => string** Returns a serialized version of the internal structures that represent buttons, sticks, name, threshold and clampThreshold. Notice that mappers are missing from this since they are functions and there's no easy, clean way to store functions. Gamepad assignement is also missing but that's more to do with not wanting to store information that will not be consistent between play sessions (different browsers give different Ids for the same gamepad, for instance)
-* **setConfig: (serializedString: string) => void** Parses the given string and assigns the player's internal state to whatever the parse results in
+* **getConfig() => string** Returns a serialized version of the internal structures that represent buttons, sticks, name, threshold and clampThreshold. Notice that mappers are missing from this since they are functions and there's no easy, clean way to store functions. Gamepad assignement is also missing but that's more to do with not wanting to store information that will not be consistent between play sessions (different browsers give different Ids for the same gamepad, for instance)
+* **setConfig(serializedString: string) => void** Parses the given string and assigns the player's internal state to whatever the parse results in
 * **getParsedGamepad() => IParsedGamepad** Returns a parsed copy of the gamepad object
   * It has two properties: { axes, buttons }
   * **axes** is a direct copy of the gamepad.axes array
