@@ -1,3 +1,15 @@
+**[How to install](#how-to-install)** |
+**[Key features](#key-features)** |
+**[How to run all the things](#how-to-run-all-the-things)** |
+**[Technologies](#technologies)** |
+**[Exported API](#exported-api)** |
+**[Simple example of usage](#simple-example-of-usage)** |
+**[Why use polling instead of events?](why-use-polling-instead-of-events)** |
+**[The Player's API](#the-players-api)** |
+**[Naming restrictions](#naming-restrictions)** |
+**[Advanced example of usage](#advanced-example-of-usage)** |
+**[Roadmap](#roadmap)**
+
 # JOYMAP
 
 A Javascript Gamepad browser API wrapper
@@ -26,7 +38,7 @@ Run **yarn add joymap**
   * For the HTML state log example, run **yarn log**
 * Build only the minified library to /bin folder with **yarn build**
 
-## Technologies
+### Technologies
 
 JoyMap is developed using [webpack 2](https://webpack.js.org/) for the dev environment/bundling and [Babel](https://babeljs.io/) as a transpiler to support ES6 ([and beyond](https://babeljs.io/docs/plugins/preset-es2017/)) as well as [flow type handling](https://flowtype.org/).
 
@@ -210,6 +222,7 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
   * player.addEvent('A.!justChanged', eventHandler) will trigger when the A button is pressed but not justChanged
   * player.addEvent('button.justChanged', eventHandler) will trigger when any button is pressed and justChanged
   * player.addEvent('!button', eventHandler) will trigger when no button is pressed. Consequently the eventHandler will receive index as -1 as part of the event object
+* Once some event handling is added, support [observable streams/reactive stuff](https://github.com/Reactive-Extensions/RxJS)
 * Support multiple inputs on a single event handler
   * This can get out of hand pretty quickly, but it certainly would be pretty neat
   * This would improve **player.addEvent** by allowing the syntax player.addEvent('A + B') for combination of inputs
