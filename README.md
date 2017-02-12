@@ -4,7 +4,7 @@
 **[Technologies](#technologies)** |
 **[Exported API](#exported-api)** |
 **[Simple example of usage](#simple-example-of-usage)** |
-**[Why use polling instead of events?](why-use-polling-instead-of-events)** |
+**[Why use polling instead of events?](#why-use-polling-instead-of-events)** |
 **[The Player's API](#the-players-api)** |
 **[Naming restrictions](#naming-restrictions)** |
 **[Advanced example of usage](#advanced-example-of-usage)** |

@@ -320,15 +320,15 @@ export default function createPlayer(params?: {
             }
             player.listenButton((indexes: IButtonIndexes) => {
                 const findIterator: Function = value => value[0] === indexes[0];
-                const bindingIndex = findKey(findIterator, state.buttons);
+                const resultName: string | null = findKey(findIterator, state.buttons);
 
-                if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
-                    player.swapButtons(inputName, bindingIndex);
+                if (!allowDuplication && resultName && state.buttons[inputName]) {
+                    player.swapButtons(inputName, resultName);
                 } else {
                     player.setButton(inputName, indexes);
                 }
 
-                callback(bindingIndex);
+                callback(resultName);
             });
         },
 
@@ -343,16 +343,16 @@ export default function createPlayer(params?: {
             }
 
             player.listenAxis((indexesResult: IStickIndexes) => {
-                const c: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
-                const bindingIndex: string | null = findKey(c, state.sticks);
+                const findIterator: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
+                const resultName: string | null = findKey(findIterator, state.sticks);
 
-                if (!allowDuplication && bindingIndex && state.sticks[inputName]) {
-                    player.swapSticks(inputName, bindingIndex);
+                if (!allowDuplication && resultName && state.sticks[inputName]) {
+                    player.swapSticks(inputName, resultName);
                 } else {
                     player.setStick(inputName, indexesResult);
                 }
 
-                callback(bindingIndex);
+                callback(resultName);
             });
         },
 
