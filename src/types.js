@@ -48,7 +48,6 @@ export type IListenOptions = {
 };
 
 export type IPlayerState = {
-    name: string,
     threshold: number,
     clampThreshold: boolean,
     memoize: boolean,
@@ -70,7 +69,6 @@ export type IPlayerState = {
 };
 
 export type IPlayer = {
-    getName: () => string,
     getPadId: () => ?string,
     isConnected: () => boolean,
     disconnect: () => void,
@@ -136,7 +134,7 @@ export type IJoyMap = {
     getUnusedPadIds: () => string[],
     getUnusedPadId: () => string | null,
 
-    addPlayer: (name?: string, padId?: ?string) => IPlayer,
+    addPlayer: (padId?: ?string) => IPlayer,
     removePlayer: (player: IPlayer) => void,
     clearPlayers: () => void,
     poll: () => void

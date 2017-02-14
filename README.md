@@ -67,7 +67,7 @@ There are three examples of usage, each of them showcasing the different ways to
   * **getPlayers() => IPlayer[]** returns an array of Players (see the Player section for more details)
   * **getUnusedPadIds() => string[]** Returns an array of Gamepad ids that are not currently assigned to a Player
   * **getUnusedPadId() => string | null** Same as above but returns only one if present
-  * **addPlayer(name: string, padId?: ?string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
+  * **addPlayer(padId?: ?string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
   * **removePlayer(player: IPlayer) => void** Remove a Player from JoyMap's Player array
   * **clearPlayers() => void** Remove all players from JoyMap's array
   * **poll() => void** Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
@@ -83,9 +83,9 @@ There are three examples of usage, each of them showcasing the different ways to
         onPoll: stepFunction,
         autoConnect: true
     });
-    const player1 = joyMap.addPlayer('player1');
-    const player2 = joyMap.addPlayer('player2');
-    const player3 = joyMap.addPlayer('player3');
+    const player1 = joyMap.addPlayer();
+    const player2 = joyMap.addPlayer();
+    const player3 = joyMap.addPlayer();
     joyMap.start();
     
     /... later on in another file, probably a mario-handling one: /
@@ -107,7 +107,6 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
 
 ### The Player's API
 
-* **getName() => string** Returns the name given to the Player
 * **getPadId() => ?string** Returns the gamepad id assigned to Player, may be connected or not
 * **isConnected() => boolean** Returns if the Player has assigned to it a currently connected gamepad
 * **disconnect() => void** Sets the Player as not connected
@@ -184,7 +183,7 @@ Taken from the StateLog example:
         autoConnect: true
     });
     
-    const jo = joyMap.addPlayer('Joustine');
+    const jo = joyMap.addPlayer();
     
     jo.setButton('Jump', jo.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
     jo.setButton('Shoot', jo.getButtonIndexes('B'));
@@ -222,7 +221,7 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
   * player.addEvent('A.!justChanged', eventHandler) will trigger when the A button is pressed but not justChanged
   * player.addEvent('button.justChanged', eventHandler) will trigger when any button is pressed and justChanged
   * player.addEvent('!button', eventHandler) will trigger when no button is pressed. Consequently the eventHandler will receive index as -1 as part of the event object
-* Once some event handling is added, support [observable streams/reactive stuff](https://github.com/Reactive-Extensions/RxJS)
+* Once some event handling is added, support [observable streams](https://github.com/Reactive-Extensions/RxJS)
 * Support multiple inputs on a single event handler
   * This can get out of hand pretty quickly, but it certainly would be pretty neat
   * This would improve **player.addEvent** by allowing the syntax player.addEvent('A + B') for combination of inputs

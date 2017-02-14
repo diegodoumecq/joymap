@@ -20,6 +20,7 @@ class Gamepad extends React.Component {
         backgroundColor: PropTypes.string.isRequired,
         pressedColor: PropTypes.string.isRequired,
         player: PropTypes.object.isRequired,
+        name: React.PropTypes.string.isRequired,
         children: React.PropTypes.node
     };
 
@@ -98,7 +99,7 @@ class Gamepad extends React.Component {
     }
 
     render() {
-        const { player, backgroundColor, pressedColor, children } = this.props;
+        const { player, backgroundColor, pressedColor, children, name } = this.props;
         const { waiting } = this.state;
 
         return (
@@ -106,7 +107,7 @@ class Gamepad extends React.Component {
                 styleName={classnames('gamepad', { disconnected: !player.isConnected(), waiting: !!waiting })}
                 style={{ backgroundColor }}>
                 <div styleName="react-inputs">
-                    <span styleName="player-name" style={{ color: pressedColor }}>{player.getName()}</span>
+                    <span styleName="player-name" style={{ color: pressedColor }}>{name}</span>
                     <div styleName="back" />
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                     {map(inputName => this.renderStick(inputName), analogInputs)}

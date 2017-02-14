@@ -1,4 +1,7 @@
 /*eslint-disable */
+
+// Simple canvas example that doesn't use any other library nor ES6 features
+
 var createJoyMap = require('../../src/JoyMap').default;
 
 require('../main.styl');
@@ -45,7 +48,7 @@ function drawCharacter(ctx, character) {
     // Draw straight image onto the rotated canvas
     ctx.drawImage(gamepadImage, x - 121, y - 75, 242, 150);
     ctx.font = '48px serif';
-    ctx.strokeText(character.player.getName(), x - 15, y);
+    ctx.strokeText(character.id, x - 15, y);
 
     // Unrotate canvas to straighten it and leave the image rotated instead
     ctx.translate(x, y);
@@ -85,7 +88,8 @@ var joyMap = createJoyMap({
         if (unusedIds.length > 0) {
             unusedIds.forEach(function (padId) {
                 var c = {
-                    player: joyMap.addPlayer(uniqueId(), padId),
+                    player: joyMap.addPlayer(padId),
+                    id: uniqueId(),
                     x: Math.random() * SIZE.width,
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI

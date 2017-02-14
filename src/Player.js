@@ -19,7 +19,6 @@ import type {
 } from './types';
 
 export default function createPlayer(params?: {
-    name?: string,
     threshold?: number,
     clampThreshold?: boolean,
     memoize?: ?boolean,
@@ -30,7 +29,6 @@ export default function createPlayer(params?: {
     let connected: boolean = !!params.padId;
 
     const state: IPlayerState = {
-        name: params.name || '',
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         memoize: params.memoize !== false,
@@ -52,7 +50,6 @@ export default function createPlayer(params?: {
     };
 
     const player: IPlayer = {
-        getName: () => state.name,
         getPadId: () => gamepadId,
         isConnected: () => connected,
         disconnect() {
@@ -66,7 +63,6 @@ export default function createPlayer(params?: {
         },
         getConfig(): string {
             return JSON.stringify({
-                name: state.name,
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
                 buttons: state.buttons,

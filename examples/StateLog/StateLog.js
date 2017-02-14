@@ -67,7 +67,7 @@ const joyMap = createJoyMap({
     }
 });
 
-const jo = joyMap.addPlayer('Joustine');
+const jo = joyMap.addPlayer();
 
 // Set custom buttons
 jo.setButton('Jump', jo.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));

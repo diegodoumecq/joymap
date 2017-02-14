@@ -13,25 +13,27 @@ import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });
 
-function joyMapSetup(params) {
-    const joyMap = createJoyMap({ threshold: 0.2, ...params });
-
-    const James = joyMap.addPlayer('James');
-    joyMap.addPlayer('Juan');
-    joyMap.addPlayer('John');
-    joyMap.addPlayer('Jim');
-
-    James.invertSticks([true, true], 'L', 'R');
-
-    return joyMap;
-}
-
 class ReactExample extends React.Component {
 
     // Setup joymap
     componentWillMount() {
-        // setSTate is called to force React to rerender after each poll
-        this.joyMap = joyMapSetup({ onPoll: () => this.setState({}) });
+        const joyMap = createJoyMap({
+            threshold: 0.2,
+            // setState is called on each poll to force React to rerender
+            onPoll: () => this.setState({})
+        });
+
+        const James = joyMap.addPlayer();
+        James.invertSticks([true, true], 'L', 'R');
+
+        this.players = [
+            { name: 'James', player: James },
+            { name: 'Juan', player: joyMap.addPlayer() },
+            { name: 'John', player: joyMap.addPlayer() },
+            { name: 'Jim', player: joyMap.addPlayer() }
+        ];
+
+        this.joyMap = joyMap;
     }
 
     // Tell joymap to start polling the gamepads
@@ -48,23 +50,26 @@ class ReactExample extends React.Component {
                     <span>Connect one or more Gamepads. Use them. Click on buttons to rebind them.</span>
                 </header>
                 <section styleName="react-example">
-                    {map(player => {
-                        const color = colorHash.hex(player.getName());
+                    {map(({ player, name }) => {
+                        const color = colorHash.hex(name);
                         return (
                             <Gamepad
-                                key={player.getName()}
+                                key={name}
+                                name={name}
                                 backgroundColor={color}
                                 pressedColor={`#${tinycolor(color).darken(20).toHex()}`}
                                 player={player}>
-                                <h2>{player.getPadId() || 'Player has no gamepad associated'}</h2>
+                                <h2>{player.getPadId() || 'Player has no gamepad assigned'}</h2>
                             </Gamepad>);
-                    }, this.joyMap.getPlayers())}
+                    }, this.players)}
                 </section>
             </article>
         );
     }
 }
 
-const CSSModuledExample = CSSModules(ReactExample, styles, { allowMultiple: true });
+// Unnecessary CSS modules decorator, catches all styleName props and applies the renamed className props
+// Used to overcome global class namespaces in css!
+const DecoratedReactExample = CSSModules(ReactExample, styles, { allowMultiple: true });
 
-render(<CSSModuledExample />, document.getElementById('app'));
+render(<DecoratedReactExample />, document.getElementById('app'));
