@@ -315,8 +315,8 @@ export default function createPlayer(params?: {
                     first argument contains invalid characters`);
             }
             player.listenButton((indexes: IButtonIndexes) => {
-                const findIterator: Function = value => value[0] === indexes[0];
-                const resultName: string | null = findKey(findIterator, state.buttons);
+                const findKeyCb: Function = value => value[0] === indexes[0];
+                const resultName: string | null = findKey(findKeyCb, state.buttons);
 
                 if (!allowDuplication && resultName && state.buttons[inputName]) {
                     player.swapButtons(inputName, resultName);
@@ -339,8 +339,8 @@ export default function createPlayer(params?: {
             }
 
             player.listenAxis((indexesResult: IStickIndexes) => {
-                const findIterator: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
-                const resultName: string | null = findKey(findIterator, state.sticks);
+                const findKeyCb: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
+                const resultName: string | null = findKey(findKeyCb, state.sticks);
 
                 if (!allowDuplication && resultName && state.sticks[inputName]) {
                     player.swapSticks(inputName, resultName);

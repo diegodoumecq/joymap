@@ -19,7 +19,6 @@ import type {
 } from './types';
 
 export default function createPlayer(params?: {
-    name?: string,
     threshold?: number,
     clampThreshold?: boolean,
     memoize?: ?boolean,
@@ -30,7 +29,6 @@ export default function createPlayer(params?: {
     let connected: boolean = !!params.padId;
 
     const state: IPlayerState = {
-        name: params.name || '',
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         memoize: params.memoize !== false,
@@ -52,7 +50,6 @@ export default function createPlayer(params?: {
     };
 
     const player: IPlayer = {
-        getName: () => state.name,
         getPadId: () => gamepadId,
         isConnected: () => connected,
         disconnect() {
@@ -66,7 +63,6 @@ export default function createPlayer(params?: {
         },
         getConfig(): string {
             return JSON.stringify({
-                name: state.name,
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
                 buttons: state.buttons,
@@ -78,25 +74,6 @@ export default function createPlayer(params?: {
         },
 
         getParsedGamepad: () => state.pad,
-
-        clearMappers() {
-            state.mappers = {};
-        },
-
-        removeMapper(mapperName: string) {
-            state.mappers = omit([mapperName], state.mappers);
-        },
-
-        update(gamepad: Gamepad) {
-            // TODO Store the buttons, sticks and mappers that have already been queried
-            // and clear those structures at the start of update
-            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
-            // Maybe add a memoizeMappers flag (default true) to Player construction
-            state.prevPad = state.pad;
-            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
-
-            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
-        },
 
         getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
             if (!connected) {
@@ -271,6 +248,25 @@ export default function createPlayer(params?: {
             }
         },
 
+        removeMapper(mapperName: string) {
+            state.mappers = omit([mapperName], state.mappers);
+        },
+
+        clearMappers() {
+            state.mappers = {};
+        },
+
+        update(gamepad: Gamepad) {
+            // TODO Store the buttons, sticks and mappers that have already been queried
+            // and clear those structures at the start of update
+            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
+            // Maybe add a memoizeMappers flag (default true) to Player construction
+            state.prevPad = state.pad;
+            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+
+            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
+        },
+
         cancelListen() {
             listenOptions = null;
         },
@@ -319,16 +315,16 @@ export default function createPlayer(params?: {
                     first argument contains invalid characters`);
             }
             player.listenButton((indexes: IButtonIndexes) => {
-                const findIterator: Function = value => value[0] === indexes[0];
-                const bindingIndex = findKey(findIterator, state.buttons);
+                const findKeyCb: Function = value => value[0] === indexes[0];
+                const resultName: string | null = findKey(findKeyCb, state.buttons);
 
-                if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
-                    player.swapButtons(inputName, bindingIndex);
+                if (!allowDuplication && resultName && state.buttons[inputName]) {
+                    player.swapButtons(inputName, resultName);
                 } else {
                     player.setButton(inputName, indexes);
                 }
 
-                callback(bindingIndex);
+                callback(resultName);
             });
         },
 
@@ -343,16 +339,16 @@ export default function createPlayer(params?: {
             }
 
             player.listenAxis((indexesResult: IStickIndexes) => {
-                const c: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
-                const bindingIndex: string | null = findKey(c, state.sticks);
+                const findKeyCb: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
+                const resultName: string | null = findKey(findKeyCb, state.sticks);
 
-                if (!allowDuplication && bindingIndex && state.sticks[inputName]) {
-                    player.swapSticks(inputName, bindingIndex);
+                if (!allowDuplication && resultName && state.sticks[inputName]) {
+                    player.swapSticks(inputName, resultName);
                 } else {
                     player.setStick(inputName, indexesResult);
                 }
 
-                callback(bindingIndex);
+                callback(resultName);
             });
         },
 

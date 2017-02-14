@@ -1,5 +1,5 @@
 /* @flow */
-import { getRawGamepads, nameIsValid } from './lib/utils';
+import { getRawGamepads } from './lib/utils';
 import {
     noop, map, isFunction, find, difference
 } from './lib/tools';
@@ -10,6 +10,7 @@ import type { IPlayer, IJoyMap, IJoyMapState } from './types';
 export default function createJoyMap(params?: {
     threshold?: number,
     clampThreshold?: boolean,
+    memoize?: ?boolean,
     onPoll?: () => void,
     autoConnect?: boolean
 } = {}) {
@@ -19,6 +20,7 @@ export default function createJoyMap(params?: {
     const state: IJoyMapState = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
+        memoize: params.memoize !== false,
         onPoll: params.onPoll || noop,
         autoConnect: params.autoConnect !== false,
         gamepads: [],
@@ -105,20 +107,16 @@ export default function createJoyMap(params?: {
             return null;
         },
 
-        addPlayer(name?: string, padId?: ?string): IPlayer {
-            if (!!name && !nameIsValid(name)) {
-                throw new Error(`On addPlayer('${name}'): argument contains invalid characters`);
-            }
-
+        addPlayer(padId?: ?string): IPlayer {
             // Given unassigned players and unused gamepads, automatically assign them
             if (state.autoConnect && !padId) {
                 padId = joyMap.getUnusedPadId();
             }
 
             const player: IPlayer = createPlayer({
-                name,
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
+                memoize: state.memoize,
                 padId
             });
 
@@ -133,7 +131,7 @@ export default function createJoyMap(params?: {
                 state.players.splice(index, 1);
                 player.destroy();
             } else {
-                throw new Error(`removePlayer(player.name: ${player.getName()}), could not find such player`);
+                throw new Error('removePlayer(player), could not find such player');
             }
         },
 

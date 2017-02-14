@@ -36,7 +36,6 @@ function createPlayer() {
     var connected = !!params.padId;
 
     var state = {
-        name: params.name || '',
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         memoize: params.memoize !== false,
@@ -58,9 +57,6 @@ function createPlayer() {
     };
 
     var player = {
-        getName: function getName() {
-            return state.name;
-        },
         getPadId: function getPadId() {
             return gamepadId;
         },
@@ -78,7 +74,6 @@ function createPlayer() {
         },
         getConfig: function getConfig() {
             return (0, _stringify2.default)({
-                name: state.name,
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
                 buttons: state.buttons,
@@ -94,18 +89,6 @@ function createPlayer() {
             return state.pad;
         },
 
-        clearMappers: function clearMappers() {
-            state.mappers = {};
-        },
-        removeMapper: function removeMapper(mapperName) {
-            state.mappers = (0, _tools.omit)([mapperName], state.mappers);
-        },
-        update: function update(gamepad) {
-            state.prevPad = state.pad;
-            state.pad = (0, _utils.parseGamepad)(gamepad, state.prevPad, state.threshold, state.clampThreshold);
-
-            listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, state.threshold);
-        },
         getButtons: function getButtons() {
             for (var _len = arguments.length, inputNames = Array(_len), _key = 0; _key < _len; _key++) {
                 inputNames[_key] = arguments[_key];
@@ -307,6 +290,18 @@ function createPlayer() {
                 sticks[btn2].indexes = _replacement;
             }
         },
+        removeMapper: function removeMapper(mapperName) {
+            state.mappers = (0, _tools.omit)([mapperName], state.mappers);
+        },
+        clearMappers: function clearMappers() {
+            state.mappers = {};
+        },
+        update: function update(gamepad) {
+            state.prevPad = state.pad;
+            state.pad = (0, _utils.parseGamepad)(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+
+            listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, state.threshold);
+        },
         cancelListen: function cancelListen() {
             listenOptions = null;
         },
@@ -361,18 +356,18 @@ function createPlayer() {
                 throw new Error('On buttonBindOnPress(\'' + inputName + '\', ...):\n                    first argument contains invalid characters');
             }
             player.listenButton(function (indexes) {
-                var findIterator = function findIterator(value) {
+                var findKeyCb = function findKeyCb(value) {
                     return value[0] === indexes[0];
                 };
-                var bindingIndex = (0, _tools.findKey)(findIterator, state.buttons);
+                var resultName = (0, _tools.findKey)(findKeyCb, state.buttons);
 
-                if (!allowDuplication && bindingIndex && state.buttons[inputName]) {
-                    player.swapButtons(inputName, bindingIndex);
+                if (!allowDuplication && resultName && state.buttons[inputName]) {
+                    player.swapButtons(inputName, resultName);
                 } else {
                     player.setButton(inputName, indexes);
                 }
 
-                callback(bindingIndex);
+                callback(resultName);
             });
         },
         stickBindOnPress: function stickBindOnPress(inputName, callback) {
@@ -383,19 +378,19 @@ function createPlayer() {
             }
 
             player.listenAxis(function (indexesResult) {
-                var c = function c(_ref3) {
+                var findKeyCb = function findKeyCb(_ref3) {
                     var indexes = _ref3.indexes;
                     return (0, _tools.arraysEqual)(indexes[0], indexesResult);
                 };
-                var bindingIndex = (0, _tools.findKey)(c, state.sticks);
+                var resultName = (0, _tools.findKey)(findKeyCb, state.sticks);
 
-                if (!allowDuplication && bindingIndex && state.sticks[inputName]) {
-                    player.swapSticks(inputName, bindingIndex);
+                if (!allowDuplication && resultName && state.sticks[inputName]) {
+                    player.swapSticks(inputName, resultName);
                 } else {
                     player.setStick(inputName, indexesResult);
                 }
 
-                callback(bindingIndex);
+                callback(resultName);
             });
         },
         destroy: function destroy() {

@@ -24,6 +24,7 @@ function createJoyMap() {
     var state = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
+        memoize: params.memoize !== false,
         onPoll: params.onPoll || _tools.noop,
         autoConnect: params.autoConnect !== false,
         gamepads: [],
@@ -120,19 +121,15 @@ function createJoyMap() {
 
             return null;
         },
-        addPlayer: function addPlayer(name, padId) {
-            if (!!name && !(0, _utils.nameIsValid)(name)) {
-                throw new Error('On addPlayer(\'' + name + '\'): argument contains invalid characters');
-            }
-
+        addPlayer: function addPlayer(padId) {
             if (state.autoConnect && !padId) {
                 padId = joyMap.getUnusedPadId();
             }
 
             var player = (0, _Player2.default)({
-                name: name,
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
+                memoize: state.memoize,
                 padId: padId
             });
 
@@ -146,7 +143,7 @@ function createJoyMap() {
                 state.players.splice(index, 1);
                 player.destroy();
             } else {
-                throw new Error('removePlayer(player.name: ' + player.getName() + '), could not find such player');
+                throw new Error('removePlayer(player), could not find such player');
             }
         },
         clearPlayers: function clearPlayers() {
