@@ -46,14 +46,14 @@ There are three examples of usage, each of them showcasing the different ways to
 
 ### Exported API
 
-* **createJoyMap** is the default export function and main point of usage.
+* **createJoyMap(params?: {}) => joyMapObject** is the default export function and main point of usage.
 * It takes a single optional argument in the form of an object with the following possible values:
   * **threshold** is a number bewteen 0 and 1 that is used for all inputs as the minimum value required to be considered as pressed
   * **clampThreshold** is a boolean that if true, will set all not pressed inputs to 0
   * **memoize** is a boolean that if true will use [fast-memoize](https://github.com/caiogondim/fast-memoize.js) on the mapping functions for buttons, sticks and mappers
   * **onPoll** is a function that will be called at the end of each polling
   * **autoConnect** is a boolean that if true, will connect all newly created Players with an unused gamepad if present at the moment of player creation
-* When **createJoyMap** gets called, it returns an object with a bunch of functions:
+* When **createJoyMap** gets called, it returns an object that has a bunch of functions:
   * **isSupported() => boolean** returns if gamepads are supported by the browser
   * **getPlayerConfigs() => string** Returns a serialized string representing an array of whatever each **player.getConfig()** returns; used for saving the current player configs for later
   * **setPlayerConfigs(jsonString: string) => void** calls **clearPlayers()** first and then creates a player for each config given in the serialized string's main array; this is intended to be used a restoration mechanism, for example **getPlayerConfigs** could be used to store the current player config in localStorage and later on restoring it with **setPlayerConfigs**
@@ -68,13 +68,14 @@ There are three examples of usage, each of them showcasing the different ways to
   * **getUnusedPadIds() => string[]** Returns an array of Gamepad ids that are not currently assigned to a Player
   * **getUnusedPadId() => string | null** Same as above but returns only one if present
   * **addPlayer(padId?: ?string) => IPlayer** Creates a new Player, adds it to an internal array and returns it
-  * **removePlayer(player: IPlayer) => void** Remove a Player from JoyMap's Player array
+  * **removePlayer(player: IPlayer) => void** Removes a Player from JoyMap's Player array
   * **clearPlayers() => void** Remove all players from JoyMap's array
-  * **poll() => void** Polls the browser gamepad API and updates all Players with the data. Can be called manually if desired
+  * **poll() => void** Polls the browser gamepad API and updates all Players with the data. Can be called manually or by using **start** and **stop**
 
 ### Simple example of usage
 
-    /... lets pretend there's a declared stepFunction that does stuff on each step/
+    // Pretend there's a declared stepFunction that does stuff on each step
+
     import createJoyMap from 'joymap';
 
     const joyMap = createJoyMap({
@@ -88,7 +89,7 @@ There are three examples of usage, each of them showcasing the different ways to
     const player3 = joyMap.addPlayer();
     joyMap.start();
     
-    /... later on in another file, probably a mario-handling one: /
+    // ... later on in another file, probably a mario-handling one:
     
     const A = player1.getButtons('A');
     if (A.pressed && A.justChanged) {
@@ -107,28 +108,30 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
 
 ### The Player's API
 
+Note: All named types like IButtonState and IListenParams are declared in the types.js file.
+
 * **getPadId() => ?string** Returns the gamepad id assigned to Player, may be connected or not
 * **isConnected() => boolean** Returns if the Player has assigned to it a currently connected gamepad
 * **disconnect() => void** Sets the Player as not connected
 * **connect(padId?: string) => void** Sets the Player as connected and assigns a new gamepad id if given one
 * **getConfig() => string** Returns a serialized version of the internal structures that represent buttons, sticks, name, threshold and clampThreshold. Notice that mappers are missing from this since they are functions and there's no easy, clean way to store functions. Gamepad assignement is also missing but that's more to do with not wanting to store information that will not be consistent between play sessions (different browsers give different Ids for the same gamepad, for instance)
 * **setConfig(serializedString: string) => void** Parses the given string and assigns the player's internal state to whatever the parse results in
-* **getButtons(...names: string[]) => IButtonState | { [index: string]: IButtonState }** Returns button objects depending on the format the arguments take
+* **getButtons(...names: string[]) => IButtonState | IButtonStates** Returns button objects depending on the format the arguments take
   * Given only one button name as argument, the returned object will be { value, pressed, justChanged }
   * Given more than one button name as arguments, the returned object will have the button names as keys and their values will be the same type of object already mentioned, meaning { value, pressed, justChanged }
   * Given no arguments, the returned value will be an object with ALL the button names as keys and their values being the already mentioned objects
   * So player.getButtons('A') will return { value, pressed, justChanged}, but player.getButtons('A', 'B') will return { A: { value, ... }, B: { value, ... } }
-* **getSticks(...names: string[]) => IStickState | { [index: string]: IStickState }** Functions the exact same way as getButtons save for the object format being { value, pressed, justChanged, inverts }
+* **getSticks(...names: string[]) => IStickState | IStickStates** Functions the exact same way as getButtons save for the object format being { value, pressed, justChanged, inverts }
   * In this case, **value** is an array of numbers, each one representing an axis of the stick. These numbers also go from -1 to 1
-* **getMappers(...names: string[]) => any | { [index: string]: any}** Again, functions the exact same way as getButtons except that mappers don't have a set object format in particular for each mapper result
+* **getMappers(...names: string[]) => IMapperState | IMapperStates** Again, functions the exact same way as getButtons except that mappers don't have a set object format in particular for each mapper result
 * **getButtonIndexes(...inputNames: string[]) => IButtonIndexes** Returns the combined indexes of the given button names, even if given only one name
   * These indexes are the index number that a given button is bound to. For example, an Xbox360 X button's index is typically 0, so it is the first value found in the browser's Gamepad buttons array
   * Combines very well with **setButton**
 * **getStickIndexes(...inputNames: string[]) => IStickIndexes** Returns the combined indexes of the given stick names, again, same thing as getButtonIndexes but applied to sticks and their axes
-* **setButton(inputName: string, indexes: number | IButtonIndexes) => void** Sets a button name to the given index / indexes. This function does not care about duplication and can even take multiple indexes
+* **setButton(inputName: string, indexes: IButtonIndex | IButtonIndexes) => void** Sets a button name to the given index / indexes. This function does not care about duplication and can even take multiple indexes
  * When one single button is assigned to multiple indexes, the resulting value is the biggest of the specified indexes. The resulting object will still be { value, pressed, justChanged }
-* **setStick(inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void** Sets a stick name to the given index / indexes. Same thing as **setButton** except it also takes the optional argument **inverts**. This argument is an array of booleans that will be assigned to the resulting stick, each bool representing if the corresponding axis should be inverted
-* **setMapper(mapperName: string, callback: Function) => void** Sets a mapper name to the given callback function. The result given by getMapper depends entirely on what this callback returns
+* **setStick(inputName: string, indexes: IStickIndex | IStickIndexes, inverts?: IStickInverts) => void** Sets a stick name to the given index / indexes. Same thing as **setButton** except it also takes the optional argument **inverts**. This argument is an array of booleans that will be assigned to the resulting stick, each bool representing if the corresponding axis should be inverted
+* **setMapper(mapperName: string, callback: IMapper) => void** Sets a mapper name to the given callback function. The result given by getMapper depends entirely on what this callback returns
   * This callback receives a reference to the player as the only argument
   * Note: do take into account that this callback will always be called by **getMapper** and at no other time
 * **invertSticks(inverts: IStickInverts, ...inputNames: string[]) => void** Sets an array of booleans as the inverts property of the given stick names
@@ -165,7 +168,7 @@ Throughout the library you're invited to name stuff. Like players, buttons, stic
 
 Taken from the StateLog example:
 
-    /... lets again pretend there's a declared stepFunction that does stuff on each step/
+    // Pretend there's a declared stepFunction that does stuff on each step
     import createJoyMap from 'joymap';
     
     const joyMap = createJoyMap({

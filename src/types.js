@@ -1,29 +1,36 @@
 /* @flow */
-export type IButtonValue = number;
-export type IButtonIndexes = number[];
-
-export type IStickValue = number[];
-// #FlowExpectError Array of array of numbers IS a valid type ... no idea why it fails spectacularly
-export type IStickIndexes = number[][];
-export type IStickInverts = boolean[];
-
+export type IButtonIndex = number; // a number that goes from 0 to N where N is the number of buttons
+export type IButtonIndexes = IButtonIndex[];
 export type IButtonState = {
-    value: IButtonValue,
+    value: number, // a number that goes from 0 to 1
     pressed: boolean,
     justChanged: boolean
 };
+export type IButtonStates = { [index: string]: IButtonState };
+export type IButtonMap = IButtonIndexes;
+export type IButtonMaps = { [key: string]: IButtonMap };
+
+export type IStickValue = number[]; // numbers that go from -1 to 1
+export type IStickIndex = number[]; // numbers that go from 0 to N where N is the number of sticks
+export type IStickIndexes = IStickIndex[];
+export type IStickInverts = boolean[];
 export type IStickState = {
     value: IStickValue,
     pressed: boolean,
     justChanged: boolean,
     inverts: IStickInverts
 };
-
-export type IButton = IButtonIndexes;
-export type IStick = {
+export type IStickStates = { [index: string]: IStickState };
+export type IStickMap = {
     indexes: IStickIndexes,
     inverts: IStickInverts
 };
+export type IStickMaps = { [key: string]: IStickMap };
+
+export type IMapperValue = any;
+export type IMapperValues = { [index: string]: IMapperValue };
+export type IMapper = () => IMapperValue;
+export type IMappers = { [key: string]: IMapper };
 
 export type IParsedGamepad = {
     buttons: IButtonState[],
@@ -54,18 +61,18 @@ export type IPlayerState = {
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
 
-    buttonMap: (pad: IParsedGamepad, prevPad: IParsedGamepad, indexes: number[]) => IButtonState,
+    buttonMap: (pad: IParsedGamepad, prevPad: IParsedGamepad, indexes: IButtonIndexes) => IButtonState,
     stickMap: (
         pad: IParsedGamepad,
         prevPad: IParsedGamepad,
-        indexMaps: IStickValue[],
+        indexMaps: IStickIndexes,
         inverts: IStickInverts,
         threshold: number
     ) => IStickState,
 
-    buttons: { [key: string]: IButton },
-    sticks: { [key: string]: IStick },
-    mappers: { [key: string]: Function }
+    buttons: IButtonMaps,
+    sticks: IStickMaps,
+    mappers: IMappers
 };
 
 export type IPlayer = {
@@ -76,16 +83,16 @@ export type IPlayer = {
     getConfig: () => string,
     setConfig: (serializedString: string) => void,
 
-    getButtons: (...names: string[]) => IButtonState | { [index: string]: IButtonState },
-    getSticks: (...names: string[]) => IStickState | { [index: string]: IStickState },
-    getMappers: (...names: string[]) => any | { [index: string]: any},
+    getButtons: (...names: string[]) => IButtonState | IButtonStates,
+    getSticks: (...names: string[]) => IStickState | IStickStates,
+    getMappers: (...names: string[]) => IMapperValue | IMapperValues,
 
     getButtonIndexes: (...inputNames: string[]) => IButtonIndexes,
     getStickIndexes: (...inputNames: string[]) => IStickIndexes,
 
-    setButton: (inputName: string, indexes: number | IButtonIndexes) => void,
-    setStick: (inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void,
-    setMapper: (mapperName: string, callback: Function) => void,
+    setButton: (inputName: string, indexes: IButtonIndex | IButtonIndexes) => void,
+    setStick: (inputName: string, indexes: any[], inverts?: IStickInverts) => void,
+    setMapper: (mapperName: string, callback: IMapper) => void,
 
     invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
     swapButtons: (btn1: string, btn2: string) => void,

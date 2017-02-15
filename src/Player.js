@@ -13,9 +13,10 @@ import {
 } from './lib/tools';
 
 import type {
-    IStickState, IButtonState, IButtonIndexes,
-    IStickIndexes, IStickInverts, IListenOptions,
-    IListenParams, IPlayerState, IPlayer
+    IStickState, IStickStates, /* IStickIndex, */IStickIndexes, IStickInverts,
+    IButtonState, IButtonStates, IButtonIndex, IButtonIndexes,
+    IListenOptions, IListenParams, IPlayerState, IPlayer,
+    IMapper, IMapperValue, IMapperValues
 } from './types';
 
 export default function createPlayer(params?: {
@@ -73,7 +74,7 @@ export default function createPlayer(params?: {
             Object.assign(state, JSON.parse(serializedString));
         },
 
-        getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
+        getButtons(...inputNames: string[]): IButtonState | IButtonStates {
             if (!connected) {
                 return getEmptyButtons(state.buttons, inputNames);
             }
@@ -94,7 +95,7 @@ export default function createPlayer(params?: {
             return result;
         },
 
-        getSticks(...inputNames: string[]): IStickState | { [index: string]: IStickState } {
+        getSticks(...inputNames: string[]): IStickState | IStickStates {
             if (!connected) {
                 return getEmptySticks(state.sticks, inputNames);
             }
@@ -120,7 +121,7 @@ export default function createPlayer(params?: {
             return result;
         },
 
-        getMappers(...mapperNames: string[]): any | { [index: string]: any } {
+        getMappers(...mapperNames: string[]): IMapperValue | IMapperValues {
             if (!connected) {
                 return getEmptyMappers(state.mappers, mapperNames);
             }
@@ -153,7 +154,7 @@ export default function createPlayer(params?: {
             return indexes;
         },
 
-        setButton(inputName: string, indexes: number | IButtonIndexes) {
+        setButton(inputName: string, indexes: IButtonIndex | IButtonIndexes) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On setButton('${inputName}'): argument contains invalid characters`);
             }
@@ -162,8 +163,7 @@ export default function createPlayer(params?: {
 
         setStick(
             inputName: string,
-            // #FlowExpectError No idea why this fails spectacularly, tried everything
-            indexes: number[] | IStickIndexes,
+            indexes: any[], // Real typing throws error: IStickIndex | IStickIndexes,
             inverts?: IStickInverts
         ) {
             if (!nameIsValid(inputName)) {
@@ -190,7 +190,7 @@ export default function createPlayer(params?: {
             }
         },
 
-        setMapper(mapperName: string, callback: Function) {
+        setMapper(mapperName: string, callback: IMapper) {
             if (!nameIsValid(mapperName)) {
                 throw new Error(`On setMapper('${mapperName}', ...):
                     first argument contains invalid characters`);
@@ -215,7 +215,7 @@ export default function createPlayer(params?: {
 
         swapButtons(btn1: string, btn2: string) {
             const { buttons } = state;
-            // For some reason I can't do:
+            // For some reason, the following line throws "unsupported expression pattern in destructuring" in Flow IDE
             // [buttons[btn1], buttons[btn2]] = [buttons[btn2], buttons[btn1]];
             const replacement = buttons[btn1];
             buttons[btn1] = buttons[btn2];

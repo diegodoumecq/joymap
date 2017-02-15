@@ -1,8 +1,8 @@
 /* @flow */
 import type {
-    IParsedGamepad, IListenOptions,
-    IButtonValue, IStickValue, IStickInverts,
-    IButtonState, IStickState, IButton, IStick
+    IParsedGamepad, IListenOptions, IMappers,
+    IButtonState, IButtonStates, IButtonMaps, IButtonIndexes,
+    IStickState, IStickStates, IStickMaps, IStickValue, IStickInverts, IStickIndexes
 } from '../types';
 
 import {
@@ -102,24 +102,24 @@ export function getDefaultSticks() {
     };
 }
 
-export function isButtonSignificant(value: IButtonValue = 0, threshold: number): boolean {
+export function isButtonSignificant(value: number = 0, threshold: number): boolean {
     return Math.abs(value) > threshold;
 }
 
-export function isStickSignificant(stickValues: IStickValue, threshold: number): boolean {
-    return stickValues.findIndex(value => Math.abs(value) >= threshold) !== -1;
+export function isStickSignificant(stickValue: IStickValue, threshold: number): boolean {
+    return stickValue.findIndex(value => Math.abs(value) >= threshold) !== -1;
 }
 
-export function getStickValue(stickValues: IStickValue, threshold: number): IStickValue {
-    if (!isStickSignificant(stickValues, threshold)) {
-        return stickValues.map(() => 0);
+export function getStickValue(stickValue: IStickValue, threshold: number): IStickValue {
+    if (!isStickSignificant(stickValue, threshold)) {
+        return stickValue.map(() => 0);
     }
 
-    return stickValues;
+    return stickValue;
 }
 
 export function getEmptyMappers(
-    mappers: { [key: string]: Function },
+    mappers: IMappers,
     mapperNames: string[]
 ): null | { [index: string]: null } {
     const emptyMapper = null;
@@ -141,9 +141,9 @@ export function getEmptyMappers(
 }
 
 export function getEmptyButtons(
-    buttons: { [key: string]: IButton },
+    buttons: IButtonMaps,
     inputNames: string[]
-): IButtonState | { [index: string]: IButtonState } {
+): IButtonState | IButtonStates {
     const emptyButton: IButtonState = {
         value: 0,
         pressed: false,
@@ -167,9 +167,9 @@ export function getEmptyButtons(
 }
 
 export function getEmptySticks(
-    sticks: { [key: string]: IStick },
+    sticks: IStickMaps,
     inputNames: string[]
-): IStickState | { [index: string]: IStickState } {
+): IStickState | IStickStates {
     const emptyStick: IStickState = {
         value: [0, 0],
         pressed: false,
@@ -217,7 +217,7 @@ export function parseGamepad(
 export function buttonMap(
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
-    indexes: number[]
+    indexes: IButtonIndexes
 ): IButtonState {
     const length = indexes.length;
 
@@ -244,7 +244,7 @@ export function buttonMap(
     };
 }
 
-function roundSticks(indexMaps: IStickValue[], axes: number[], threshold: number): IStickValue {
+function roundSticks(indexMaps: IStickIndexes, axes: number[], threshold: number): IStickValue {
     let count = 0;
     let counts = [];
 
@@ -263,7 +263,7 @@ function roundSticks(indexMaps: IStickValue[], axes: number[], threshold: number
 export function stickMap(
     pad: IParsedGamepad,
     prevPad: IParsedGamepad,
-    indexMaps: IStickValue[],
+    indexMaps: IStickIndexes,
     inverts: IStickInverts,
     threshold: number
 ): IStickState {
