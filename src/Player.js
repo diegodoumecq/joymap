@@ -73,8 +73,6 @@ export default function createPlayer(params?: {
             Object.assign(state, JSON.parse(serializedString));
         },
 
-        getParsedGamepad: () => state.pad,
-
         getButtons(...inputNames: string[]): IButtonState | { [index: string]: IButtonState } {
             if (!connected) {
                 return getEmptyButtons(state.buttons, inputNames);
@@ -128,28 +126,16 @@ export default function createPlayer(params?: {
             }
 
             if (mapperNames.length === 0) {
-                return mapValues(mapper => mapper({
-                    pad: state.pad,
-                    prevPad: state.prevPad,
-                    player
-                }), state.mappers);
+                return mapValues(mapper => mapper(player), state.mappers);
             }
 
             if (mapperNames.length === 1) {
-                return state.mappers[mapperNames[0]]({
-                    pad: state.pad,
-                    prevPad: state.prevPad,
-                    player
-                });
+                return state.mappers[mapperNames[0]](player);
             }
 
             const result = {};
             mapperNames.forEach(mapperName => {
-                result[mapperName] = state.mappers[mapperName]({
-                    pad: state.pad,
-                    prevPad: state.prevPad,
-                    player
-                });
+                result[mapperName] = state.mappers[mapperName](player);
             });
 
             return result;
@@ -209,7 +195,8 @@ export default function createPlayer(params?: {
                 throw new Error(`On setMapper('${mapperName}', ...):
                     first argument contains invalid characters`);
             }
-            state.mappers[mapperName] = state.memoize ? memoize(callback) : callback;
+            // TODO: Figure out how to change mapper's API to allow memoization
+            state.mappers[mapperName] = callback;
         },
 
         invertSticks(inverts: IStickInverts, ...inputNames: string[]) {
@@ -257,10 +244,6 @@ export default function createPlayer(params?: {
         },
 
         update(gamepad: Gamepad) {
-            // TODO Store the buttons, sticks and mappers that have already been queried
-            // and clear those structures at the start of update
-            // Maybe we can use those structures to avoid some costly calculations to stickMap's prevPressed
-            // Maybe add a memoizeMappers flag (default true) to Player construction
             state.prevPad = state.pad;
             state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
 

@@ -94,9 +94,10 @@ var joyMap = createJoyMap({
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI
                 };
-                c.player.setMapper('AnyButton', function (params) {
-                    return params.pad.buttons.some(function (button) {
-                        return button.pressed;
+                c.player.setMapper('AnyButton', function (player) {
+                    const buttons = player.getButtons();
+                    return Object.keys(buttons).some(function (name) {
+                        return buttons[name].pressed;
                     });
                 });
                 characters.push(c);

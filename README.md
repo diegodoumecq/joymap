@@ -113,11 +113,6 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
 * **connect(padId?: string) => void** Sets the Player as connected and assigns a new gamepad id if given one
 * **getConfig() => string** Returns a serialized version of the internal structures that represent buttons, sticks, name, threshold and clampThreshold. Notice that mappers are missing from this since they are functions and there's no easy, clean way to store functions. Gamepad assignement is also missing but that's more to do with not wanting to store information that will not be consistent between play sessions (different browsers give different Ids for the same gamepad, for instance)
 * **setConfig(serializedString: string) => void** Parses the given string and assigns the player's internal state to whatever the parse results in
-* **getParsedGamepad() => IParsedGamepad** Returns a parsed copy of the gamepad object
-  * It has two properties: { axes, buttons }
-  * **axes** is a direct copy of the gamepad.axes array
-  * **buttons** is an array of objects { pressed, justChanged, value }
-  * **pressed** and **justChanged** both being booleans, and value being the value given by the browser API, typically between 0 and 1
 * **getButtons(...names: string[]) => IButtonState | { [index: string]: IButtonState }** Returns button objects depending on the format the arguments take
   * Given only one button name as argument, the returned object will be { value, pressed, justChanged }
   * Given more than one button name as arguments, the returned object will have the button names as keys and their values will be the same type of object already mentioned, meaning { value, pressed, justChanged }
@@ -134,10 +129,7 @@ Being stuck with polling, JoyMap offers the methods **joyMap.start()** and **joy
  * When one single button is assigned to multiple indexes, the resulting value is the biggest of the specified indexes. The resulting object will still be { value, pressed, justChanged }
 * **setStick(inputName: string, indexes: number[] | IStickIndexes, inverts?: IStickInverts) => void** Sets a stick name to the given index / indexes. Same thing as **setButton** except it also takes the optional argument **inverts**. This argument is an array of booleans that will be assigned to the resulting stick, each bool representing if the corresponding axis should be inverted
 * **setMapper(mapperName: string, callback: Function) => void** Sets a mapper name to the given callback function. The result given by getMapper depends entirely on what this callback returns
-  * This callback receives a single object as argument with the following values:
-  * **pad** is the parsed gamepad object
-  * **prevPad** is the parsed gamepad object from the previous poll
-  * **player** is a reference to this same player
+  * This callback receives a reference to the player as the only argument
   * Note: do take into account that this callback will always be called by **getMapper** and at no other time
 * **invertSticks(inverts: IStickInverts, ...inputNames: string[]) => void** Sets an array of booleans as the inverts property of the given stick names
 * **swapButtons(btn1: string, btn2: string) => void** Swaps two buttons' indexes

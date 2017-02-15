@@ -12,10 +12,10 @@ import createJoyMap from '../../src/JoyMap';
 document.getElementById('app').innerHTML = `
     <article class="examples-container">
         <header>
-            <h1 className="title">JoyMap Dev console example</h1>
+            <h1 className="title">JoyMap input logging example</h1>
         </header>
         <div class="log-example">
-            <p>Suggestion: Open the dev console</p>
+            <p>The dev console is also used to store all the logged input</p>
         </div>
     </article>`;
 
@@ -32,11 +32,12 @@ function createPlayer(joyMap, padId) {
     p.setButton('StickAverage', p.getStickIndexes('L', 'R'));
 
     // Set mappers
-    p.setMapper('Point', ({ player }) => player.getSticks('R').pressed);
-    p.setMapper('MovePoint', ({ player }) => countPressed(player.getSticks()));
-    p.setMapper('CountFace', ({ player }) => countPressed(player.getButtons('A', 'B', 'X', 'Y')));
-    p.setMapper('CountAll', ({ pad, player }) => {
-        const buttonCount = countPressed(pad.buttons);
+    p.setMapper('Move', player => player.getSticks('L').pressed);
+    p.setMapper('Point', player => player.getSticks('R').pressed);
+    p.setMapper('MovePoint', player => countPressed(player.getSticks('R', 'L')) === 2);
+    p.setMapper('CountFace', player => countPressed(player.getButtons('A', 'B', 'X', 'Y')));
+    p.setMapper('CountAll', player => {
+        const buttonCount = countPressed(player.getButtons());
         const stickCount = countPressed(player.getSticks());
 
         if (buttonCount || stickCount) {

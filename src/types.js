@@ -76,8 +76,6 @@ export type IPlayer = {
     getConfig: () => string,
     setConfig: (serializedString: string) => void,
 
-    getParsedGamepad: () => IParsedGamepad,
-
     getButtons: (...names: string[]) => IButtonState | { [index: string]: IButtonState },
     getSticks: (...names: string[]) => IStickState | { [index: string]: IStickState },
     getMappers: (...names: string[]) => any | { [index: string]: any},
