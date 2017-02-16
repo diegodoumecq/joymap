@@ -10,7 +10,6 @@ import type { IPlayer, IJoyMap, IJoyMapState } from './types';
 export default function createJoyMap(params?: {
     threshold?: number,
     clampThreshold?: boolean,
-    memoize?: ?boolean,
     onPoll?: () => void,
     autoConnect?: boolean
 } = {}) {
@@ -20,7 +19,6 @@ export default function createJoyMap(params?: {
     const state: IJoyMapState = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
-        memoize: params.memoize !== false,
         onPoll: params.onPoll || noop,
         autoConnect: params.autoConnect !== false,
         gamepads: [],
@@ -116,7 +114,6 @@ export default function createJoyMap(params?: {
             const player: IPlayer = createPlayer({
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
-                memoize: state.memoize,
                 padId
             });
 
@@ -145,6 +142,7 @@ export default function createJoyMap(params?: {
                 && rawGamepad.connected
                 && rawGamepad.buttons.length
                 && rawGamepad.axes.length
+                && rawGamepad.timestamp !== 0
                 && (!!rawGamepad.id || rawGamepad.id === 0));
 
             state.players.forEach((player: IPlayer) => {

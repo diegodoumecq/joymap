@@ -13,7 +13,6 @@ var _from = require('babel-runtime/core-js/array/from');
 var _from2 = _interopRequireDefault(_from);
 
 exports.getRawGamepads = getRawGamepads;
-exports.updateListenOptions = updateListenOptions;
 exports.nameIsValid = nameIsValid;
 exports.getDefaultButtons = getDefaultButtons;
 exports.getDefaultSticks = getDefaultSticks;
@@ -23,9 +22,9 @@ exports.getStickValue = getStickValue;
 exports.getEmptyMappers = getEmptyMappers;
 exports.getEmptyButtons = getEmptyButtons;
 exports.getEmptySticks = getEmptySticks;
-exports.parseGamepad = parseGamepad;
 exports.buttonMap = buttonMap;
 exports.stickMap = stickMap;
+exports.updateListenOptions = updateListenOptions;
 
 var _tools = require('./tools');
 
@@ -36,51 +35,6 @@ function getRawGamepads() {
         return (0, _from2.default)(navigator.getGamepads());
     }
     return [];
-}
-
-function updateListenOptions(listenOptions, parsedGamepad, threshold) {
-    if (!listenOptions) {
-        return null;
-    }
-
-    var callback = listenOptions.callback,
-        quantity = listenOptions.quantity,
-        type = listenOptions.type,
-        currentValue = listenOptions.currentValue,
-        targetValue = listenOptions.targetValue,
-        useTimeStamp = listenOptions.useTimeStamp,
-        consecutive = listenOptions.consecutive,
-        allowOffset = listenOptions.allowOffset;
-
-
-    var indexes = type === 'axes' ? (0, _tools.findIndexes)(function (value) {
-        return Math.abs(value) > threshold;
-    }, parsedGamepad.axes) : (0, _tools.findIndexes)(function (_ref) {
-        var pressed = _ref.pressed,
-            justChanged = _ref.justChanged;
-        return pressed && (currentValue !== 0 || justChanged);
-    }, parsedGamepad.buttons);
-
-    if (indexes.length === quantity && (!consecutive || (0, _tools.isConsecutive)(indexes)) && (allowOffset || indexes[0] % quantity === 0)) {
-        if (useTimeStamp && currentValue === 0) {
-            return (0, _assign2.default)({}, listenOptions, { currentValue: Date.now() });
-        }
-
-        var comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
-
-        if (targetValue <= comparison) {
-            callback(indexes);
-            return null;
-        }
-
-        if (!useTimeStamp) {
-            return (0, _assign2.default)({}, listenOptions, { currentValue: comparison });
-        }
-
-        return listenOptions;
-    }
-
-    return (0, _assign2.default)({}, listenOptions, { currentValue: 0 });
 }
 
 function nameIsValid(name) {
@@ -130,20 +84,20 @@ function isButtonSignificant() {
     return Math.abs(value) > threshold;
 }
 
-function isStickSignificant(stickValues, threshold) {
-    return stickValues.findIndex(function (value) {
+function isStickSignificant(stickValue, threshold) {
+    return stickValue.findIndex(function (value) {
         return Math.abs(value) >= threshold;
     }) !== -1;
 }
 
-function getStickValue(stickValues, threshold) {
-    if (!isStickSignificant(stickValues, threshold)) {
-        return stickValues.map(function () {
+function getStickValue(stickValue, threshold) {
+    if (!isStickSignificant(stickValue, threshold)) {
+        return stickValue.map(function () {
             return 0;
         });
     }
 
-    return stickValues;
+    return stickValue;
 }
 
 function getEmptyMappers(mappers, mapperNames) {
@@ -218,23 +172,7 @@ function getEmptySticks(sticks, inputNames) {
     return result;
 }
 
-function parseGamepad(pad, prevPad, threshold, clampThreshold) {
-    return {
-        buttons: pad.buttons.map(function (button, index) {
-            var previous = prevPad.buttons[index];
-            var pressed = isButtonSignificant(button.value, threshold);
-
-            return {
-                pressed: pressed,
-                justChanged: pressed !== (previous ? isButtonSignificant(previous.value, threshold) : false),
-                value: clampThreshold && !pressed ? 0 : button.value
-            };
-        }),
-        axes: pad.axes
-    };
-}
-
-function buttonMap(pad, prevPad, indexes) {
+function buttonMap(pad, prevPad, indexes, threshold) {
     var length = indexes.length;
 
     var prevPressed = false;
@@ -243,13 +181,17 @@ function buttonMap(pad, prevPad, indexes) {
 
     var i = 0;
     while (i < length) {
-        var prevValue = prevPad.buttons[indexes[i]];
         if (!prevPressed) {
-            prevPressed = !!prevValue && prevValue.pressed;
+            var prevValue = prevPad.buttons[indexes[i]] || 0;
+            prevPressed = isButtonSignificant(prevValue, threshold);
         }
-        var padButton = pad.buttons[indexes[i]];
-        value = Math.max(value, !padButton ? 0 : padButton.value);
-        pressed = pressed || !!padButton && padButton.pressed;
+
+        var currValue = pad.buttons[indexes[i]] || 0;
+        value = Math.max(value, currValue);
+        if (!pressed) {
+            pressed = isButtonSignificant(currValue, threshold);
+        }
+
         i += 1;
     }
 
@@ -297,4 +239,43 @@ function stickMap(pad, prevPad, indexMaps, inverts, threshold) {
         justChanged: pressed !== prevPressed,
         inverts: inverts
     };
+}
+
+function updateListenOptions(listenOptions, pad, threshold) {
+    var callback = listenOptions.callback,
+        quantity = listenOptions.quantity,
+        type = listenOptions.type,
+        currentValue = listenOptions.currentValue,
+        targetValue = listenOptions.targetValue,
+        useTimeStamp = listenOptions.useTimeStamp,
+        consecutive = listenOptions.consecutive,
+        allowOffset = listenOptions.allowOffset;
+
+
+    var indexes = type === 'axes' ? (0, _tools.findIndexes)(function (value) {
+        return Math.abs(value) > threshold;
+    }, pad.axes) : (0, _tools.findIndexes)(function (value) {
+        return isButtonSignificant(value, threshold);
+    }, pad.buttons);
+
+    if (indexes.length === quantity && (!consecutive || (0, _tools.isConsecutive)(indexes)) && (allowOffset || indexes[0] % quantity === 0)) {
+        if (useTimeStamp && currentValue === 0) {
+            return (0, _assign2.default)({}, listenOptions, { currentValue: Date.now() });
+        }
+
+        var comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
+
+        if (targetValue <= comparison) {
+            callback(indexes);
+            return null;
+        }
+
+        if (!useTimeStamp) {
+            return (0, _assign2.default)({}, listenOptions, { currentValue: comparison });
+        }
+
+        return listenOptions;
+    }
+
+    return (0, _assign2.default)({}, listenOptions, { currentValue: 0 });
 }

@@ -24,7 +24,6 @@ function createJoyMap() {
     var state = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
-        memoize: params.memoize !== false,
         onPoll: params.onPoll || _tools.noop,
         autoConnect: params.autoConnect !== false,
         gamepads: [],
@@ -129,7 +128,6 @@ function createJoyMap() {
             var player = (0, _Player2.default)({
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
-                memoize: state.memoize,
                 padId: padId
             });
 
@@ -153,7 +151,7 @@ function createJoyMap() {
         },
         poll: function poll() {
             state.gamepads = (0, _utils.getRawGamepads)().filter(function (rawGamepad) {
-                return rawGamepad && rawGamepad.connected && rawGamepad.buttons.length && rawGamepad.axes.length && (!!rawGamepad.id || rawGamepad.id === 0);
+                return rawGamepad && rawGamepad.connected && rawGamepad.buttons.length && rawGamepad.axes.length && rawGamepad.timestamp !== 0 && (!!rawGamepad.id || rawGamepad.id === 0);
             });
 
             state.players.forEach(function (player) {

@@ -28,6 +28,11 @@ var _tools = require('./lib/tools');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var mockGamepad = {
+    axes: [],
+    buttons: []
+};
+
 function createPlayer() {
     var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -38,18 +43,11 @@ function createPlayer() {
     var state = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
-        memoize: params.memoize !== false,
-        pad: {
-            buttons: [],
-            axes: []
-        },
-        prevPad: {
-            buttons: [],
-            axes: []
-        },
+        pad: mockGamepad,
+        prevPad: mockGamepad,
 
-        buttonMap: params.memoize ? (0, _fastMemoize2.default)(_utils.buttonMap) : _utils.buttonMap,
-        stickMap: params.memoize ? (0, _fastMemoize2.default)(_utils.stickMap) : _utils.stickMap,
+        buttonMap: (0, _fastMemoize2.default)(_utils.buttonMap),
+        stickMap: (0, _fastMemoize2.default)(_utils.stickMap),
 
         buttons: (0, _utils.getDefaultButtons)(),
         sticks: (0, _utils.getDefaultSticks)(),
@@ -83,12 +81,6 @@ function createPlayer() {
         setConfig: function setConfig(serializedString) {
             (0, _assign2.default)(state, JSON.parse(serializedString));
         },
-
-
-        getParsedGamepad: function getParsedGamepad() {
-            return state.pad;
-        },
-
         getButtons: function getButtons() {
             for (var _len = arguments.length, inputNames = Array(_len), _key = 0; _key < _len; _key++) {
                 inputNames[_key] = arguments[_key];
@@ -100,17 +92,17 @@ function createPlayer() {
 
             if (inputNames.length === 0) {
                 return (0, _tools.mapValues)(function (button) {
-                    return state.buttonMap(state.pad, state.prevPad, button);
+                    return state.buttonMap(state.pad, state.prevPad, button, state.threshold);
                 }, state.buttons);
             }
 
             if (inputNames.length === 1) {
-                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]], state.threshold);
             }
 
             var result = {};
             inputNames.forEach(function (inputName) {
-                result[inputName] = state.buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
+                result[inputName] = state.buttonMap(state.pad, state.prevPad, state.buttons[inputName], state.threshold);
             });
 
             return result;
@@ -163,29 +155,17 @@ function createPlayer() {
 
             if (mapperNames.length === 0) {
                 return (0, _tools.mapValues)(function (mapper) {
-                    return mapper({
-                        pad: state.pad,
-                        prevPad: state.prevPad,
-                        player: player
-                    });
+                    return mapper(player);
                 }, state.mappers);
             }
 
             if (mapperNames.length === 1) {
-                return state.mappers[mapperNames[0]]({
-                    pad: state.pad,
-                    prevPad: state.prevPad,
-                    player: player
-                });
+                return state.mappers[mapperNames[0]](player);
             }
 
             var result = {};
             mapperNames.forEach(function (mapperName) {
-                result[mapperName] = state.mappers[mapperName]({
-                    pad: state.pad,
-                    prevPad: state.prevPad,
-                    player: player
-                });
+                result[mapperName] = state.mappers[mapperName](player);
             });
 
             return result;
@@ -251,7 +231,8 @@ function createPlayer() {
             if (!(0, _utils.nameIsValid)(mapperName)) {
                 throw new Error('On setMapper(\'' + mapperName + '\', ...):\n                    first argument contains invalid characters');
             }
-            state.mappers[mapperName] = state.memoize ? (0, _fastMemoize2.default)(callback) : callback;
+
+            state.mappers[mapperName] = callback;
         },
         invertSticks: function invertSticks(inverts) {
             for (var _len6 = arguments.length, inputNames = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
@@ -298,9 +279,16 @@ function createPlayer() {
         },
         update: function update(gamepad) {
             state.prevPad = state.pad;
-            state.pad = (0, _utils.parseGamepad)(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+            state.pad = {
+                axes: gamepad.axes,
+                buttons: gamepad.buttons.map(function (a) {
+                    return a.value;
+                })
+            };
 
-            listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, state.threshold);
+            if (listenOptions) {
+                listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, state.threshold);
+            }
         },
         cancelListen: function cancelListen() {
             listenOptions = null;
