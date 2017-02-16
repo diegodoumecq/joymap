@@ -1,6 +1,6 @@
 /* @flow */
 import type {
-    IParsedGamepad, IListenOptions, IMappers,
+    IListenOptions, IMappers, IGamepad,
     IButtonState, IButtonStates, IButtonMaps, IButtonIndexes,
     IStickState, IStickStates, IStickMaps, IStickValue, IStickInverts, IStickIndexes
 } from '../types';
@@ -14,53 +14,6 @@ export function getRawGamepads(): Gamepad[] {
         return Array.from(navigator.getGamepads());
     }
     return [];
-}
-
-export function updateListenOptions(
-    listenOptions: IListenOptions | null,
-    parsedGamepad: IParsedGamepad,
-    threshold: number
-) {
-    if (!listenOptions) {
-        return null;
-    }
-
-    const {
-        callback, quantity, type,
-        currentValue, targetValue,
-        useTimeStamp, consecutive, allowOffset
-    } = listenOptions;
-
-    const indexes = type === 'axes' ?
-        findIndexes(value => Math.abs(value) > threshold, parsedGamepad.axes) :
-        findIndexes(
-            ({ pressed, justChanged }) => pressed && (currentValue !== 0 || justChanged),
-            parsedGamepad.buttons
-        );
-
-    if (indexes.length === quantity
-    && (!consecutive || isConsecutive(indexes))
-    && (allowOffset || indexes[0] % quantity === 0)) {
-        if (useTimeStamp && currentValue === 0) {
-            return Object.assign({}, listenOptions, { currentValue: Date.now() });
-        }
-
-        const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
-
-        if (targetValue <= comparison) {
-            callback(indexes);
-            return null;
-        }
-
-        if (!useTimeStamp) {
-            return Object.assign({}, listenOptions, { currentValue: comparison });
-        }
-
-        return listenOptions;
-    }
-
-    // Clean currentValue
-    return Object.assign({}, listenOptions, { currentValue: 0 });
 }
 
 export function nameIsValid(name: string) {
@@ -193,31 +146,11 @@ export function getEmptySticks(
     return result;
 }
 
-export function parseGamepad(
-    pad: Gamepad,
-    prevPad: IParsedGamepad,
-    threshold: number,
-    clampThreshold: boolean
-): IParsedGamepad {
-    return {
-        buttons: pad.buttons.map((button: { value: number }, index: number) => {
-            const previous: IButtonState = prevPad.buttons[index];
-            const pressed = isButtonSignificant(button.value, threshold);
-
-            return {
-                pressed,
-                justChanged: pressed !== (previous ? isButtonSignificant(previous.value, threshold) : false),
-                value: clampThreshold && !pressed ? 0 : button.value
-            };
-        }),
-        axes: pad.axes
-    };
-}
-
 export function buttonMap(
-    pad: IParsedGamepad,
-    prevPad: IParsedGamepad,
-    indexes: IButtonIndexes
+    pad: IGamepad,
+    prevPad: IGamepad,
+    indexes: IButtonIndexes,
+    threshold: number
 ): IButtonState {
     const length = indexes.length;
 
@@ -227,13 +160,17 @@ export function buttonMap(
 
     let i = 0;
     while (i < length) {
-        const prevValue = prevPad.buttons[indexes[i]];
         if (!prevPressed) {
-            prevPressed = !!prevValue && prevValue.pressed;
+            const prevValue = prevPad.buttons[indexes[i]] || 0;
+            prevPressed = isButtonSignificant(prevValue, threshold);
         }
-        const padButton = pad.buttons[indexes[i]];
-        value = Math.max(value, !padButton ? 0 : padButton.value);
-        pressed = pressed || (!!padButton && padButton.pressed);
+
+        const currValue = pad.buttons[indexes[i]] || 0;
+        value = Math.max(value, currValue);
+        if (!pressed) {
+            pressed = isButtonSignificant(currValue, threshold);
+        }
+
         i += 1;
     }
 
@@ -261,8 +198,8 @@ function roundSticks(indexMaps: IStickIndexes, axes: number[], threshold: number
 }
 
 export function stickMap(
-    pad: IParsedGamepad,
-    prevPad: IParsedGamepad,
+    pad: IGamepad,
+    prevPad: IGamepad,
     indexMaps: IStickIndexes,
     inverts: IStickInverts,
     threshold: number
@@ -277,4 +214,44 @@ export function stickMap(
         justChanged: pressed !== prevPressed,
         inverts
     };
+}
+
+export function updateListenOptions(
+    listenOptions: IListenOptions,
+    pad: IGamepad,
+    threshold: number
+) {
+    const {
+        callback, quantity, type,
+        currentValue, targetValue,
+        useTimeStamp, consecutive, allowOffset
+    } = listenOptions;
+
+    const indexes = type === 'axes' ?
+        findIndexes(value => Math.abs(value) > threshold, pad.axes) :
+        findIndexes(value => isButtonSignificant(value, threshold), pad.buttons);
+
+    if (indexes.length === quantity
+    && (!consecutive || isConsecutive(indexes))
+    && (allowOffset || indexes[0] % quantity === 0)) {
+        if (useTimeStamp && currentValue === 0) {
+            return Object.assign({}, listenOptions, { currentValue: Date.now() });
+        }
+
+        const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
+
+        if (targetValue <= comparison) {
+            callback(indexes);
+            return null;
+        }
+
+        if (!useTimeStamp) {
+            return Object.assign({}, listenOptions, { currentValue: comparison });
+        }
+
+        return listenOptions;
+    }
+
+    // Clean currentValue
+    return Object.assign({}, listenOptions, { currentValue: 0 });
 }

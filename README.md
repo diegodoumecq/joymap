@@ -50,7 +50,6 @@ There are three examples of usage, each of them showcasing the different ways to
 * It takes a single optional argument in the form of an object with the following possible values:
   * **threshold** is a number bewteen 0 and 1 that is used for all inputs as the minimum value required to be considered as pressed
   * **clampThreshold** is a boolean that if true, will set all not pressed inputs to 0
-  * **memoize** is a boolean that if true will use [fast-memoize](https://github.com/caiogondim/fast-memoize.js) on the mapping functions for buttons, sticks and mappers
   * **onPoll** is a function that will be called at the end of each polling
   * **autoConnect** is a boolean that if true, will connect all newly created Players with an unused gamepad if present at the moment of player creation
 * When **createJoyMap** gets called, it returns an object that has a bunch of functions:
@@ -139,7 +138,7 @@ Note: All named types like IButtonState and IListenParams are declared in the ty
 * **swapSticks(btn1: string, btn2: string, includeInverts?: boolean) => void** Swaps two sticks' indexes, and if **includeInverts** is true, also swaps the inverts of each stick
 * **removeMapper(mapperName: string) => void** Removes a single mapper
 * **clearMappers() => void** Clears all the mappers
-* **update(gamepad: Gamepad) => void** Typically called on each poll of JoyMap, updates the parsed gamepad and checks on for the status of **listenButton** and **listenAxis**
+* **update(gamepad: Gamepad) => void** A function called on each poll by JoyMap, updates internal structures and checks for the status of **listenButton** and **listenAxis**
 * **cancelListen() => void** Will cancel the waiting process of **listenButton** or **listenAxis**
   * Note: You can only wait for buttons or for axes, never both at the same time
 * **listenButton(callback: Function, quantity?: number, params?: IListenParams) => void** Once called, JoyMap will ask in each poll for a **quantity** of pressed buttons and once such a thing is found given the criteria specified by the options, it will call callback with the activated input indexes as arguments

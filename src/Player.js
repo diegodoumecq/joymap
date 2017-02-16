@@ -3,7 +3,7 @@ import memoize from 'fast-memoize';
 
 import {
     updateListenOptions, nameIsValid,
-    getDefaultButtons, getDefaultSticks, parseGamepad,
+    getDefaultButtons, getDefaultSticks,
     stickMap, buttonMap, getEmptyMappers,
     getEmptyButtons, getEmptySticks
 } from './lib/utils';
@@ -16,13 +16,17 @@ import type {
     IStickState, IStickStates, /* IStickIndex, */IStickIndexes, IStickInverts,
     IButtonState, IButtonStates, IButtonIndex, IButtonIndexes,
     IListenOptions, IListenParams, IPlayerState, IPlayer,
-    IMapper, IMapperValue, IMapperValues
+    IMapper, IMapperValue, IMapperValues, IGamepad
 } from './types';
+
+const mockGamepad: IGamepad = {
+    axes: [],
+    buttons: []
+};
 
 export default function createPlayer(params?: {
     threshold?: number,
     clampThreshold?: boolean,
-    memoize?: ?boolean,
     padId?: ?string
 } = {}): IPlayer {
     let listenOptions: null | IListenOptions = null;
@@ -32,18 +36,11 @@ export default function createPlayer(params?: {
     const state: IPlayerState = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
-        memoize: params.memoize !== false,
-        pad: {
-            buttons: [],
-            axes: []
-        },
-        prevPad: {
-            buttons: [],
-            axes: []
-        },
+        pad: mockGamepad,
+        prevPad: mockGamepad,
 
-        buttonMap: params.memoize ? memoize(buttonMap) : buttonMap,
-        stickMap: params.memoize ? memoize(stickMap) : stickMap,
+        buttonMap: memoize(buttonMap),
+        stickMap: memoize(stickMap),
 
         buttons: getDefaultButtons(),
         sticks: getDefaultSticks(),
@@ -80,16 +77,23 @@ export default function createPlayer(params?: {
             }
 
             if (inputNames.length === 0) {
-                return mapValues(button => state.buttonMap(state.pad, state.prevPad, button), state.buttons);
+                return mapValues(
+                    button => state.buttonMap(state.pad, state.prevPad, button, state.threshold),
+                    state.buttons
+                );
             }
 
             if (inputNames.length === 1) {
-                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]]);
+                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]], state.threshold);
             }
 
             const result = {};
             inputNames.forEach(inputName => {
-                result[inputName] = state.buttonMap(state.pad, state.prevPad, state.buttons[inputName]);
+                result[inputName] = state.buttonMap(
+                    state.pad,
+                    state.prevPad,
+                    state.buttons[inputName],
+                    state.threshold);
             });
 
             return result;
@@ -245,9 +249,14 @@ export default function createPlayer(params?: {
 
         update(gamepad: Gamepad) {
             state.prevPad = state.pad;
-            state.pad = parseGamepad(gamepad, state.prevPad, state.threshold, state.clampThreshold);
+            state.pad = {
+                axes: gamepad.axes,
+                buttons: gamepad.buttons.map(a => a.value)
+            };
 
-            listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
+            if (listenOptions) {
+                listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
+            }
         },
 
         cancelListen() {

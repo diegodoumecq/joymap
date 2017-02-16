@@ -32,9 +32,9 @@ export type IMapperValues = { [index: string]: IMapperValue };
 export type IMapper = () => IMapperValue;
 export type IMappers = { [key: string]: IMapper };
 
-export type IParsedGamepad = {
-    buttons: IButtonState[],
-    axes: number[]
+export type IGamepad = {
+    axes: number[],
+    buttons: number[]
 };
 
 export type IListenParams = {
@@ -57,14 +57,13 @@ export type IListenOptions = {
 export type IPlayerState = {
     threshold: number,
     clampThreshold: boolean,
-    memoize: boolean,
-    pad: IParsedGamepad,
-    prevPad: IParsedGamepad,
+    pad: IGamepad,
+    prevPad: IGamepad,
 
-    buttonMap: (pad: IParsedGamepad, prevPad: IParsedGamepad, indexes: IButtonIndexes) => IButtonState,
+    buttonMap: (pad: IGamepad, prevPad: IGamepad, indexes: IButtonIndexes) => IButtonState,
     stickMap: (
-        pad: IParsedGamepad,
-        prevPad: IParsedGamepad,
+        pad: IGamepad,
+        prevPad: IGamepad,
         indexMaps: IStickIndexes,
         inverts: IStickInverts,
         threshold: number
@@ -114,7 +113,6 @@ export type IPlayer = {
 export type IJoyMapState = {
     threshold: number,
     clampThreshold: boolean,
-    memoize: boolean,
     onPoll: () => void,
     autoConnect: boolean,
     gamepads: Gamepad[],
