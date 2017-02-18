@@ -43,6 +43,36 @@ export type IListenParams = {
     allowOffset: boolean
 };
 
+export type IModule = {
+    getPadId: () => ?string,
+    isConnected: () => boolean,
+    disconnect: () => void,
+    connect: (padId?: string) => void,
+    getConfig: () => string,
+    setConfig: (serializedString: string) => void,
+
+    getButtonIndexes: (...inputNames: string[]) => IButtonIndexes,
+    getStickIndexes: (...inputNames: string[]) => IStickIndexes,
+
+    setButton: (inputName: string, indexes: IButtonIndex | IButtonIndexes) => void,
+    setStick: (inputName: string, indexes: any[], inverts?: IStickInverts) => void,
+    setMapper: (mapperName: string, callback: IMapper) => void,
+
+    invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
+    swapButtons: (btn1: string, btn2: string) => void,
+    swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
+
+    update: (gamepad: Gamepad) => void,
+
+    cancelListen: () => void,
+    listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
+    listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
+    buttonBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
+    stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
+
+    destroy: () => void
+};
+
 export type IListenOptions = {
     callback: (indexes: number[]) => void,
     quantity: number,
@@ -54,7 +84,7 @@ export type IListenOptions = {
     allowOffset: boolean
 };
 
-export type IPlayerState = {
+export type IQueryModuleState = {
     threshold: number,
     clampThreshold: boolean,
     pad: IGamepad,
@@ -74,71 +104,39 @@ export type IPlayerState = {
     mappers: IMappers
 };
 
-export type IPlayer = {
-    getPadId: () => ?string,
-    isConnected: () => boolean,
-    disconnect: () => void,
-    connect: (padId?: string) => void,
-    getConfig: () => string,
-    setConfig: (serializedString: string) => void,
-
+export type IQueryModule = IModule & {
     getButtons: (...names: string[]) => IButtonState | IButtonStates,
     getSticks: (...names: string[]) => IStickState | IStickStates,
     getMappers: (...names: string[]) => IMapperValue | IMapperValues,
 
-    getButtonIndexes: (...inputNames: string[]) => IButtonIndexes,
-    getStickIndexes: (...inputNames: string[]) => IStickIndexes,
-
-    setButton: (inputName: string, indexes: IButtonIndex | IButtonIndexes) => void,
-    setStick: (inputName: string, indexes: any[], inverts?: IStickInverts) => void,
-    setMapper: (mapperName: string, callback: IMapper) => void,
-
-    invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
-    swapButtons: (btn1: string, btn2: string) => void,
-    swapSticks: (btn1: string, btn2: string, includeInverts?: boolean) => void,
-
     removeMapper: (mapperName: string) => void,
     clearMappers: () => void,
-    update: (gamepad: Gamepad) => void,
-
-    cancelListen: () => void,
-    listenButton: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    listenAxis: (callback: Function, quantity?: number, params?: IListenParams) => void,
-    buttonBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
-    stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
-
-    destroy: () => void
+    setMapper: (mapperName: string, callback: IMapper) => void
 };
 
 export type IJoyMapState = {
-    threshold: number,
-    clampThreshold: boolean,
     onPoll: () => void,
     autoConnect: boolean,
     gamepads: Gamepad[],
-    players: IPlayer[]
+    modules: IModule[]
 };
 
 export type IJoyMap = {
     isSupported: () => boolean,
-    getPlayerConfigs: () => string,
-    setPlayerConfigs: (jsonString: string) => void,
 
     start: () => void,
     stop: () => void,
 
-    setThreshold: (threshold: number) => void,
-    setClampThreshold: (clampThreshold: boolean) => void,
     setOnPoll: (onPoll: Function) => void,
     setAutoConnect: (autoConnect: boolean) => void,
 
     getGamepads: () => Gamepad[],
-    getPlayers: () => IPlayer[],
+    getModules: () => IModule[],
     getUnusedPadIds: () => string[],
     getUnusedPadId: () => string | null,
 
-    addPlayer: (padId?: ?string) => IPlayer,
-    removePlayer: (player: IPlayer) => void,
-    clearPlayers: () => void,
+    addModule: (module: IModule) => void,
+    removeModule: (module: IModule) => void,
+    clearModules: () => void,
     poll: () => void
 };

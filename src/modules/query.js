@@ -6,34 +6,38 @@ import {
     getDefaultButtons, getDefaultSticks,
     stickMap, buttonMap, getEmptyMappers,
     getEmptyButtons, getEmptySticks
-} from './lib/utils';
+} from '../lib/common';
 
 import {
     findKey, omit, arraysEqual, mapValues
-} from './lib/tools';
+} from '../lib/tools';
 
 import type {
     IStickState, IStickStates, /* IStickIndex, */IStickIndexes, IStickInverts,
     IButtonState, IButtonStates, IButtonIndex, IButtonIndexes,
-    IListenOptions, IListenParams, IPlayerState, IPlayer,
+    IListenOptions, IListenParams, IQueryModuleState, IQueryModule,
     IMapper, IMapperValue, IMapperValues, IGamepad
-} from './types';
+} from '../types';
 
 const mockGamepad: IGamepad = {
     axes: [],
     buttons: []
 };
 
-export default function createPlayer(params?: {
+// TODO review clampThreshold
+
+export default function createQueryModule(params?: {
     threshold?: number,
     clampThreshold?: boolean,
     padId?: ?string
-} = {}): IPlayer {
+} = {}): IQueryModule {
     let listenOptions: null | IListenOptions = null;
     let gamepadId: ?string = params.padId ? params.padId : null;
     let connected: boolean = !!params.padId;
 
-    const state: IPlayerState = {
+    const state: IQueryModuleState = {
+        type: 'query',
+
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         pad: mockGamepad,
@@ -47,7 +51,7 @@ export default function createPlayer(params?: {
         mappers: {}
     };
 
-    const player: IPlayer = {
+    const module: IQueryModule = {
         getPadId: () => gamepadId,
         isConnected: () => connected,
         disconnect() {
@@ -131,16 +135,16 @@ export default function createPlayer(params?: {
             }
 
             if (mapperNames.length === 0) {
-                return mapValues(mapper => mapper(player), state.mappers);
+                return mapValues(mapper => mapper(module), state.mappers);
             }
 
             if (mapperNames.length === 1) {
-                return state.mappers[mapperNames[0]](player);
+                return state.mappers[mapperNames[0]](module);
             }
 
             const result = {};
             mapperNames.forEach(mapperName => {
-                result[mapperName] = state.mappers[mapperName](player);
+                result[mapperName] = state.mappers[mapperName](module);
             });
 
             return result;
@@ -306,14 +310,14 @@ export default function createPlayer(params?: {
                 throw new Error(`On buttonBindOnPress('${inputName}', ...):
                     first argument contains invalid characters`);
             }
-            player.listenButton((indexes: IButtonIndexes) => {
+            module.listenButton((indexes: IButtonIndexes) => {
                 const findKeyCb: Function = value => value[0] === indexes[0];
                 const resultName: string | null = findKey(findKeyCb, state.buttons);
 
                 if (!allowDuplication && resultName && state.buttons[inputName]) {
-                    player.swapButtons(inputName, resultName);
+                    module.swapButtons(inputName, resultName);
                 } else {
-                    player.setButton(inputName, indexes);
+                    module.setButton(inputName, indexes);
                 }
 
                 callback(resultName);
@@ -330,14 +334,14 @@ export default function createPlayer(params?: {
                     first argument contains invalid characters`);
             }
 
-            player.listenAxis((indexesResult: IStickIndexes) => {
+            module.listenAxis((indexesResult: IStickIndexes) => {
                 const findKeyCb: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
                 const resultName: string | null = findKey(findKeyCb, state.sticks);
 
                 if (!allowDuplication && resultName && state.sticks[inputName]) {
-                    player.swapSticks(inputName, resultName);
+                    module.swapSticks(inputName, resultName);
                 } else {
-                    player.setStick(inputName, indexesResult);
+                    module.setStick(inputName, indexesResult);
                 }
 
                 callback(resultName);
@@ -345,7 +349,7 @@ export default function createPlayer(params?: {
         },
 
         destroy() {
-            player.disconnect();
+            module.disconnect();
             state.pad = {
                 buttons: [],
                 axes: []
@@ -354,9 +358,9 @@ export default function createPlayer(params?: {
                 buttons: [],
                 axes: []
             };
-            player.clearMappers();
+            module.clearMappers();
         }
     };
 
-    return player;
+    return module;
 }

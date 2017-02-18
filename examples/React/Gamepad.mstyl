@@ -76,7 +76,7 @@ shoulder(right)
     background: rgba(0,0,0,0.5)
 
 
-.player-name
+.module-name
     position absolute
     top 70px
     width 100%

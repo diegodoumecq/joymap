@@ -1,15 +1,12 @@
 /* @flow */
-import { getRawGamepads } from './lib/utils';
+import { getRawGamepads } from './lib/common';
 import {
     noop, map, isFunction, find, difference
 } from './lib/tools';
 
-import createPlayer from './Player';
-import type { IPlayer, IJoyMap, IJoyMapState } from './types';
+import type { IModule, IJoyMap, IJoyMapState } from './types';
 
 export default function createJoyMap(params?: {
-    threshold?: number,
-    clampThreshold?: boolean,
     onPoll?: () => void,
     autoConnect?: boolean
 } = {}) {
@@ -17,36 +14,24 @@ export default function createJoyMap(params?: {
     const isSupported = navigator && isFunction(navigator.getGamepads);
 
     const state: IJoyMapState = {
-        threshold: params.threshold || 0.2,
-        clampThreshold: params.clampThreshold !== false,
         onPoll: params.onPoll || noop,
         autoConnect: params.autoConnect !== false,
         gamepads: [],
-        players: []
+        modules: []
     };
 
     const joyMap: IJoyMap = {
         isSupported: () => isSupported,
 
-        getPlayerConfigs(): string {
-            return `[${state.players.map(player => player.getConfig).join(',')}]`;
-        },
-
-        setPlayerConfigs(jsonString: string = '[]') {
-            joyMap.clearPlayers();
-            const parsedList = JSON.parse(jsonString);
-            parsedList.forEach(playerConfig => joyMap.addPlayer().setConfig(playerConfig));
-        },
-
         start() {
             if (isSupported && animationFrameRequestId === null) {
                 joyMap.poll();
                 if (state.autoConnect) {
-                    state.players.forEach(p => {
-                        if (!p.isConnected()) {
+                    state.modules.forEach(module => {
+                        if (!module.isConnected()) {
                             const padId = joyMap.getUnusedPadId();
                             if (padId) {
-                                p.connect(padId);
+                                module.connect(padId);
                             }
                         }
                     });
@@ -66,14 +51,6 @@ export default function createJoyMap(params?: {
             }
         },
 
-        setThreshold(threshold: number) {
-            state.threshold = threshold;
-        },
-
-        setClampThreshold(clampThreshold: boolean) {
-            state.clampThreshold = clampThreshold;
-        },
-
         setOnPoll(onPoll: Function) {
             state.onPoll = onPoll;
         },
@@ -83,20 +60,20 @@ export default function createJoyMap(params?: {
         },
 
         getGamepads: () => state.gamepads,
-        getPlayers: () => state.players,
+        getModules: () => state.modules,
 
         getUnusedPadIds(): string[] {
-            return difference(map('id', state.gamepads), state.players.map(p => p.getPadId()));
+            return difference(map('id', state.gamepads), state.modules.map(m => m.getPadId()));
         },
 
         getUnusedPadId(): string | null {
-            const playerIds = state.players.map(p => p.getPadId());
+            const usedIds = state.modules.map(module => module.getPadId());
             const gamepadIds = map('id', state.gamepads);
 
             const length = gamepadIds.length;
             let i = 0;
             while (i < length) {
-                if (!playerIds.includes(gamepadIds[i])) {
+                if (!usedIds.includes(gamepadIds[i])) {
                     return gamepadIds[i];
                 }
                 i += 1;
@@ -105,35 +82,29 @@ export default function createJoyMap(params?: {
             return null;
         },
 
-        addPlayer(padId?: ?string): IPlayer {
-            // Given unassigned players and unused gamepads, automatically assign them
-            if (state.autoConnect && !padId) {
-                padId = joyMap.getUnusedPadId();
+        addModule(module: IModule) {
+            state.modules.push(module);
+
+            if (state.autoConnect && !module.getPadId()) {
+                const padId = joyMap.getUnusedPadId();
+                if (padId) {
+                    module.connect(padId);
+                }
             }
-
-            const player: IPlayer = createPlayer({
-                threshold: state.threshold,
-                clampThreshold: state.clampThreshold,
-                padId
-            });
-
-            state.players.push(player);
-
-            return player;
         },
 
-        removePlayer(player: IPlayer) {
-            const index = state.players.indexOf(player);
+        removeModule(module: IModule) {
+            const index = state.modules.indexOf(module);
             if (index !== -1) {
-                state.players.splice(index, 1);
-                player.destroy();
+                state.modules.splice(index, 1);
+                module.destroy();
             } else {
-                throw new Error('removePlayer(player), could not find such player');
+                throw new Error('removeModule(module), could not find such module');
             }
         },
 
-        clearPlayers() {
-            state.players.forEach(player => joyMap.removePlayer(player));
+        clearModules() {
+            state.modules.forEach(module => joyMap.removeModule(module));
         },
 
         poll() {
@@ -145,16 +116,18 @@ export default function createJoyMap(params?: {
                 && rawGamepad.timestamp !== 0
                 && (!!rawGamepad.id || rawGamepad.id === 0));
 
-            state.players.forEach((player: IPlayer) => {
-                const gamepad: ?Gamepad = find({ id: player.getPadId() }, state.gamepads);
+            // TODO review gamepad connection because gamepad doesnt autoconnect even if the flag is true the first time
+
+            state.modules.forEach((module: IModule) => {
+                const gamepad: ?Gamepad = find({ id: module.getPadId() }, state.gamepads);
 
                 if (gamepad) {
-                    if (!player.isConnected()) {
-                        player.connect();
+                    if (!module.isConnected()) {
+                        module.connect();
                     }
-                    player.update(gamepad);
-                } else if (player.isConnected()) {
-                    player.disconnect();
+                    module.update(gamepad);
+                } else if (module.isConnected()) {
+                    module.disconnect();
                 }
             });
 

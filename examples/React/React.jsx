@@ -8,7 +8,7 @@ import tinycolor from 'tinycolor2';
 
 import styles from './React.mstyl';
 
-import createJoyMap from '../../src/JoyMap';
+import createJoyMap, { createQueryModule } from '../../src/index';
 import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });
@@ -23,15 +23,20 @@ class ReactExample extends React.Component {
             onPoll: () => this.setState({})
         });
 
-        const James = joyMap.addPlayer();
+        const James = createQueryModule();
         James.invertSticks([true, true], 'L', 'R');
 
         this.players = [
-            { name: 'James', player: James },
-            { name: 'Juan', player: joyMap.addPlayer() },
-            { name: 'John', player: joyMap.addPlayer() },
-            { name: 'Jim', player: joyMap.addPlayer() }
+            { name: 'James', module: James },
+            { name: 'Juan', module: createQueryModule() },
+            { name: 'John', module: createQueryModule() },
+            { name: 'Jim', module: createQueryModule() }
         ];
+
+        joyMap.addModule(James);
+        joyMap.addModule(this.players[1].module);
+        joyMap.addModule(this.players[2].module);
+        joyMap.addModule(this.players[3].module);
 
         this.joyMap = joyMap;
     }
@@ -50,7 +55,7 @@ class ReactExample extends React.Component {
                     <span>Connect one or more Gamepads. Use them. Click on buttons to rebind them.</span>
                 </header>
                 <section styleName="react-example">
-                    {map(({ player, name }) => {
+                    {map(({ module, name }) => {
                         const color = colorHash.hex(name);
                         return (
                             <Gamepad
@@ -58,8 +63,8 @@ class ReactExample extends React.Component {
                                 name={name}
                                 backgroundColor={color}
                                 pressedColor={`#${tinycolor(color).darken(20).toHex()}`}
-                                player={player}>
-                                <h2>{player.getPadId() || 'Player has no gamepad assigned'}</h2>
+                                module={module}>
+                                <h2>{module.getPadId() || 'Player has no gamepad assigned'}</h2>
                             </Gamepad>);
                     }, this.players)}
                 </section>
