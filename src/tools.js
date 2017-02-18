@@ -1,6 +1,29 @@
 /* @flow */
 
-// Lodash function replacements
+// These are domain-specific
+
+import type { IStickValue } from './types';
+
+export function getRawGamepads(): Gamepad[] {
+    if (navigator && navigator.getGamepads) {
+        return Array.from(navigator.getGamepads());
+    }
+    return [];
+}
+
+export function nameIsValid(name: string) {
+    return /^[a-z0-9]+$/i.test(name);
+}
+
+export function isButtonSignificant(value: number = 0, threshold: number): boolean {
+    return Math.abs(value) > threshold;
+}
+
+export function isStickSignificant(stickValue: IStickValue, threshold: number): boolean {
+    return stickValue.findIndex(value => Math.abs(value) >= threshold) !== -1;
+}
+
+// These are generic Lodash function replacements
 
 export function noop() {}
 

@@ -43,6 +43,33 @@ export type IListenParams = {
     allowOffset: boolean
 };
 
+export type IListenOptions = {
+    callback: (indexes: number[]) => void,
+    quantity: number,
+    type: 'buttons' | 'axes',
+    currentValue: number,
+    useTimeStamp: boolean,
+    targetValue: number,
+    consecutive: boolean,
+    allowOffset: boolean
+};
+
+export type IModuleParams = {
+    threshold?: number,
+    clampThreshold?: boolean,
+    padId?: ?string
+};
+
+export type IModuleState = {
+    threshold: number,
+    clampThreshold: boolean,
+    pad: IGamepad,
+    prevPad: IGamepad,
+
+    buttons: IButtonMaps,
+    sticks: IStickMaps
+};
+
 export type IModule = {
     getPadId: () => ?string,
     isConnected: () => boolean,
@@ -56,7 +83,6 @@ export type IModule = {
 
     setButton: (inputName: string, indexes: IButtonIndex | IButtonIndexes) => void,
     setStick: (inputName: string, indexes: any[], inverts?: IStickInverts) => void,
-    setMapper: (mapperName: string, callback: IMapper) => void,
 
     invertSticks: (inverts: IStickInverts, ...inputNames: string[]) => void,
     swapButtons: (btn1: string, btn2: string) => void,
@@ -71,37 +97,6 @@ export type IModule = {
     stickBindOnPress: (inputName: string, callback: Function, allowDuplication?: boolean) => void,
 
     destroy: () => void
-};
-
-export type IListenOptions = {
-    callback: (indexes: number[]) => void,
-    quantity: number,
-    type: 'buttons' | 'axes',
-    currentValue: number,
-    useTimeStamp: boolean,
-    targetValue: number,
-    consecutive: boolean,
-    allowOffset: boolean
-};
-
-export type IQueryModuleState = {
-    threshold: number,
-    clampThreshold: boolean,
-    pad: IGamepad,
-    prevPad: IGamepad,
-
-    buttonMap: (pad: IGamepad, prevPad: IGamepad, indexes: IButtonIndexes) => IButtonState,
-    stickMap: (
-        pad: IGamepad,
-        prevPad: IGamepad,
-        indexMaps: IStickIndexes,
-        inverts: IStickInverts,
-        threshold: number
-    ) => IStickState,
-
-    buttons: IButtonMaps,
-    sticks: IStickMaps,
-    mappers: IMappers
 };
 
 export type IQueryModule = IModule & {

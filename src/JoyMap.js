@@ -1,8 +1,7 @@
 /* @flow */
-import { getRawGamepads } from './lib/common';
 import {
-    noop, map, isFunction, find, difference
-} from './lib/tools';
+    getRawGamepads, noop, map, isFunction, find, difference
+} from './tools';
 
 import type { IModule, IJoyMap, IJoyMapState } from './types';
 

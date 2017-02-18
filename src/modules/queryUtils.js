@@ -1,75 +1,14 @@
-/* @flow */
-import type {
-    IListenOptions, IMappers, IGamepad,
-    IButtonState, IButtonStates, IButtonMaps, IButtonIndexes,
-    IStickState, IStickStates, IStickMaps, IStickValue, IStickInverts, IStickIndexes
-} from '../types';
-
 import {
-    findIndexes, isConsecutive, mapValues
-} from './tools';
+    isButtonSignificant, isStickSignificant, mapValues
+} from '../tools';
 
-export function getRawGamepads(): Gamepad[] {
-    if (navigator && navigator.getGamepads) {
-        return Array.from(navigator.getGamepads());
-    }
-    return [];
-}
-
-export function nameIsValid(name: string) {
-    return /^[a-z0-9]+$/i.test(name);
-}
-
-export function getDefaultButtons() {
-    return {
-        dpadUp: [12],
-        dpadDown: [13],
-        dpadLeft: [14],
-        dpadRight: [15],
-        L1: [4],
-        L2: [6],
-        L3: [10],
-        R1: [5],
-        R2: [7],
-        R3: [11],
-        A: [0],
-        B: [1],
-        X: [2],
-        Y: [3],
-        start: [9],
-        select: [8],
-        home: [16]
-    };
-}
-
-export function getDefaultSticks() {
-    return {
-        L: {
-            indexes: [[0, 1]],
-            inverts: [false, false]
-        },
-        R: {
-            indexes: [[2, 3]],
-            inverts: [false, false]
-        }
-    };
-}
-
-export function isButtonSignificant(value: number = 0, threshold: number): boolean {
-    return Math.abs(value) > threshold;
-}
-
-export function isStickSignificant(stickValue: IStickValue, threshold: number): boolean {
-    return stickValue.findIndex(value => Math.abs(value) >= threshold) !== -1;
-}
-
-export function getStickValue(stickValue: IStickValue, threshold: number): IStickValue {
-    if (!isStickSignificant(stickValue, threshold)) {
-        return stickValue.map(() => 0);
-    }
-
-    return stickValue;
-}
+import type {
+    IStickState, IStickStates, IStickIndexes,
+    IStickValue, IStickInverts,
+    IButtonState, IButtonStates, IButtonIndexes,
+    IGamepad,
+    IMappers, IButtonMaps, IStickMaps
+} from '../types';
 
 export function getEmptyMappers(
     mappers: IMappers,
@@ -181,7 +120,7 @@ export function buttonMap(
     };
 }
 
-function roundSticks(indexMaps: IStickIndexes, axes: number[], threshold: number): IStickValue {
+export function roundSticks(indexMaps: IStickIndexes, axes: number[], threshold: number): IStickValue {
     let count = 0;
     let counts = [];
 
@@ -214,44 +153,4 @@ export function stickMap(
         justChanged: pressed !== prevPressed,
         inverts
     };
-}
-
-export function updateListenOptions(
-    listenOptions: IListenOptions,
-    pad: IGamepad,
-    threshold: number
-) {
-    const {
-        callback, quantity, type,
-        currentValue, targetValue,
-        useTimeStamp, consecutive, allowOffset
-    } = listenOptions;
-
-    const indexes = type === 'axes' ?
-        findIndexes(value => Math.abs(value) > threshold, pad.axes) :
-        findIndexes(value => isButtonSignificant(value, threshold), pad.buttons);
-
-    if (indexes.length === quantity
-    && (!consecutive || isConsecutive(indexes))
-    && (allowOffset || indexes[0] % quantity === 0)) {
-        if (useTimeStamp && currentValue === 0) {
-            return Object.assign({}, listenOptions, { currentValue: Date.now() });
-        }
-
-        const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
-
-        if (targetValue <= comparison) {
-            callback(indexes);
-            return null;
-        }
-
-        if (!useTimeStamp) {
-            return Object.assign({}, listenOptions, { currentValue: comparison });
-        }
-
-        return listenOptions;
-    }
-
-    // Clean currentValue
-    return Object.assign({}, listenOptions, { currentValue: 0 });
 }
