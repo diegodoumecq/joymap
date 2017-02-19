@@ -3,7 +3,34 @@ import {
     getRawGamepads, noop, map, isFunction, find, difference
 } from './tools';
 
-import type { IModule, IJoyMap, IJoyMapState } from './types';
+import type { IModule } from './types';
+
+type IJoyMapState = {
+    onPoll: () => void,
+    autoConnect: boolean,
+    gamepads: Gamepad[],
+    modules: IModule[]
+};
+
+type IJoyMap = {
+    isSupported: () => boolean,
+
+    start: () => void,
+    stop: () => void,
+
+    setOnPoll: (onPoll: Function) => void,
+    setAutoConnect: (autoConnect: boolean) => void,
+
+    getGamepads: () => Gamepad[],
+    getModules: () => IModule[],
+    getUnusedPadIds: () => string[],
+    getUnusedPadId: () => string | null,
+
+    addModule: (module: IModule) => void,
+    removeModule: (module: IModule) => void,
+    clearModules: () => void,
+    poll: () => void
+};
 
 export default function createJoyMap(params?: {
     onPoll?: () => void,

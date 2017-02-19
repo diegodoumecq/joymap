@@ -109,29 +109,12 @@ export type IQueryModule = IModule & {
     setMapper: (mapperName: string, callback: IMapper) => void
 };
 
-export type IJoyMapState = {
-    onPoll: () => void,
-    autoConnect: boolean,
-    gamepads: Gamepad[],
-    modules: IModule[]
-};
+export type IButtonEventCb = (event: IButtonState) => void;
+export type IStickEventCb = (event: IStickState) => void;
 
-export type IJoyMap = {
-    isSupported: () => boolean,
-
-    start: () => void,
-    stop: () => void,
-
-    setOnPoll: (onPoll: Function) => void,
-    setAutoConnect: (autoConnect: boolean) => void,
-
-    getGamepads: () => Gamepad[],
-    getModules: () => IModule[],
-    getUnusedPadIds: () => string[],
-    getUnusedPadId: () => string | null,
-
-    addModule: (module: IModule) => void,
-    removeModule: (module: IModule) => void,
-    clearModules: () => void,
-    poll: () => void
+export type IEventModule = IModule & {
+    addButtonEvent: (name: string, callback: IButtonEventCb) => void,
+    removeButtonEvent: (name: string, callback: IButtonEventCb) => void,
+    addStickEvent: (name: string, callback: IStickEventCb) => void,
+    removeStickEvent: (name: string, callback: IStickEventCb) => void
 };

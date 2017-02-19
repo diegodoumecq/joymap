@@ -1,7 +1,7 @@
 /* @flow */
 import memoize from 'fast-memoize';
 
-import createBasicModule from './base';
+import createBaseModule from './base';
 
 import {
     nameIsValid, omit, mapValues
@@ -20,7 +20,7 @@ import type {
 } from '../types';
 
 export default function createQueryModule(params?: IModuleParams = {}): IQueryModule {
-    const { state, module: basicModule } = createBasicModule(params);
+    const { state, module: baseModule } = createBaseModule(params);
 
     let mappers = {};
 
@@ -28,7 +28,7 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
     const stickMapMemoized = memoize(stickMap);
 
     const module: IQueryModule = {
-        ...basicModule,
+        ...baseModule,
         getButtons(...inputNames: string[]): IButtonState | IButtonStates {
             if (!module.isConnected()) {
                 return getEmptyButtons(state.buttons, inputNames);
