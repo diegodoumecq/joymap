@@ -16,24 +16,17 @@ var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-exports.default = createPlayer;
+exports.default = createModule;
 
-var _fastMemoize = require('fast-memoize');
+var _utils = require('../common/utils');
 
-var _fastMemoize2 = _interopRequireDefault(_fastMemoize);
+var _baseUtils = require('./baseUtils');
 
-var _utils = require('./lib/utils');
-
-var _tools = require('./lib/tools');
+var _baseTypes = require('./baseTypes');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var mockGamepad = {
-    axes: [],
-    buttons: []
-};
-
-function createPlayer() {
+function createModule() {
     var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var listenOptions = null;
@@ -43,18 +36,14 @@ function createPlayer() {
     var state = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
-        pad: mockGamepad,
-        prevPad: mockGamepad,
+        pad: _baseUtils.mockGamepad,
+        prevPad: _baseUtils.mockGamepad,
 
-        buttonMap: (0, _fastMemoize2.default)(_utils.buttonMap),
-        stickMap: (0, _fastMemoize2.default)(_utils.stickMap),
-
-        buttons: (0, _utils.getDefaultButtons)(),
-        sticks: (0, _utils.getDefaultSticks)(),
-        mappers: {}
+        buttons: (0, _baseUtils.getDefaultButtons)(),
+        sticks: (0, _baseUtils.getDefaultSticks)()
     };
 
-    var player = {
+    var module = {
         getPadId: function getPadId() {
             return gamepadId;
         },
@@ -81,100 +70,11 @@ function createPlayer() {
         setConfig: function setConfig(serializedString) {
             (0, _assign2.default)(state, JSON.parse(serializedString));
         },
-        getButtons: function getButtons() {
-            for (var _len = arguments.length, inputNames = Array(_len), _key = 0; _key < _len; _key++) {
-                inputNames[_key] = arguments[_key];
-            }
-
-            if (!connected) {
-                return (0, _utils.getEmptyButtons)(state.buttons, inputNames);
-            }
-
-            if (inputNames.length === 0) {
-                return (0, _tools.mapValues)(function (button) {
-                    return state.buttonMap(state.pad, state.prevPad, button, state.threshold);
-                }, state.buttons);
-            }
-
-            if (inputNames.length === 1) {
-                return state.buttonMap(state.pad, state.prevPad, state.buttons[inputNames[0]], state.threshold);
-            }
-
-            var result = {};
-            inputNames.forEach(function (inputName) {
-                result[inputName] = state.buttonMap(state.pad, state.prevPad, state.buttons[inputName], state.threshold);
-            });
-
-            return result;
-        },
-        getSticks: function getSticks() {
-            for (var _len2 = arguments.length, inputNames = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                inputNames[_key2] = arguments[_key2];
-            }
-
-            if (!connected) {
-                return (0, _utils.getEmptySticks)(state.sticks, inputNames);
-            }
-
-            if (inputNames.length === 0) {
-                return (0, _tools.mapValues)(function (stick) {
-                    var indexes = stick.indexes,
-                        inverts = stick.inverts;
-
-                    return state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
-                }, state.sticks);
-            }
-
-            if (inputNames.length === 1) {
-                var _state$sticks$inputNa = state.sticks[inputNames[0]],
-                    _indexes = _state$sticks$inputNa.indexes,
-                    inverts = _state$sticks$inputNa.inverts;
-
-                return state.stickMap(state.pad, state.prevPad, _indexes, inverts, state.threshold);
-            }
-
-            var result = {};
-            inputNames.forEach(function (inputName) {
-                var _state$sticks$inputNa2 = state.sticks[inputName],
-                    indexes = _state$sticks$inputNa2.indexes,
-                    inverts = _state$sticks$inputNa2.inverts;
-
-                result[inputName] = state.stickMap(state.pad, state.prevPad, indexes, inverts, state.threshold);
-            });
-
-            return result;
-        },
-        getMappers: function getMappers() {
-            for (var _len3 = arguments.length, mapperNames = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-                mapperNames[_key3] = arguments[_key3];
-            }
-
-            if (!connected) {
-                return (0, _utils.getEmptyMappers)(state.mappers, mapperNames);
-            }
-
-            if (mapperNames.length === 0) {
-                return (0, _tools.mapValues)(function (mapper) {
-                    return mapper(player);
-                }, state.mappers);
-            }
-
-            if (mapperNames.length === 1) {
-                return state.mappers[mapperNames[0]](player);
-            }
-
-            var result = {};
-            mapperNames.forEach(function (mapperName) {
-                result[mapperName] = state.mappers[mapperName](player);
-            });
-
-            return result;
-        },
         getButtonIndexes: function getButtonIndexes() {
             var indexes = [];
 
-            for (var _len4 = arguments.length, inputNames = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-                inputNames[_key4] = arguments[_key4];
+            for (var _len = arguments.length, inputNames = Array(_len), _key = 0; _key < _len; _key++) {
+                inputNames[_key] = arguments[_key];
             }
 
             inputNames.forEach(function (inputName) {
@@ -185,8 +85,8 @@ function createPlayer() {
         getStickIndexes: function getStickIndexes() {
             var indexes = [];
 
-            for (var _len5 = arguments.length, inputNames = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-                inputNames[_key5] = arguments[_key5];
+            for (var _len2 = arguments.length, inputNames = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                inputNames[_key2] = arguments[_key2];
             }
 
             inputNames.forEach(function (inputName) {
@@ -227,16 +127,9 @@ function createPlayer() {
                 };
             }
         },
-        setMapper: function setMapper(mapperName, callback) {
-            if (!(0, _utils.nameIsValid)(mapperName)) {
-                throw new Error('On setMapper(\'' + mapperName + '\', ...):\n                    first argument contains invalid characters');
-            }
-
-            state.mappers[mapperName] = callback;
-        },
         invertSticks: function invertSticks(inverts) {
-            for (var _len6 = arguments.length, inputNames = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
-                inputNames[_key6 - 1] = arguments[_key6];
+            for (var _len3 = arguments.length, inputNames = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+                inputNames[_key3 - 1] = arguments[_key3];
             }
 
             if (inputNames.length > 0) {
@@ -271,12 +164,6 @@ function createPlayer() {
                 sticks[btn2].indexes = _replacement;
             }
         },
-        removeMapper: function removeMapper(mapperName) {
-            state.mappers = (0, _tools.omit)([mapperName], state.mappers);
-        },
-        clearMappers: function clearMappers() {
-            state.mappers = {};
-        },
         update: function update(gamepad) {
             state.prevPad = state.pad;
             state.pad = {
@@ -287,7 +174,7 @@ function createPlayer() {
             };
 
             if (listenOptions) {
-                listenOptions = (0, _utils.updateListenOptions)(listenOptions, state.pad, state.threshold);
+                listenOptions = (0, _baseUtils.updateListenOptions)(listenOptions, state.pad, state.threshold);
             }
         },
         cancelListen: function cancelListen() {
@@ -343,16 +230,16 @@ function createPlayer() {
             if (!(0, _utils.nameIsValid)(inputName)) {
                 throw new Error('On buttonBindOnPress(\'' + inputName + '\', ...):\n                    first argument contains invalid characters');
             }
-            player.listenButton(function (indexes) {
+            module.listenButton(function (indexes) {
                 var findKeyCb = function findKeyCb(value) {
                     return value[0] === indexes[0];
                 };
-                var resultName = (0, _tools.findKey)(findKeyCb, state.buttons);
+                var resultName = (0, _utils.findKey)(findKeyCb, state.buttons);
 
                 if (!allowDuplication && resultName && state.buttons[inputName]) {
-                    player.swapButtons(inputName, resultName);
+                    module.swapButtons(inputName, resultName);
                 } else {
-                    player.setButton(inputName, indexes);
+                    module.setButton(inputName, indexes);
                 }
 
                 callback(resultName);
@@ -365,24 +252,24 @@ function createPlayer() {
                 throw new Error('On stickBindOnPress(\'' + inputName + '\', ...):\n                    first argument contains invalid characters');
             }
 
-            player.listenAxis(function (indexesResult) {
+            module.listenAxis(function (indexesResult) {
                 var findKeyCb = function findKeyCb(_ref3) {
                     var indexes = _ref3.indexes;
-                    return (0, _tools.arraysEqual)(indexes[0], indexesResult);
+                    return (0, _utils.arraysEqual)(indexes[0], indexesResult);
                 };
-                var resultName = (0, _tools.findKey)(findKeyCb, state.sticks);
+                var resultName = (0, _utils.findKey)(findKeyCb, state.sticks);
 
                 if (!allowDuplication && resultName && state.sticks[inputName]) {
-                    player.swapSticks(inputName, resultName);
+                    module.swapSticks(inputName, resultName);
                 } else {
-                    player.setStick(inputName, indexesResult);
+                    module.setStick(inputName, indexesResult);
                 }
 
                 callback(resultName);
             });
         },
         destroy: function destroy() {
-            player.disconnect();
+            module.disconnect();
             state.pad = {
                 buttons: [],
                 axes: []
@@ -391,9 +278,8 @@ function createPlayer() {
                 buttons: [],
                 axes: []
             };
-            player.clearMappers();
         }
     };
 
-    return player;
+    return { module: module, state: state };
 }

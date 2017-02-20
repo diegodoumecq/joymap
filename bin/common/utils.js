@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _from = require('babel-runtime/core-js/array/from');
+
+var _from2 = _interopRequireDefault(_from);
+
 var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
@@ -31,6 +35,13 @@ exports.matches = matches;
 exports.find = find;
 exports.findIndex = findIndex;
 exports.findKey = findKey;
+exports.getRawGamepads = getRawGamepads;
+exports.nameIsValid = nameIsValid;
+exports.isButtonSignificant = isButtonSignificant;
+exports.isStickSignificant = isStickSignificant;
+exports.buttonMap = buttonMap;
+exports.roundSticks = roundSticks;
+exports.stickMap = stickMap;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -250,4 +261,98 @@ function findKey(search, target) {
     }
 
     return null;
+}
+
+function getRawGamepads() {
+    if (navigator && navigator.getGamepads) {
+        return (0, _from2.default)(navigator.getGamepads());
+    }
+    return [];
+}
+
+function nameIsValid(name) {
+    return (/^[a-z0-9]+$/i.test(name)
+    );
+}
+
+function isButtonSignificant() {
+    var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var threshold = arguments[1];
+
+    return Math.abs(value) > threshold;
+}
+
+function isStickSignificant(stickValue, threshold) {
+    return stickValue.findIndex(function (value) {
+        return Math.abs(value) >= threshold;
+    }) !== -1;
+}
+
+function buttonMap(pad, prevPad, indexes, threshold) {
+    var length = indexes.length;
+
+    var prevPressed = false;
+    var value = 0;
+    var pressed = false;
+
+    var i = 0;
+    while (i < length) {
+        if (!prevPressed) {
+            var prevValue = prevPad.buttons[indexes[i]] || 0;
+            prevPressed = isButtonSignificant(prevValue, threshold);
+        }
+
+        var currValue = pad.buttons[indexes[i]] || 0;
+        value = Math.max(value, currValue);
+        if (!pressed) {
+            pressed = isButtonSignificant(currValue, threshold);
+        }
+
+        i += 1;
+    }
+
+    return {
+        value: value,
+        pressed: pressed,
+        justChanged: pressed !== prevPressed
+    };
+}
+
+function roundSticks(indexMaps, axes, threshold) {
+    var count = 0;
+    var counts = [];
+
+    indexMaps.forEach(function (indexes) {
+        var values = indexes.map(function (i) {
+            return axes[i];
+        });
+
+        if (isStickSignificant(values, threshold)) {
+            counts = values.map(function (v, i) {
+                return v + (counts[i] || 0);
+            });
+            count += 1;
+        }
+    });
+
+    return count === 0 ? indexMaps[0].map(function () {
+        return 0;
+    }) : counts.map(function (v) {
+        return v / count;
+    });
+}
+
+function stickMap(pad, prevPad, indexMaps, inverts, threshold) {
+    var prevPressed = isStickSignificant(roundSticks(indexMaps, prevPad.axes, threshold), threshold);
+    var value = roundSticks(indexMaps, pad.axes, threshold).map(function (v, i) {
+        return !inverts[i] ? v : v * -1;
+    });
+    var pressed = isStickSignificant(value, threshold);
+
+    return {
+        value: value,
+        pressed: pressed,
+        justChanged: pressed !== prevPressed,
+        inverts: inverts
+    };
 }

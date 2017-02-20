@@ -5,60 +5,46 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = createJoyMap;
 
-var _utils = require('./lib/utils');
-
-var _tools = require('./lib/tools');
-
-var _Player = require('./Player');
-
-var _Player2 = _interopRequireDefault(_Player);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _utils = require('./common/utils');
 
 function createJoyMap() {
     var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var animationFrameRequestId = null;
-    var _isSupported = navigator && (0, _tools.isFunction)(navigator.getGamepads);
+    var isSupported = navigator && (0, _utils.isFunction)(navigator.getGamepads);
 
     var state = {
-        threshold: params.threshold || 0.2,
-        clampThreshold: params.clampThreshold !== false,
-        onPoll: params.onPoll || _tools.noop,
+        onPoll: params.onPoll || _utils.noop,
         autoConnect: params.autoConnect !== false,
         gamepads: [],
-        players: []
+        modules: []
     };
 
     var joyMap = {
-        isSupported: function isSupported() {
-            return _isSupported;
-        },
+        isSupported: function (_isSupported) {
+            function isSupported() {
+                return _isSupported.apply(this, arguments);
+            }
 
-        getPlayerConfigs: function getPlayerConfigs() {
-            return '[' + state.players.map(function (player) {
-                return player.getConfig;
-            }).join(',') + ']';
-        },
-        setPlayerConfigs: function setPlayerConfigs() {
-            var jsonString = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '[]';
+            isSupported.toString = function () {
+                return _isSupported.toString();
+            };
 
-            joyMap.clearPlayers();
-            var parsedList = JSON.parse(jsonString);
-            parsedList.forEach(function (playerConfig) {
-                return joyMap.addPlayer().setConfig(playerConfig);
-            });
-        },
+            return isSupported;
+        }(function () {
+            return isSupported;
+        }),
+
         start: function start() {
-            if (_isSupported && animationFrameRequestId === null) {
+            if (isSupported && animationFrameRequestId === null) {
                 (function () {
                     joyMap.poll();
                     if (state.autoConnect) {
-                        state.players.forEach(function (p) {
-                            if (!p.isConnected()) {
+                        state.modules.forEach(function (module) {
+                            if (!module.isConnected()) {
                                 var padId = joyMap.getUnusedPadId();
                                 if (padId) {
-                                    p.connect(padId);
+                                    module.connect(padId);
                                 }
                             }
                         });
@@ -77,12 +63,6 @@ function createJoyMap() {
                 animationFrameRequestId = null;
             }
         },
-        setThreshold: function setThreshold(threshold) {
-            state.threshold = threshold;
-        },
-        setClampThreshold: function setClampThreshold(clampThreshold) {
-            state.clampThreshold = clampThreshold;
-        },
         setOnPoll: function setOnPoll(onPoll) {
             state.onPoll = onPoll;
         },
@@ -94,25 +74,25 @@ function createJoyMap() {
         getGamepads: function getGamepads() {
             return state.gamepads;
         },
-        getPlayers: function getPlayers() {
-            return state.players;
+        getModules: function getModules() {
+            return state.modules;
         },
 
         getUnusedPadIds: function getUnusedPadIds() {
-            return (0, _tools.difference)((0, _tools.map)('id', state.gamepads), state.players.map(function (p) {
-                return p.getPadId();
+            return (0, _utils.difference)((0, _utils.map)('id', state.gamepads), state.modules.map(function (m) {
+                return m.getPadId();
             }));
         },
         getUnusedPadId: function getUnusedPadId() {
-            var playerIds = state.players.map(function (p) {
-                return p.getPadId();
+            var usedIds = state.modules.map(function (module) {
+                return module.getPadId();
             });
-            var gamepadIds = (0, _tools.map)('id', state.gamepads);
+            var gamepadIds = (0, _utils.map)('id', state.gamepads);
 
             var length = gamepadIds.length;
             var i = 0;
             while (i < length) {
-                if (!playerIds.includes(gamepadIds[i])) {
+                if (!usedIds.includes(gamepadIds[i])) {
                     return gamepadIds[i];
                 }
                 i += 1;
@@ -120,33 +100,28 @@ function createJoyMap() {
 
             return null;
         },
-        addPlayer: function addPlayer(padId) {
-            if (state.autoConnect && !padId) {
-                padId = joyMap.getUnusedPadId();
+        addModule: function addModule(module) {
+            state.modules.push(module);
+
+            if (state.autoConnect && !module.getPadId()) {
+                var padId = joyMap.getUnusedPadId();
+                if (padId) {
+                    module.connect(padId);
+                }
             }
-
-            var player = (0, _Player2.default)({
-                threshold: state.threshold,
-                clampThreshold: state.clampThreshold,
-                padId: padId
-            });
-
-            state.players.push(player);
-
-            return player;
         },
-        removePlayer: function removePlayer(player) {
-            var index = state.players.indexOf(player);
+        removeModule: function removeModule(module) {
+            var index = state.modules.indexOf(module);
             if (index !== -1) {
-                state.players.splice(index, 1);
-                player.destroy();
+                state.modules.splice(index, 1);
+                module.destroy();
             } else {
-                throw new Error('removePlayer(player), could not find such player');
+                throw new Error('removeModule(module), could not find such module');
             }
         },
-        clearPlayers: function clearPlayers() {
-            state.players.forEach(function (player) {
-                return joyMap.removePlayer(player);
+        clearModules: function clearModules() {
+            state.modules.forEach(function (module) {
+                return joyMap.removeModule(module);
             });
         },
         poll: function poll() {
@@ -154,16 +129,16 @@ function createJoyMap() {
                 return rawGamepad && rawGamepad.connected && rawGamepad.buttons.length && rawGamepad.axes.length && rawGamepad.timestamp !== 0 && (!!rawGamepad.id || rawGamepad.id === 0);
             });
 
-            state.players.forEach(function (player) {
-                var gamepad = (0, _tools.find)({ id: player.getPadId() }, state.gamepads);
+            state.modules.forEach(function (module) {
+                var gamepad = (0, _utils.find)({ id: module.getPadId() }, state.gamepads);
 
                 if (gamepad) {
-                    if (!player.isConnected()) {
-                        player.connect();
+                    if (!module.isConnected()) {
+                        module.connect();
                     }
-                    player.update(gamepad);
-                } else if (player.isConnected()) {
-                    player.disconnect();
+                    module.update(gamepad);
+                } else if (module.isConnected()) {
+                    module.disconnect();
                 }
             });
 
