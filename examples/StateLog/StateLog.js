@@ -6,7 +6,7 @@ import {
 import '../main.styl';
 import './StateLog.styl';
 
-import createJoyMap, { createQueryModule } from '../../src/index';
+import { createJoyMap, createQueryModule } from '../../src/index';
 
 // Populate the app div with some basic html
 document.getElementById('app').innerHTML = `

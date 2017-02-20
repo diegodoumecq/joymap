@@ -2,7 +2,7 @@
 
 // Simple canvas example that doesn't use any other library nor ES6 features
 var joyMap = require('../../src/index');
-var createJoyMap = joyMap.default;
+var createJoyMap = joyMap.createJoyMap;
 var createQueryModule = joyMap.createQueryModule;
 
 require('../main.styl');

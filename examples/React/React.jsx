@@ -8,7 +8,7 @@ import tinycolor from 'tinycolor2';
 
 import styles from './React.mstyl';
 
-import createJoyMap, { createQueryModule } from '../../src/index';
+import { createJoyMap, createQueryModule } from '../../src/index';
 import Gamepad from './Gamepad.jsx';
 
 const colorHash = new ColorHash({ saturation: [0.1, 0.7, 0.8], lightness: 0.5 });
