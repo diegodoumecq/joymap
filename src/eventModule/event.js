@@ -1,13 +1,13 @@
 /* @flow */
 import memoize from 'fast-memoize';
 
-import createBaseModule from './base';
+import createBaseModule from '../baseModule/base';
 
-import { buttonMap, stickMap } from './queryUtils';
+import { buttonMap, stickMap } from '../common/utils';
 
-import type {
-    IEventModule, IModuleParams, IButtonEventCb, IStickEventCb
-} from '../types';
+import type { IModuleParams } from '../baseModule/baseTypes';
+
+import type { IEventModule, IButtonEventCb, IStickEventCb } from './eventTypes';
 
 function isValidButtonEventName(name: string, buttons: {}): boolean {
     return Object.keys(buttons).includes(name);

@@ -1,19 +1,22 @@
 /* @flow */
 import {
     nameIsValid, findKey, arraysEqual
-} from '../tools';
+} from '../common/utils';
+
+import type {
+    IStickIndexes, IStickInverts,
+    IButtonIndex, IButtonIndexes
+} from '../common/types';
 
 import {
     mockGamepad, getDefaultButtons,
     getDefaultSticks, updateListenOptions
 } from './baseUtils';
 
-import type {
-    IStickIndexes, IStickInverts, IModuleParams,
-    IButtonIndex, IButtonIndexes,
-    IListenOptions, IListenParams,
-    IModule, IModuleState
-} from '../types';
+import {
+    IModule, IModuleParams, IModuleState,
+    IListenOptions, IListenParams
+} from './baseTypes';
 
 // TODO review clampThreshold
 

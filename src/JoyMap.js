@@ -1,9 +1,9 @@
 /* @flow */
 import {
     getRawGamepads, noop, map, isFunction, find, difference
-} from './tools';
+} from './common/utils';
 
-import type { IModule } from './types';
+import type { IModule } from './baseModule/baseTypes';
 
 type IJoyMapState = {
     onPoll: () => void,

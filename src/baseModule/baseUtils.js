@@ -1,8 +1,8 @@
 import {
     isButtonSignificant, findIndexes, isConsecutive
-} from '../tools';
+} from '../common/utils';
 
-import { IGamepad, IListenOptions } from '../types';
+import { IGamepad, IListenOptions } from '../common/types';
 
 export const mockGamepad: IGamepad = {
     axes: [],

@@ -1,23 +1,25 @@
 /* @flow */
 import memoize from 'fast-memoize';
 
-import createBaseModule from './base';
+import createBaseModule from '../baseModule/base';
 
 import {
-    nameIsValid, omit, mapValues
-} from '../tools';
-
-import {
-    getEmptyMappers, getEmptyButtons, getEmptySticks,
-    buttonMap, stickMap
-} from './queryUtils';
+    nameIsValid, omit, mapValues, buttonMap, stickMap
+} from '../common/utils';
 
 import type {
     IStickState, IStickStates,
-    IButtonState, IButtonStates,
+    IButtonState, IButtonStates
+} from '../common/types';
+
+import {
+    getEmptyMappers, getEmptyButtons, getEmptySticks
+} from './queryUtils';
+
+import type {
     IQueryModule, IModuleParams,
     IMapper, IMapperValue, IMapperValues
-} from '../types';
+} from './queryTypes';
 
 export default function createQueryModule(params?: IModuleParams = {}): IQueryModule {
     const { state, module: baseModule } = createBaseModule(params);

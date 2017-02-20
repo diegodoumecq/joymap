@@ -2,9 +2,9 @@
 
 import 'babel-polyfill';
 
-import createBaseModule from './modules/base';
-import createQueryModule from './modules/query';
-import createEventModule from './modules/event';
+import createBaseModule from './baseModule/base';
+import createQueryModule from './queryModule/query';
+import createEventModule from './eventModule/event';
 import createJoyMap from './JoyMap';
 
 export default {
