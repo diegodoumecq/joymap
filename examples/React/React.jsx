@@ -18,7 +18,6 @@ class ReactExample extends React.Component {
     // Setup joymap
     componentWillMount() {
         const joyMap = createJoyMap({
-            threshold: 0.2,
             // setState is called on each poll to force React to rerender
             onPoll: () => this.setState({})
         });

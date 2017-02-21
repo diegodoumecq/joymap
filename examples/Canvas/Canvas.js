@@ -24,7 +24,7 @@ function uniqueId(prefix) {
 // Populate the app div with a canvas
 document.getElementById('app').innerHTML = '<article class="examples-container">' +
         '<header>' +
-            '<h1 className="title">JoyMap Canvas example</h1>' +
+            '<h1 className="title">JoyMap Canvas example using query module</h1>' +
             '<h2>We create characters whenever you connect a gamepad</h2>' +
             '<h3>We also DESTROY them when the gamepad gets unplugged</h3>' +
         '</header>' +

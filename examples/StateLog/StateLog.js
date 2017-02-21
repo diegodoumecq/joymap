@@ -12,7 +12,7 @@ import { createJoyMap, createQueryModule } from '../../src/index';
 document.getElementById('app').innerHTML = `
     <article class="examples-container">
         <header>
-            <h1 className="title">JoyMap input logging example</h1>
+            <h1 className="title">JoyMap input logging example using the query module</h1>
         </header>
         <div class="log-example">
             <p>The dev console is also used to store all the logged input</p>
@@ -66,7 +66,6 @@ const showMappers = true;
 
 // Initial joyMap setup
 const joyMap = createJoyMap({
-    threshold: 0.2,
     onPoll() {
         const unusedIds = joyMap.getUnusedPadIds();
 
@@ -74,12 +73,12 @@ const joyMap = createJoyMap({
             forEach(padId => setupModule(joyMap, padId), unusedIds);
         }
 
-        forEach(player => {
+        forEach(module => {
             // On each frame render to HTML and console.log the state of buttons, sticks and mappers
             const compilation = [
-                !showButtons ? '' : stringifyInputs(player.getButtons()),
-                !showSticks ? '' : stringifyInputs(player.getSticks()),
-                !showMappers ? '' : stringifyMappers(player.getMappers())
+                !showButtons ? '' : stringifyInputs(module.getButtons()),
+                !showSticks ? '' : stringifyInputs(module.getSticks()),
+                !showMappers ? '' : stringifyMappers(module.getMappers())
             ];
 
             const stringOutput = join(', ', compact(compilation));
@@ -89,7 +88,7 @@ const joyMap = createJoyMap({
                 console.log(stringOutput); // eslint-disable-line
 
                 // Re-render this last output into HTML
-                document.getElementById(player.getPadId()).innerHTML = renderRows(compact([
+                document.getElementById(module.getPadId()).innerHTML = renderRows(compact([
                     !showButtons ? null : {
                         inputType: 'buttons',
                         compilation: compilation[0],

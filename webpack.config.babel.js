@@ -14,6 +14,14 @@ const libPath = path.resolve(__dirname, 'src');
 const publicPath = path.resolve(__dirname, 'public');
 
 const entries = {
+    canvas: {
+        path: path.resolve(__dirname, 'examples/Canvas'),
+        file: 'Canvas.js'
+    },
+    arrows: {
+        path: path.resolve(__dirname, 'examples/Arrows'),
+        file: 'Arrows.js'
+    },
     log: {
         path: path.resolve(__dirname, 'examples/StateLog'),
         file: 'StateLog.js'
@@ -21,10 +29,6 @@ const entries = {
     react: {
         path: path.resolve(__dirname, 'examples/React'),
         file: 'React.jsx'
-    },
-    canvas: {
-        path: path.resolve(__dirname, 'examples/Canvas'),
-        file: 'Canvas.js'
     }
 };
 
