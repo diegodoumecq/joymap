@@ -11,7 +11,7 @@
     "react": "webpack-dev-server --hot --env.example=react",
     "log": "webpack-dev-server --hot --env.example=log",
     "canvas": "webpack-dev-server --hot --env.example=canvas",
-    "arrows": "webpack-dev-server --hot --env.example=arrows",
+    "fighting": "webpack-dev-server --hot --env.example=fighting",
     "build": "del-cli -f bin/* && babel src -d bin && flow-copy-source -v src bin",
     "test": "ava"
   },

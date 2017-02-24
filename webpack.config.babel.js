@@ -18,9 +18,9 @@ const entries = {
         path: path.resolve(__dirname, 'examples/Canvas'),
         file: 'Canvas.js'
     },
-    arrows: {
-        path: path.resolve(__dirname, 'examples/Arrows'),
-        file: 'Arrows.js'
+    fighting: {
+        path: path.resolve(__dirname, 'examples/Fighting'),
+        file: 'Fighting.js'
     },
     log: {
         path: path.resolve(__dirname, 'examples/StateLog'),
