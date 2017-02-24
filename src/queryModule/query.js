@@ -4,7 +4,7 @@ import memoize from 'fast-memoize';
 import createBaseModule from '../baseModule/base';
 
 import {
-    nameIsValid, omit, mapValues, buttonMap, stickMap
+    omit, mapValues, buttonMap, stickMap
 } from '../common/utils';
 
 import type {
@@ -107,10 +107,6 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
         },
 
         setMapper(mapperName: string, callback: IMapper) {
-            if (!nameIsValid(mapperName)) {
-                throw new Error(`On setMapper('${mapperName}', ...):
-                    first argument contains invalid characters`);
-            }
             // TODO: Figure out how to change mapper's API to allow memoization
             mappers[mapperName] = callback;
         },
