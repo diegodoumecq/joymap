@@ -80,7 +80,8 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
 
         setStick(
             inputName: string,
-            indexes: any[], // Real typing throws error: IStickIndex | IStickIndexes,
+            indexes: Array<number | Array<number>>,
+        //  indexes: IStickIndex | IStickIndexes,
             inverts?: IStickInverts
         ) {
             if (!nameIsValid(inputName)) {
@@ -195,7 +196,7 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
 
         buttonBindOnPress(
             inputName: string,
-            callback: () => void,
+            callback: (string | null) => void,
             allowDuplication?: boolean = false
         ) {
             if (!nameIsValid(inputName)) {
@@ -218,7 +219,7 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
 
         stickBindOnPress(
             inputName: string,
-            callback: () => void,
+            callback: (string | null) => void,
             allowDuplication?: boolean = false
         ) {
             if (!nameIsValid(inputName)) {
