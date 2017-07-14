@@ -36,24 +36,41 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
                 return getEmptyButtons(state.buttons, inputNames);
             }
 
+            // Return the complete collection of button states
             if (inputNames.length === 0) {
                 return mapValues(
-                    button => buttonMapMemoized(state.pad, state.prevPad, button, state.threshold),
+                    button => buttonMapMemoized(
+                        state.pad,
+                        state.prevPad,
+                        button,
+                        state.threshold,
+                        state.clampThreshold
+                    ),
                     state.buttons
                 );
             }
 
+            // Return one button state
             if (inputNames.length === 1) {
-                return buttonMapMemoized(state.pad, state.prevPad, state.buttons[inputNames[0]], state.threshold);
+                return buttonMapMemoized(
+                    state.pad,
+                    state.prevPad,
+                    state.buttons[inputNames[0]],
+                    state.threshold,
+                    state.clampThreshold
+                );
             }
 
+            // Return the collection of button states requested
             const result = {};
             inputNames.forEach(inputName => {
                 result[inputName] = buttonMapMemoized(
                     state.pad,
                     state.prevPad,
                     state.buttons[inputName],
-                    state.threshold);
+                    state.threshold,
+                    state.clampThreshold
+                );
             });
 
             return result;
@@ -67,19 +84,40 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
             if (inputNames.length === 0) {
                 return mapValues(stick => {
                     const { indexes, inverts } = stick;
-                    return stickMapMemoized(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                    return stickMapMemoized(
+                        state.pad,
+                        state.prevPad,
+                        indexes,
+                        inverts,
+                        state.threshold,
+                        state.clampThreshold
+                    );
                 }, state.sticks);
             }
 
             if (inputNames.length === 1) {
                 const { indexes, inverts } = state.sticks[inputNames[0]];
-                return stickMapMemoized(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                return stickMapMemoized(
+                    state.pad,
+                    state.prevPad,
+                    indexes,
+                    inverts,
+                    state.threshold,
+                    state.clampThreshold
+                );
             }
 
             const result = {};
             inputNames.forEach(inputName => {
                 const { indexes, inverts } = state.sticks[inputName];
-                result[inputName] = stickMapMemoized(state.pad, state.prevPad, indexes, inverts, state.threshold);
+                result[inputName] = stickMapMemoized(
+                    state.pad,
+                    state.prevPad,
+                    indexes,
+                    inverts,
+                    state.threshold,
+                    state.clampThreshold
+                );
             });
 
             return result;

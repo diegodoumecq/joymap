@@ -237,14 +237,16 @@ export function isButtonSignificant(value: number = 0, threshold: number): boole
 }
 
 export function isStickSignificant(stickValue: IStickValue, threshold: number): boolean {
-    return stickValue.findIndex(value => Math.abs(value) >= threshold) !== -1;
+    const squaredMagnitude = stickValue.reduce((result, value) => result + (value ** 2), 0);
+    return (threshold * threshold) < squaredMagnitude;
 }
 
 export function buttonMap(
     pad: IGamepad,
     prevPad: IGamepad,
     indexes: IButtonIndexes,
-    threshold: number
+    threshold: number,
+    clampThreshold: boolean
 ): IButtonState {
     const length = indexes.length;
 
@@ -269,7 +271,7 @@ export function buttonMap(
     }
 
     return {
-        value,
+        value: !clampThreshold || pressed ? value : 0,
         pressed,
         justChanged: pressed !== prevPressed
     };
@@ -296,14 +298,15 @@ export function stickMap(
     prevPad: IGamepad,
     indexMaps: IStickIndexes,
     inverts: IStickInverts,
-    threshold: number
+    threshold: number,
+    clampThreshold: boolean
 ): IStickState {
     const prevPressed = isStickSignificant(roundSticks(indexMaps, prevPad.axes, threshold), threshold);
-    const value = roundSticks(indexMaps, pad.axes, threshold).map((v, i) => (!inverts[i] ? v : v * -1));
+    const value = roundSticks(indexMaps, pad.axes, threshold);
     const pressed = isStickSignificant(value, threshold);
 
     return {
-        value,
+        value: !clampThreshold || pressed ? value.map((v, i) => (!inverts[i] ? v : v * -1)) : value.map(() => 0),
         pressed,
         justChanged: pressed !== prevPressed,
         inverts
