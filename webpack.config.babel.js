@@ -1,13 +1,11 @@
-import { LoaderOptionsPlugin } from 'webpack';
 import path from 'path';
 
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import WriteFilePlugin from 'write-file-webpack-plugin';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
-
 import Autoprefixer from 'autoprefixer';
 
-const port = 9000;
+const port = 9001;
 const bundleFolder = 'devBundle';
 const binPath = path.resolve(__dirname, bundleFolder);
 const libPath = path.resolve(__dirname, 'src');
@@ -77,7 +75,11 @@ export default function (env = {}) {
                         localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
                     }
                 }, {
-                    loader: 'postcss-loader'
+                    loader: 'postcss-loader',
+                    options: {
+                        sourceMap: true,
+                        plugins: [Autoprefixer]
+                    }
                 }, {
                     loader: 'stylus-loader',
                     query: {
@@ -92,7 +94,11 @@ export default function (env = {}) {
                 }, {
                     loader: 'css-loader'
                 }, {
-                    loader: 'postcss-loader'
+                    loader: 'postcss-loader',
+                    options: {
+                        sourceMap: true,
+                        plugins: [Autoprefixer]
+                    }
                 }, {
                     loader: 'stylus-loader',
                     query: {
@@ -108,15 +114,7 @@ export default function (env = {}) {
                         limit: '10000',
                         mimetype: 'application/png'
                     }
-                }/* , {
-                    loader: 'image-webpack-loader',
-                    options: {
-                        progressive: true,
-                        optimizationLevel: 7,
-                        interlaced: false
-                    }
-                }*/
-                ]
+                }]
             }, {
                 test: /\.woff[2]?$/,
                 rules: [{
@@ -138,16 +136,7 @@ export default function (env = {}) {
             }, {
                 test: /\.eot$/,
                 rules: [{ loader: 'file-loader' }]
-            }/* , {
-                test: /\.svg$/,
-                rules: [{
-                    loader: 'url-loader',
-                    options: {
-                        limit: '10000',
-                        mimetype: 'image/svg+xml'
-                    }
-                }]
-            } */]
+            }]
         },
 
         plugins: [
@@ -159,13 +148,7 @@ export default function (env = {}) {
                 dry: false
             }),
 
-            new CopyWebpackPlugin([{ from: publicPath }]),
-
-            new LoaderOptionsPlugin({
-                options: {
-                    postcss: [Autoprefixer({})]
-                }
-            })
+            new CopyWebpackPlugin([{ from: publicPath }])
         ]
     };
 }

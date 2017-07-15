@@ -10,6 +10,7 @@
     "react"
   ],
   "rules": {
+    "flowtype/no-types-missing-file-annotation": 0,
     "linebreak-style": 0,
     "no-param-reassign": 0,
     "import/no-extraneous-dependencies": 0,

@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import CSSModules from 'react-css-modules';
 
 import { map } from 'lodash/fp';
@@ -20,8 +21,8 @@ class Gamepad extends React.Component {
         backgroundColor: PropTypes.string.isRequired,
         pressedColor: PropTypes.string.isRequired,
         module: PropTypes.object.isRequired,
-        name: React.PropTypes.string.isRequired,
-        children: React.PropTypes.node
+        name: PropTypes.string.isRequired,
+        children: PropTypes.node
     };
 
     state = {
