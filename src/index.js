@@ -1,5 +1,3 @@
-/* @flow */
-
 import 'babel-polyfill';
 
 import createBaseModule from './baseModule/base';

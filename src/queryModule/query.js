@@ -1,27 +1,15 @@
-/* @flow */
+
 import memoize from 'fast-memoize';
+import { mapValues, omit, forEach } from 'lodash/fp';
 
+import { buttonMap, stickMap } from '../common/utils';
 import createBaseModule from '../baseModule/base';
-
-import {
-    omit, mapValues, buttonMap, stickMap
-} from '../common/utils';
-
-import type {
-    IStickState, IStickStates,
-    IButtonState, IButtonStates
-} from '../common/types';
 
 import {
     getEmptyMappers, getEmptyButtons, getEmptySticks
 } from './queryUtils';
 
-import type {
-    IQueryModule, IModuleParams,
-    IMapper, IMapperValue, IMapperValues
-} from './queryTypes';
-
-export default function createQueryModule(params?: IModuleParams = {}): IQueryModule {
+export default function createQueryModule(params = {}) {
     const { state, module: baseModule } = createBaseModule(params);
 
     let mappers = {};
@@ -29,9 +17,9 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
     const buttonMapMemoized = memoize(buttonMap);
     const stickMapMemoized = memoize(stickMap);
 
-    const module: IQueryModule = {
+    const module = {
         ...baseModule,
-        getButtons(...inputNames: string[]): IButtonState | IButtonStates {
+        getButtons(...inputNames) {
             if (!module.isConnected()) {
                 return getEmptyButtons(state.buttons, inputNames);
             }
@@ -63,7 +51,7 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
 
             // Return the collection of button states requested
             const result = {};
-            inputNames.forEach(inputName => {
+            forEach(inputName => {
                 result[inputName] = buttonMapMemoized(
                     state.pad,
                     state.prevPad,
@@ -71,12 +59,12 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
                     state.threshold,
                     state.clampThreshold
                 );
-            });
+            }, inputNames);
 
             return result;
         },
 
-        getSticks(...inputNames: string[]): IStickState | IStickStates {
+        getSticks(...inputNames) {
             if (!module.isConnected()) {
                 return getEmptySticks(state.sticks, inputNames);
             }
@@ -108,7 +96,7 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
             }
 
             const result = {};
-            inputNames.forEach(inputName => {
+            forEach(inputName => {
                 const { indexes, inverts } = state.sticks[inputName];
                 result[inputName] = stickMapMemoized(
                     state.pad,
@@ -118,12 +106,12 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
                     state.threshold,
                     state.clampThreshold
                 );
-            });
+            }, inputNames);
 
             return result;
         },
 
-        getMappers(...mapperNames: string[]): IMapperValue | IMapperValues {
+        getMappers(...mapperNames) {
             if (!module.isConnected()) {
                 return getEmptyMappers(mappers, mapperNames);
             }
@@ -137,19 +125,19 @@ export default function createQueryModule(params?: IModuleParams = {}): IQueryMo
             }
 
             const result = {};
-            mapperNames.forEach(mapperName => {
+            forEach(mapperName => {
                 result[mapperName] = mappers[mapperName](module);
-            });
+            }, mapperNames);
 
             return result;
         },
 
-        setMapper(mapperName: string, callback: IMapper) {
+        setMapper(mapperName, callback) {
             // TODO: Figure out how to change mapper's API to allow memoization
             mappers[mapperName] = callback;
         },
 
-        removeMapper(mapperName: string) {
+        removeMapper(mapperName) {
             mappers = omit([mapperName], mappers);
         },
 

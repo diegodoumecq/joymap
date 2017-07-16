@@ -1,31 +1,18 @@
-/* @flow */
-import {
-    nameIsValid, findKey, arraysEqual
-} from '../common/utils';
 
-import type {
-    IStickIndexes, IStickInverts,
-    IButtonIndex, IButtonIndexes
-} from '../common/types';
+import { findKey, isEqual, map } from 'lodash/fp';
+import { nameIsValid } from '../common/utils';
 
 import {
     mockGamepad, getDefaultButtons,
     getDefaultSticks, updateListenOptions
 } from './baseUtils';
 
-import {
-    IModule, IModuleParams, IModuleState,
-    IListenOptions, IListenParams
-} from './baseTypes';
+export default function createModule(params = {}) {
+    let listenOptions = null;
+    let gamepadId = params.padId ? params.padId : null;
+    let connected = !!params.padId;
 
-// TODO review clampThreshold
-
-export default function createModule(params?: IModuleParams = {}): { module: IModule, state: IModuleState } {
-    let listenOptions: null | IListenOptions = null;
-    let gamepadId: ?string = params.padId ? params.padId : null;
-    let connected: boolean = !!params.padId;
-
-    const state: IModuleState = {
+    const state = {
         threshold: params.threshold || 0.2,
         clampThreshold: params.clampThreshold !== false,
         pad: mockGamepad,
@@ -35,19 +22,19 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
         sticks: getDefaultSticks()
     };
 
-    const module: IModule = {
+    const module = {
         getPadId: () => gamepadId,
         isConnected: () => connected,
         disconnect() {
             connected = false;
         },
-        connect(padId?: string) {
+        connect(padId) {
             connected = true;
             if (padId) {
                 gamepadId = padId;
             }
         },
-        getConfig(): string {
+        getConfig() {
             return JSON.stringify({
                 threshold: state.threshold,
                 clampThreshold: state.clampThreshold,
@@ -55,35 +42,30 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
                 sticks: state.sticks
             });
         },
-        setConfig(serializedString: string) {
+        setConfig(serializedString) {
             Object.assign(state, JSON.parse(serializedString));
         },
 
-        getButtonIndexes(...inputNames: string[]): IButtonIndexes {
+        getButtonIndexes(...inputNames) {
             const indexes = [];
             inputNames.forEach(inputName => indexes.push(...state.buttons[inputName]));
             return indexes;
         },
 
-        getStickIndexes(...inputNames: string[]): IStickIndexes {
+        getStickIndexes(...inputNames) {
             const indexes = [];
             inputNames.forEach(inputName => indexes.push(...state.sticks[inputName].indexes));
             return indexes;
         },
 
-        setButton(inputName: string, indexes: IButtonIndex | IButtonIndexes) {
+        setButton(inputName, indexes) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On setButton('${inputName}'): argument contains invalid characters`);
             }
-            state.buttons[inputName] = (typeof indexes === 'number') ? [indexes] : indexes;
+            state.buttons[inputName] = indexes;
         },
 
-        setStick(
-            inputName: string,
-            indexes: Array<number | Array<number>>,
-        //  indexes: IStickIndex | IStickIndexes,
-            inverts?: IStickInverts
-        ) {
+        setStick(inputName, indexes, inverts) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On setStick('${inputName}'): argument contains invalid characters`);
             }
@@ -93,22 +75,15 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
                     argument indexes is an empty array`);
             }
 
-            const firstValue: number | number[] = indexes[0];
+            const firstValue = indexes[0];
 
-            if (Array.isArray(firstValue)) {
-                state.sticks[inputName] = {
-                    indexes,
-                    inverts: inverts || firstValue.map(() => false)
-                };
-            } else {
-                state.sticks[inputName] = {
-                    indexes: [indexes],
-                    inverts: inverts || indexes.map(() => false)
-                };
-            }
+            state.sticks[inputName] = {
+                indexes,
+                inverts: inverts || map(() => false, firstValue)
+            };
         },
 
-        invertSticks(inverts: IStickInverts, ...inputNames: string[]) {
+        invertSticks(inverts, ...inputNames) {
             if (inputNames.length > 0) {
                 inputNames.forEach(inputName => {
                     const stick = state.sticks[inputName];
@@ -122,7 +97,7 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
             }
         },
 
-        swapButtons(btn1: string, btn2: string) {
+        swapButtons(btn1, btn2) {
             const { buttons } = state;
             // For some reason, the following line throws "unsupported expression pattern in destructuring" in Flow IDE
             // [buttons[btn1], buttons[btn2]] = [buttons[btn2], buttons[btn1]];
@@ -131,7 +106,7 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
             buttons[btn2] = replacement;
         },
 
-        swapSticks(btn1: string, btn2: string, includeInverts?: boolean = false) {
+        swapSticks(btn1, btn2, includeInverts = false) {
             const { sticks } = state;
             if (includeInverts) {
                 const replacement = sticks[btn1];
@@ -144,11 +119,11 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
             }
         },
 
-        update(gamepad: Gamepad) {
+        update(gamepad) {
             state.prevPad = state.pad;
             state.pad = {
                 axes: gamepad.axes,
-                buttons: gamepad.buttons.map(a => a.value)
+                buttons: map(a => a.value, gamepad.buttons)
             };
 
             if (listenOptions) {
@@ -161,9 +136,9 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
         },
 
         listenButton(
-            callback: (indexes: number[]) => void,
-            quantity?: number = 1,
-            { waitFor = [1, 'polls'], consecutive = false, allowOffset = true }: IListenParams = {}
+            callback,
+            quantity,
+            { waitFor = [1, 'polls'], consecutive = false, allowOffset = true } = {}
         ) {
             listenOptions = {
                 callback,
@@ -178,9 +153,9 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
         },
 
         listenAxis(
-            callback: (indexes: number[]) => void,
-            quantity: number = 2,
-            { waitFor = [100, 'ms'], consecutive = true, allowOffset = true }: IListenParams = {}
+            callback,
+            quantity = 2,
+            { waitFor = [100, 'ms'], consecutive = true, allowOffset = true } = {}
         ) {
             listenOptions = {
                 callback,
@@ -194,18 +169,13 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
             };
         },
 
-        buttonBindOnPress(
-            inputName: string,
-            callback: (string | null) => void,
-            allowDuplication?: boolean = false
-        ) {
+        buttonBindOnPress(inputName, callback, allowDuplication = false) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On buttonBindOnPress('${inputName}', ...):
                     first argument contains invalid characters`);
             }
-            module.listenButton((indexes: IButtonIndexes) => {
-                const findKeyCb: Function = value => value[0] === indexes[0];
-                const resultName: string | null = findKey(findKeyCb, state.buttons);
+            module.listenButton(indexes => {
+                const resultName = findKey(value => value[0] === indexes[0], state.buttons);
 
                 if (!allowDuplication && resultName && state.buttons[inputName]) {
                     module.swapButtons(inputName, resultName);
@@ -217,19 +187,14 @@ export default function createModule(params?: IModuleParams = {}): { module: IMo
             });
         },
 
-        stickBindOnPress(
-            inputName: string,
-            callback: (string | null) => void,
-            allowDuplication?: boolean = false
-        ) {
+        stickBindOnPress(inputName, callback, allowDuplication = false) {
             if (!nameIsValid(inputName)) {
                 throw new Error(`On stickBindOnPress('${inputName}', ...):
                     first argument contains invalid characters`);
             }
 
-            module.listenAxis((indexesResult: IStickIndexes) => {
-                const findKeyCb: Function = ({ indexes }) => arraysEqual(indexes[0], indexesResult);
-                const resultName: string | null = findKey(findKeyCb, state.sticks);
+            module.listenAxis(indexesResult => {
+                const resultName = findKey(({ indexes }) => isEqual(indexes[0], indexesResult), state.sticks);
 
                 if (!allowDuplication && resultName && state.sticks[inputName]) {
                     module.swapSticks(inputName, resultName);

@@ -1,16 +1,7 @@
-import { mapValues } from '../common/utils';
 
-import type {
-    IStickState, IStickStates,
-    IButtonState, IButtonStates, IButtonMaps, IStickMaps
-} from '../common/types';
+import { mapValues, forEach } from 'lodash/fp';
 
-import type { IMappers } from './queryTypes';
-
-export function getEmptyMappers(
-    mappers: IMappers,
-    mapperNames: string[]
-): null | { [index: string]: null } {
+export function getEmptyMappers(mappers, mapperNames) {
     const emptyMapper = null;
 
     if (mapperNames.length === 0) {
@@ -22,18 +13,15 @@ export function getEmptyMappers(
     }
 
     const result = {};
-    mapperNames.forEach(mapperName => {
+    forEach(mapperName => {
         result[mapperName] = emptyMapper;
-    });
+    }, mapperNames);
 
     return result;
 }
 
-export function getEmptyButtons(
-    buttons: IButtonMaps,
-    inputNames: string[]
-): IButtonState | IButtonStates {
-    const emptyButton: IButtonState = {
+export function getEmptyButtons(buttons, inputNames) {
+    const emptyButton = {
         value: 0,
         pressed: false,
         justChanged: false
@@ -48,18 +36,15 @@ export function getEmptyButtons(
     }
 
     const result = {};
-    inputNames.forEach(mapperName => {
+    forEach(mapperName => {
         result[mapperName] = emptyButton;
-    });
+    }, inputNames);
 
     return result;
 }
 
-export function getEmptySticks(
-    sticks: IStickMaps,
-    inputNames: string[]
-): IStickState | IStickStates {
-    const emptyStick: IStickState = {
+export function getEmptySticks(sticks, inputNames) {
+    const emptyStick = {
         value: [0, 0],
         pressed: false,
         justChanged: false,
@@ -75,9 +60,9 @@ export function getEmptySticks(
     }
 
     const result = {};
-    inputNames.forEach(mapperName => {
+    forEach(mapperName => {
         result[mapperName] = emptyStick;
-    });
+    }, inputNames);
 
     return result;
 }

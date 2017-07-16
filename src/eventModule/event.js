@@ -1,23 +1,20 @@
-/* @flow */
+
 import memoize from 'fast-memoize';
+import { filter, forEach, includes } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
 
 import { buttonMap, stickMap } from '../common/utils';
 
-import type { IModuleParams } from '../baseModule/baseTypes';
-
-import type { IEventModule, IButtonEventCb, IStickEventCb } from './eventTypes';
-
-function isValidButtonEventName(name: string, buttons: {}): boolean {
-    return Object.keys(buttons).includes(name);
+function isValidButtonEventName(name, buttons) {
+    return includes(name, Object.keys(buttons));
 }
 
-function isValidStickEventName(name: string, sticks: {}): boolean {
-    return Object.keys(sticks).includes(name);
+function isValidStickEventName(name, sticks) {
+    return includes(name, Object.keys(sticks));
 }
 
-export default function createEventModule(params?: IModuleParams = {}): IEventModule {
+export default function createEventModule(params = {}) {
     const { state, module: baseModule } = createBaseModule(params);
 
     const buttonMapMemoized = memoize(buttonMap);
@@ -26,12 +23,12 @@ export default function createEventModule(params?: IModuleParams = {}): IEventMo
     let buttonEvents = [];
     let stickEvents = [];
 
-    const module: IEventModule = {
+    const module = {
         ...baseModule,
 
         // TODO Support more options other than just button names and stick names
 
-        addButtonEvent(name: string, callback: IButtonEventCb) {
+        addButtonEvent(name, callback) {
             if (isValidButtonEventName(name, state.buttons)) {
                 buttonEvents.push({
                     name, callback
@@ -39,11 +36,11 @@ export default function createEventModule(params?: IModuleParams = {}): IEventMo
             }
         },
 
-        removeButtonEvent(name: string, callback: IButtonEventCb) {
-            buttonEvents = buttonEvents.filter(e => e.name !== name || e.callback !== callback);
+        removeButtonEvent(name, callback) {
+            buttonEvents = filter(event => event.name !== name || event.callback !== callback, buttonEvents);
         },
 
-        addStickEvent(name: string, callback: IStickEventCb) {
+        addStickEvent(name, callback) {
             if (isValidStickEventName(name, state.sticks)) {
                 stickEvents.push({
                     name, callback
@@ -51,23 +48,24 @@ export default function createEventModule(params?: IModuleParams = {}): IEventMo
             }
         },
 
-        removeStickEvent(name: string, callback: IStickEventCb) {
-            stickEvents = stickEvents.filter(e => e.name !== name || e.callback !== callback);
+        removeStickEvent(name, callback) {
+            stickEvents = filter(event => event.name !== name || event.callback !== callback, stickEvents);
         },
 
-        update(gamepad: Gamepad) {
+        update(gamepad) {
             baseModule.update(gamepad);
 
-            buttonEvents.forEach(e => {
-                const indexes = state.buttons[e.name];
+            forEach(event => {
+                const indexes = state.buttons[event.name];
                 const result = buttonMapMemoized(state.pad, state.prevPad, indexes, state.threshold);
 
                 if (result.pressed) {
-                    e.callback(result);
+                    event.callback(result);
                 }
-            });
-            stickEvents.forEach(e => {
-                const stick = state.sticks[e.name];
+            }, buttonEvents);
+
+            forEach(event => {
+                const stick = state.sticks[event.name];
                 const result = stickMapMemoized(
                     state.pad,
                     state.prevPad,
@@ -77,9 +75,9 @@ export default function createEventModule(params?: IModuleParams = {}): IEventMo
                 );
 
                 if (result.pressed) {
-                    e.callback(result);
+                    event.callback(result);
                 }
-            });
+            }, stickEvents);
         }
     };
 

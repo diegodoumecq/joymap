@@ -9,7 +9,7 @@ const port = 9001;
 const bundleFolder = 'devBundle';
 const binPath = path.resolve(__dirname, bundleFolder);
 const libPath = path.resolve(__dirname, 'src');
-const publicPath = path.resolve(__dirname, 'public');
+const staticPath = path.resolve(__dirname, 'static');
 
 const entries = {
     canvas: {
@@ -148,7 +148,7 @@ export default function (env = {}) {
                 dry: false
             }),
 
-            new CopyWebpackPlugin([{ from: publicPath }])
+            new CopyWebpackPlugin([{ from: staticPath }])
         ]
     };
 }

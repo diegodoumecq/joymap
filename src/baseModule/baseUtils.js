@@ -1,19 +1,15 @@
+
 import {
-    isButtonSignificant, findIndexes, isConsecutive
+    isButtonSignificant, findIndexes, isConsecutive,
+    assignIn
 } from '../common/utils';
 
-import { IGamepad, IListenOptions } from '../common/types';
-
-export const mockGamepad: IGamepad = {
+export const mockGamepad = {
     axes: [],
     buttons: []
 };
 
-export function updateListenOptions(
-    listenOptions: IListenOptions,
-    pad: IGamepad,
-    threshold: number
-) {
+export function updateListenOptions(listenOptions, pad, threshold) {
     const {
         callback, quantity, type,
         currentValue, targetValue,
@@ -28,25 +24,29 @@ export function updateListenOptions(
     && (!consecutive || isConsecutive(indexes))
     && (allowOffset || indexes[0] % quantity === 0)) {
         if (useTimeStamp && currentValue === 0) {
-            return Object.assign({}, listenOptions, { currentValue: Date.now() });
+            return assignIn(listenOptions, { currentValue: Date.now() });
         }
 
         const comparison = useTimeStamp ? Date.now() - currentValue : currentValue + 1;
 
         if (targetValue <= comparison) {
-            callback(indexes);
+            if (type === 'axes') {
+                callback([indexes]);
+            } else {
+                callback(indexes);
+            }
             return null;
         }
 
         if (!useTimeStamp) {
-            return Object.assign({}, listenOptions, { currentValue: comparison });
+            return assignIn(listenOptions, { currentValue: comparison });
         }
 
         return listenOptions;
     }
 
     // Clean currentValue
-    return Object.assign({}, listenOptions, { currentValue: 0 });
+    return assignIn(listenOptions, { currentValue: 0 });
 }
 
 export function getDefaultButtons() {

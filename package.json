@@ -12,7 +12,7 @@
     "log": "webpack-dev-server --hot --env.example=log",
     "canvas": "webpack-dev-server --hot --env.example=canvas",
     "fighting": "webpack-dev-server --hot --env.example=fighting",
-    "build": "del-cli -f bin/* && babel src -d bin && flow-copy-source -v src bin",
+    "build": "del-cli -f bin/* && babel src -d bin",
     "test": "ava"
   },
   "author": {
@@ -21,15 +21,11 @@
   },
   "tags": [
     "gamepad",
-    "joystick",
-    "flow",
-    "flowtype"
+    "joystick"
   ],
   "keywords": [
     "gamepad",
-    "joystick",
-    "flow",
-    "flowtype"
+    "joystick"
   ],
   "homepage": "https://github.com/diegodoumecq/joymap",
   "repository": {
@@ -83,12 +79,9 @@
     "empty": "0.10.1",
     "eslint": "3.19.0",
     "eslint-config-airbnb-base": "11.2.0",
-    "eslint-plugin-flowtype": "2.34.0",
     "eslint-plugin-import": "2.3.0",
     "eslint-plugin-react": "7.0.1",
     "file-loader": "0.11.2",
-    "flow-bin": "0.50.0",
-    "flow-copy-source": "1.1.0",
     "postcss-loader": "2.0.5",
     "prop-types": "15.5.10",
     "react": "16.0.0-alpha.13",

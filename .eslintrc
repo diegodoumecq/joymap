@@ -2,15 +2,10 @@
   "parser": "babel-eslint",
   "extends": [
     "airbnb-base",
-    "plugin:flowtype/recommended",
     "plugin:react/recommended"
   ],
-  "plugins": [
-    "flowtype",
-    "react"
-  ],
+  "plugins": ["react"],
   "rules": {
-    "flowtype/no-types-missing-file-annotation": 0,
     "linebreak-style": 0,
     "no-param-reassign": 0,
     "import/no-extraneous-dependencies": 0,

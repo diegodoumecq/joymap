@@ -1,109 +1,7 @@
-/* @flow */
-import type {
-    IStickState, IStickIndexes,
-    IStickValue, IStickInverts,
-    IButtonState, IButtonIndexes,
-    IGamepad
-} from './types';
 
-// These are generic Lodash function replacements
+import { forEach, reduce, map } from 'lodash/fp';
 
-export function noop() {}
-
-export function arraysEqual(a: any[], b: any[]): boolean {
-    if (a === b) {
-        return true;
-    }
-
-    const length = a.length;
-    if (length !== b.length) {
-        return false;
-    }
-
-    let i = 0;
-    while (i < length) {
-        if (a[i] !== b[i]) {
-            return false;
-        }
-        i += 1;
-    }
-    return true;
-}
-
-export function map(attr: string = '', target: Object[] | Object): any[] {
-    if (Array.isArray(target)) {
-        return target.map(value => value[attr]);
-    }
-
-    const indexes = Object.keys(target);
-    const length = indexes.length;
-    const result = [];
-    let i = 0;
-    while (i < length) {
-        const index = indexes[i];
-        result.push(target[index][attr]);
-        i += 1;
-    }
-
-    return result;
-}
-
-export function isFunction(value: any): boolean {
-    return typeof value === 'function';
-}
-
-export function includes<T>(search: T, list: T[] = []): boolean {
-    return list.indexOf(search) !== -1;
-}
-
-export function difference<T>(source: T[], removal: T[]): T[] {
-    const length = source.length;
-    const result = [];
-    let i = 0;
-
-    while (i < length) {
-        if (!includes(source[i], removal)) {
-            result.push(source[i]);
-        }
-        i += 1;
-    }
-
-    return result;
-}
-
-export function omit(indexes: string[], target: Object): Object {
-    const length = indexes.length;
-    const result = Object.assign({}, target);
-    let i = 0;
-
-    while (i < length) {
-        delete result[indexes[i]];
-        i += 1;
-    }
-
-    return result;
-}
-
-export function unique<T>(target: T[]): T[] {
-    const length = target.length;
-
-    if (length <= 1) {
-        return target;
-    }
-
-    const result = [];
-    let i = 0;
-    while (i < length) {
-        if (!result.includes(target[i])) {
-            result.push(target[i]);
-        }
-        i += 1;
-    }
-
-    return result;
-}
-
-export function isConsecutive(target: number[]): boolean {
+export function isConsecutive(target) {
     const length = target.length;
 
     if (length <= 1) {
@@ -121,14 +19,13 @@ export function isConsecutive(target: number[]): boolean {
     return true;
 }
 
-type FindIndexesCb = (value: any, index: number) => boolean;
-export function findIndexes(iterator: FindIndexesCb, target: any[]): number[] {
+export function findIndexes(iterator, target) {
     const length = target.length;
     const result = [];
     let i = 0;
 
     while (i < length) {
-        if (iterator(target[i], i)) {
+        if (iterator(target[i])) {
             result.push(i);
         }
         i += 1;
@@ -137,117 +34,27 @@ export function findIndexes(iterator: FindIndexesCb, target: any[]): number[] {
     return result;
 }
 
-type MapValuesCb = (value: any, name: string) => any;
-export function mapValues(iterator: MapValuesCb, obj: Object): Object {
-    const result = {};
-    Object.keys(obj).forEach(name => {
-        result[name] = iterator(obj[name], name);
-    });
-    return result;
-}
-
-export function matches(comparison: Object, source: Object) {
-    const match = Object.keys(comparison).map(name => [comparison[name], name]);
-    const length = match.length;
-    let i = 0;
-
-    while (i < length) {
-        const [value, index] = match[i];
-        if (source[index] !== value) {
-            return false;
-        }
-        i += 1;
-    }
-
-    return true;
-}
-
-export function find(search: Object, target: Object[]): any | null {
-    const length = target.length;
-    let i = 0;
-
-    while (i < length) {
-        const value = target[i];
-        if (matches(search, value)) {
-            return value;
-        }
-        i += 1;
-    }
-
-    return null;
-}
-
-export function findIndex(search: Object, target: any[]): number {
-    const length = target.length;
-    let i = 0;
-
-    while (i < length) {
-        if (matches(search, target[i])) {
-            return i;
-        }
-        i += 1;
-    }
-
-    return -1;
-}
-
-type FindKeyCb = (value: any, name?: string) => boolean;
-export function findKey(search: FindKeyCb | Object, target: Object): string | null {
-    const targetIndexes = Object.keys(target);
-    const length = targetIndexes.length;
-    let i = 0;
-    if (typeof search === 'function') {
-        while (i < length) {
-            const index = targetIndexes[i];
-            if (search(target[index], index)) {
-                return index;
-            }
-            i += 1;
-        }
-    } else {
-        while (i < length) {
-            const index = targetIndexes[i];
-            if (matches(search, target[index])) {
-                return index;
-            }
-            i += 1;
-        }
-    }
-
-    return null;
-}
-
-
-// These are domain-specific
-
-
-export function getRawGamepads(): Gamepad[] {
+export function getRawGamepads() {
     if (navigator && navigator.getGamepads) {
         return Array.from(navigator.getGamepads());
     }
     return [];
 }
 
-export function nameIsValid(name: string) {
+export function nameIsValid(name) {
     return /^[a-z0-9]+$/i.test(name);
 }
 
-export function isButtonSignificant(value: number = 0, threshold: number): boolean {
+export function isButtonSignificant(value = 0, threshold) {
     return Math.abs(value) > threshold;
 }
 
-export function isStickSignificant(stickValue: IStickValue, threshold: number): boolean {
-    const squaredMagnitude = stickValue.reduce((result, value) => result + (value ** 2), 0);
+export function isStickSignificant(stickValue, threshold) {
+    const squaredMagnitude = reduce((result, value) => result + (value ** 2), 0, stickValue);
     return (threshold * threshold) < squaredMagnitude;
 }
 
-export function buttonMap(
-    pad: IGamepad,
-    prevPad: IGamepad,
-    indexes: IButtonIndexes,
-    threshold: number,
-    clampThreshold: boolean
-): IButtonState {
+export function buttonMap(pad, prevPad, indexes, threshold, clampThreshold) {
     const length = indexes.length;
 
     let prevPressed = false;
@@ -277,36 +84,29 @@ export function buttonMap(
     };
 }
 
-export function roundSticks(indexMaps: IStickIndexes, axes: number[], threshold: number): IStickValue {
-    let count = 0;
-    let counts = [];
+export function roundSticks(indexMaps, axes, threshold) {
+    let stickNumber = 0;
+    let axesSums = [];
 
-    indexMaps.forEach(indexes => {
-        const values = indexes.map(i => axes[i]);
+    forEach(indexes => {
+        const values = map(i => axes[i], indexes);
 
         if (isStickSignificant(values, threshold)) {
-            counts = values.map((v, i) => v + (counts[i] || 0));
-            count += 1;
+            axesSums = map((v, i) => v + (axesSums[i] || 0), values);
+            stickNumber += 1;
         }
-    });
+    }, indexMaps);
 
-    return count === 0 ? indexMaps[0].map(() => 0) : counts.map(v => v / count);
+    return stickNumber === 0 ? map(() => 0, indexMaps[0]) : map(v => v / stickNumber, axesSums);
 }
 
-export function stickMap(
-    pad: IGamepad,
-    prevPad: IGamepad,
-    indexMaps: IStickIndexes,
-    inverts: IStickInverts,
-    threshold: number,
-    clampThreshold: boolean
-): IStickState {
+export function stickMap(pad, prevPad, indexMaps, inverts, threshold, clampThreshold) {
     const prevPressed = isStickSignificant(roundSticks(indexMaps, prevPad.axes, threshold), threshold);
     const value = roundSticks(indexMaps, pad.axes, threshold);
     const pressed = isStickSignificant(value, threshold);
 
     return {
-        value: !clampThreshold || pressed ? value.map((v, i) => (!inverts[i] ? v : v * -1)) : value.map(() => 0),
+        value: !clampThreshold || pressed ? map((v, i) => (!inverts[i] ? v : v * -1), value) : map(() => 0, value),
         pressed,
         justChanged: pressed !== prevPressed,
         inverts
