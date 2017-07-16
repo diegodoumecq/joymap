@@ -41,6 +41,15 @@ export function getRawGamepads() {
     return [];
 }
 
+export function gamepadIsValid(rawGamepad) {
+    return rawGamepad
+        && rawGamepad.connected
+        && rawGamepad.buttons.length
+        && rawGamepad.axes.length
+        && rawGamepad.timestamp !== 0
+        && (!!rawGamepad.id || rawGamepad.id === 0);
+}
+
 export function nameIsValid(name) {
     return /^[a-z0-9]+$/i.test(name);
 }
@@ -92,7 +101,7 @@ export function roundSticks(indexMaps, axes, threshold) {
         const values = map(i => axes[i], indexes);
 
         if (isStickSignificant(values, threshold)) {
-            axesSums = map((v, i) => v + (axesSums[i] || 0), values);
+            axesSums = values.map((v, i) => v + (axesSums[i] || 0));
             stickNumber += 1;
         }
     }, indexMaps);
@@ -106,7 +115,7 @@ export function stickMap(pad, prevPad, indexMaps, inverts, threshold, clampThres
     const pressed = isStickSignificant(value, threshold);
 
     return {
-        value: !clampThreshold || pressed ? map((v, i) => (!inverts[i] ? v : v * -1), value) : map(() => 0, value),
+        value: !clampThreshold || pressed ? value.map((v, i) => (!inverts[i] ? v : v * -1)) : map(() => 0, value),
         pressed,
         justChanged: pressed !== prevPressed,
         inverts

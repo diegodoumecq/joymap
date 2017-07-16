@@ -1,17 +1,17 @@
 
 import memoize from 'fast-memoize';
-import { filter, forEach, includes } from 'lodash/fp';
+import { filter, forEach, assignIn } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
 
 import { buttonMap, stickMap } from '../common/utils';
 
 function isValidButtonEventName(name, buttons) {
-    return includes(name, Object.keys(buttons));
+    return !!buttons[name];
 }
 
 function isValidStickEventName(name, sticks) {
-    return includes(name, Object.keys(sticks));
+    return !!sticks[name];
 }
 
 export default function createEventModule(params = {}) {
@@ -23,36 +23,32 @@ export default function createEventModule(params = {}) {
     let buttonEvents = [];
     let stickEvents = [];
 
-    const module = {
+    const module = assignIn(baseModule, {
         ...baseModule,
 
         // TODO Support more options other than just button names and stick names
 
-        addButtonEvent(name, callback) {
+        addButtonEvent: (name, callback) => {
             if (isValidButtonEventName(name, state.buttons)) {
-                buttonEvents.push({
-                    name, callback
-                });
+                buttonEvents.push({ name, callback });
             }
         },
 
-        removeButtonEvent(name, callback) {
+        removeButtonEvent: (name, callback) => {
             buttonEvents = filter(event => event.name !== name || event.callback !== callback, buttonEvents);
         },
 
-        addStickEvent(name, callback) {
+        addStickEvent: (name, callback) => {
             if (isValidStickEventName(name, state.sticks)) {
-                stickEvents.push({
-                    name, callback
-                });
+                stickEvents.push({ name, callback });
             }
         },
 
-        removeStickEvent(name, callback) {
+        removeStickEvent: (name, callback) => {
             stickEvents = filter(event => event.name !== name || event.callback !== callback, stickEvents);
         },
 
-        update(gamepad) {
+        update: gamepad => {
             baseModule.update(gamepad);
 
             forEach(event => {
@@ -79,7 +75,7 @@ export default function createEventModule(params = {}) {
                 }
             }, stickEvents);
         }
-    };
+    });
 
     return module;
 }

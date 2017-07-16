@@ -1,9 +1,10 @@
 
 import {
-    noop, map, isFunction, find,
+    noop, map, isFunction, find, filter,
     difference, forEach, includes, indexOf
 } from 'lodash/fp';
-import { getRawGamepads } from './common/utils';
+
+import { getRawGamepads, gamepadIsValid } from './common/utils';
 
 export default function createJoyMap(params = {}) {
     let animationFrameRequestId = null;
@@ -47,15 +48,12 @@ export default function createJoyMap(params = {}) {
             }
         },
 
-        setOnPoll: onPoll => {
-            state.onPoll = onPoll;
-        },
+        setOnPoll: onPoll => { state.onPoll = onPoll; },
 
-        setAutoConnect: autoConnect => {
-            state.autoConnect = autoConnect;
-        },
+        setAutoConnect: autoConnect => { state.autoConnect = autoConnect; },
 
         getGamepads: () => state.gamepads,
+
         getModules: () => state.modules,
 
         getUnusedPadIds: () => difference(map('id', state.gamepads), map(module => module.getPadId(), state.modules)),
@@ -64,16 +62,7 @@ export default function createJoyMap(params = {}) {
             const usedIds = map(module => module.getPadId(), state.modules);
             const gamepadIds = map('id', state.gamepads);
 
-            const length = gamepadIds.length;
-            let i = 0;
-            while (i < length) {
-                if (!includes(gamepadIds[i], usedIds)) {
-                    return gamepadIds[i];
-                }
-                i += 1;
-            }
-
-            return null;
+            return find(id => !includes(id, usedIds), gamepadIds);
         },
 
         addModule: module => {
@@ -88,31 +77,14 @@ export default function createJoyMap(params = {}) {
         },
 
         removeModule: module => {
-            // TODO refactor with other lodash/fp functions
-            const index = indexOf(module, state.modules);
-            if (index !== -1) {
-                state.modules.splice(index, 1);
-                module.destroy();
-            } else {
-                throw new Error('removeModule(module), could not find such module');
-            }
+            state.modules = filter(m => m !== module, state.modules);
+            module.destroy();
         },
 
-        clearModules: () => {
-            forEach(module => joyMap.removeModule(module), state.modules);
-        },
+        clearModules: () => forEach(module => joyMap.removeModule(module), state.modules),
 
         poll: () => {
-            state.gamepads = getRawGamepads().filter(rawGamepad =>
-                rawGamepad
-                && rawGamepad.connected
-                && rawGamepad.buttons.length
-                && rawGamepad.axes.length
-                && rawGamepad.timestamp !== 0
-                && (!!rawGamepad.id || rawGamepad.id === 0)
-            );
-
-            // TODO review gamepad connection because gamepad doesnt autoconnect even if the flag is true the first time
+            state.gamepads = filter(gamepadIsValid, getRawGamepads());
 
             forEach(module => {
                 if (state.autoConnect && !module.getPadId()) {

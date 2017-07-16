@@ -1,6 +1,6 @@
 
 import memoize from 'fast-memoize';
-import { mapValues, omit, forEach } from 'lodash/fp';
+import { assignIn, mapValues, omit, forEach } from 'lodash/fp';
 
 import { buttonMap, stickMap } from '../common/utils';
 import createBaseModule from '../baseModule/base';
@@ -17,9 +17,8 @@ export default function createQueryModule(params = {}) {
     const buttonMapMemoized = memoize(buttonMap);
     const stickMapMemoized = memoize(stickMap);
 
-    const module = {
-        ...baseModule,
-        getButtons(...inputNames) {
+    const module = assignIn(baseModule, {
+        getButtons: (...inputNames) => {
             if (!module.isConnected()) {
                 return getEmptyButtons(state.buttons, inputNames);
             }
@@ -64,7 +63,7 @@ export default function createQueryModule(params = {}) {
             return result;
         },
 
-        getSticks(...inputNames) {
+        getSticks: (...inputNames) => {
             if (!module.isConnected()) {
                 return getEmptySticks(state.sticks, inputNames);
             }
@@ -111,7 +110,7 @@ export default function createQueryModule(params = {}) {
             return result;
         },
 
-        getMappers(...mapperNames) {
+        getMappers: (...mapperNames) => {
             if (!module.isConnected()) {
                 return getEmptyMappers(mappers, mapperNames);
             }
@@ -132,20 +131,13 @@ export default function createQueryModule(params = {}) {
             return result;
         },
 
-        setMapper(mapperName, callback) {
-            // TODO: Figure out how to change mapper's API to allow memoization
-            mappers[mapperName] = callback;
-        },
+        setMapper: (mapperName, callback) => { mappers[mapperName] = callback; },
 
-        removeMapper(mapperName) {
-            mappers = omit([mapperName], mappers);
-        },
+        removeMapper: mapperName => { mappers = omit([mapperName], mappers); },
 
-        clearMappers() {
-            mappers = {};
-        },
+        clearMappers: () => { mappers = {}; },
 
-        destroy() {
+        destroy: () => {
             module.disconnect();
             state.pad = {
                 buttons: [],
@@ -157,7 +149,7 @@ export default function createQueryModule(params = {}) {
             };
             module.clearMappers();
         }
-    };
+    });
 
     return module;
 }
