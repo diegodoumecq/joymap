@@ -1,7 +1,7 @@
 
 import {
     noop, map, isFunction, find, filter,
-    difference, forEach, includes, indexOf
+    difference, forEach, includes
 } from 'lodash/fp';
 
 import { getRawGamepads, gamepadIsValid } from './common/utils';

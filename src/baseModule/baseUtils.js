@@ -45,7 +45,6 @@ export function updateListenOptions(listenOptions, pad, threshold) {
         return listenOptions;
     }
 
-    // Clean currentValue
     return assignIn(listenOptions, { currentValue: 0 });
 }
 
