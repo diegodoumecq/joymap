@@ -50,10 +50,10 @@ There are four examples of usage, each of them showcasing the different ways to 
 
 Joymap exports an object with a few creation functions:
 
-    createBaseModule
-    createQueryModule
-    createEventModule
-    createJoyMap
+* createBaseModule
+* createQueryModule
+* createEventModule
+* createJoyMap
 
 From among them, the initial point of interaction with the library is **createJoyMap**. It is necessary to use this function since it handles polling the browser's Gamepad API and passes that data along to the different assigned modules. It does not, however, parse or map anything by itself: the modules are the ones that handle that responsibility.
 
@@ -129,9 +129,11 @@ These functions all return a single module. All modules contain at least the fol
 
 ### Simple example of usage
 
-    // Pretend there's a declared stepFunction that does stuff on each step
-
     import createJoyMap, { createQueryModule } from 'joymap';
+    
+    function stepFunction() {
+        // do stuff immediately after each Poll
+    }
 
     const joyMap = createJoyMap({
         onPoll: stepFunction,
@@ -146,10 +148,12 @@ These functions all return a single module. All modules contain at least the fol
     joyMap.addModule(module3);
     joyMap.start();
     
-    // ... later on in another file, probably a mario-handling one:
+    //////
+    // ... later on in a player-handling file
+    //////
     
-    const A = module1.getButtons('A');
-    if (A.pressed && A.justChanged) {
+    const AButton = mario.module.getButtons('A'); // mario.module may be module1 from above
+    if (AButton.pressed && AButton.justChanged && mario.isOnFloor()) {
         mario.jump();
     }
 
@@ -158,6 +162,8 @@ As you can see in the example above, you can create as many modules as you'd lik
 For more a in-depth view on what the library supports and how, do please look at the examples in /examples.
 
 ### The Query Module
+
+This module is based around polling the current state of the gamepad. It is also the only module that offers mappers: basically functions that map a player to a particular output.
 
 * **getButtons(...names: string[]) => buttonState | buttonStates** Returns button objects depending on the format the arguments take
   * Given only one button name as argument, the returned object will be { value, pressed, justChanged }
@@ -173,32 +179,73 @@ For more a in-depth view on what the library supports and how, do please look at
 * **removeMapper(mapperName: string) => void** Removes a single mapper
 * **clearMappers() => void** Clears all the mappers
 
+### The Event Module
+
+This module is based around setting up event callbacks to specific gamepad inputs.
+
+* **addButtonEvent(eventName: string, callback: Function) => void** Adds a button event listener to be called when eventName happens
+  * **eventName** Identifies the button/s to listen to. Can be either simple or composite
+  * **callback** is the function that will be called when **eventName** happens. If the event was simple, it will also receive the button's state as the only argument
+* **addStickEvent(eventName: string, callback: Function) => void** Adds a stick event listener to be called when eventName happens
+  * **eventName** Identifies the stick to listen to. Can only be simple
+  * **callback** is the function that will be called when **eventName** happens. It will receive the stick's state as the only argument
+* **removeButtonEvent(eventName: string, callback: Function) => void** Removes a button event listener
+  * The **eventName** and **callback** must match exactly to the ones used to listen to the event in the first place
+* **removeStickEvent(eventName: string, callback: Function) => void** Removes a stick event listener
+  * The **eventName** and **callback** must match exactly to the ones used to listen to the event in the first place
+ 
+### Composite Events
+
+Simple events are fairly easy to comprehend, press the **A** button and the corresponding eventName **A** will trigger. However, composite events are more flexible and useful than that because they allow for listening to various inputs at once through the use of operators.
+
+There are two different operators available: **!** and **+**. The former being the classic **not** operator that basically lets you listen to something not being pressed. The latter being the **+** operator that is working as a boolean **&**, triggering only when two inputs are pressed.
+
+So you can do something like:
+
+    import createJoyMap, { createEventModule } from 'joymap';
+
+    const joyMap = createJoyMap();
+    const module = createEventModule();
+
+    joyMap.addModule(module);
+    joyMap.addButtonEvent('A + B + !X + !Y', () => console.log('copy command'))
+    joyMap.start();
+    
+This will result in the 'copy command' message logged only when the user is pressing down on A and B at the same time but not pressing either X nor Y.
+
+Also, please consider that:
+
+* If the **eventName** is something invalid, like 'A B' or '+ A + B', the event will just never trigger.
+* Spaces are completely optional
+
 ### Naming restrictions
 
-Throughout the library you're invited to name stuff. Like players, buttons, sticks and mappers. For the sake of making things easier for everybody in the future, these values shall only be alphanumeric. Why? Well, the event handling system that is not developed yet would require a strict naming convention to avoid mixing up names of stuff with possible operators.
+Throughout the library you're invited to name stuff. Like events, buttons, sticks and mappers. For the sake of making things easier for everybody in the future, these values shall only be alphanumeric. Why? Future-proofing mostly. The event handling system would require a strict naming convention to avoid mixing up names of stuff with possible operators.
 
 ### Advanced example of usage
 
 Taken from the StateLog example:
 
-    // Pretend there's a declared stepFunction that does stuff on each step
     import createJoyMap, { createQueryModule } from 'joymap';
     
-    const joyMap = createJoyMap({
-        onPoll: stepFunction,
-        autoConnect: true
-    });
-    const jo = createQueryModule({ threshold: 0.2, clampThreshold: true });
+    function stepFunction() {
+        // do stuff immediately after each Poll
+    }
     
-    jo.setButton('Jump', jo.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
-    jo.setButton('Shoot', jo.getButtonIndexes('B'));
-    jo.setButton('LookUp', jo.getButtonIndexes('dpadUp'));
-    jo.setButton('LookDown', jo.getButtonIndexes('dpadDown'));
-    jo.setButton('LookLeft', jo.getButtonIndexes('dpadLeft'));
-    jo.setButton('LookRight', jo.getButtonIndexes('dpadRight'));
-    jo.setButton('StickAverage', jo.getStickIndexes('L', 'R'));
+    const joyMap = createJoyMap();
+    const mainModule = createQueryModule();
+    joyMap.addModule(mainModule);
     
-    jo.setMapper('Point', module => module.getSticks('R').pressed);
+    mainModule.setButton('Jump', mainModule.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
+    mainModule.setButton('Shoot', mainModule.getButtonIndexes('B'));
+    mainModule.setButton('LookUp', mainModule.getButtonIndexes('dpadUp'));
+    mainModule.setButton('LookDown', mainModule.getButtonIndexes('dpadDown'));
+    mainModule.setButton('LookLeft', mainModule.getButtonIndexes('dpadLeft'));
+    mainModule.setButton('LookRight', mainModule.getButtonIndexes('dpadRight'));
+    mainModule.setButton('StickAverage', mainModule.getStickIndexes('L', 'R'));
+    
+    mainModule.setMapper('Point', module => module.getSticks('R').pressed);
+    joyMap.start();
 
 ### Roadmap
 
@@ -212,9 +259,11 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
 * Implement rumble when it gets supported
   * [We do have vibration support but only for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
   * There's an [open issue](https://github.com/w3c/gamepad/issues/19) about this
-* Improve event module
-  * eventModule.addEvent('!A', eventHandler) will trigger eventHandler every time the A button is not pressed
-  * eventModule.addEvent('A.!justChanged', eventHandler) will trigger eventHandler when the A button is pressed but not justChanged
+* More improvements to the event module
+  * Add the .justChanged modifier:
+  * eventModule.addEvent('A.justChanged', eventHandler) would trigger eventHandler when the A button is justChanged, pressed or not
+  * eventModule.addEvent('!A.justChanged', eventHandler) would trigger eventHandler when the A button is not justChanged, pressed or not
+  * eventModule.addEvent('A + !A.justChanged', eventHandler) would trigger eventHandler when the A button is pressed & not justChanged
 * Once some event handling is added, support [observable streams](https://github.com/Reactive-Extensions/RxJS)
 * Support multiple inputs on a single event handler
   * This can get out of hand pretty quickly, but it certainly would be pretty neat
