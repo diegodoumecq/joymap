@@ -1,18 +1,11 @@
 
 import memoize from 'fast-memoize';
-import { filter, forEach, assignIn } from 'lodash/fp';
+import { filter, forEach, assignIn, map } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
 
-import { buttonMap, stickMap } from '../common/utils';
-
-function isValidButtonEventName(name, buttons) {
-    return !!buttons[name];
-}
-
-function isValidStickEventName(name, sticks) {
-    return !!sticks[name];
-}
+import { buttonMap, stickMap, nameIsValid } from '../common/utils';
+import { eventIsValid, getEventTokens, verifyTokens } from './eventUtils';
 
 export default function createEventModule(params = {}) {
     const { state, module: baseModule } = createBaseModule(params);
@@ -26,48 +19,68 @@ export default function createEventModule(params = {}) {
     const module = assignIn(baseModule, {
         ...baseModule,
 
-        // TODO Support more options other than just button names and stick names
-
-        addButtonEvent: (name, callback) => {
-            if (isValidButtonEventName(name, state.buttons)) {
-                buttonEvents.push({ name, callback });
+        addButtonEvent: (eventName, callback) => {
+            const tokens = getEventTokens(eventName);
+            if (eventIsValid(tokens)) {
+                buttonEvents.push({ name: eventName, callback, tokens });
             }
         },
 
-        removeButtonEvent: (name, callback) => {
-            buttonEvents = filter(event => event.name !== name || event.callback !== callback, buttonEvents);
+        removeButtonEvent: (eventName, callback) => {
+            buttonEvents = filter(event => event.name !== eventName || event.callback !== callback, buttonEvents);
         },
 
         addStickEvent: (name, callback) => {
-            if (isValidStickEventName(name, state.sticks)) {
+            if (nameIsValid(name)) {
                 stickEvents.push({ name, callback });
             }
         },
 
-        removeStickEvent: (name, callback) => {
-            stickEvents = filter(event => event.name !== name || event.callback !== callback, stickEvents);
+        removeStickEvent: (eventName, callback) => {
+            stickEvents = filter(event => event.name !== eventName || event.callback !== callback, stickEvents);
         },
 
         update: gamepad => {
             baseModule.update(gamepad);
 
             forEach(event => {
-                const indexes = state.buttons[event.name];
-                const result = buttonMapMemoized(state.pad, state.prevPad, indexes, state.threshold);
+                if (state.buttons[event.name]) {
+                    // simple button event
+                    const result = buttonMapMemoized(
+                        state.pad,
+                        state.prevPad,
+                        state.buttons[event.name],
+                        state.threshold,
+                        state.clampThreshold
+                    );
 
-                if (result.pressed) {
-                    event.callback(result);
+                    if (result.pressed) {
+                        event.callback(result);
+                    }
+                } else if (verifyTokens(
+                    // composite button event
+                    map(name => (!state.buttons[name] ? name : buttonMapMemoized(
+                        state.pad,
+                        state.prevPad,
+                        state.buttons[name],
+                        state.threshold,
+                        state.clampThreshold
+                    ).pressed), event.tokens)
+                )) {
+                    event.callback(true);
                 }
             }, buttonEvents);
 
             forEach(event => {
+                // simple stick event
                 const stick = state.sticks[event.name];
                 const result = stickMapMemoized(
                     state.pad,
                     state.prevPad,
                     stick.indexes,
                     stick.inverts,
-                    state.threshold
+                    state.threshold,
+                    state.clampThreshold
                 );
 
                 if (result.pressed) {
