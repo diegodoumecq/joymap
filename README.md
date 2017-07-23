@@ -5,7 +5,9 @@
 **[Default export API](#default-export-api)** |
 **[Modules](#modules)** |
 **[Simple example of usage](#simple-example-of-usage)** |
-**[The Player's API](#the-players-api)** |
+**[The Query Module](#the-query-module)** |
+**[The Event Module](#the-event-module)** |
+**[Composite Events](#composite-events)** |
 **[Naming restrictions](#naming-restrictions)** |
 **[Advanced example of usage](#advanced-example-of-usage)** |
 **[Roadmap](#roadmap)**
@@ -215,7 +217,7 @@ This will result in the 'copy command' message logged only when the user is pres
 
 Also, please consider that:
 
-* If the **eventName** is something invalid, like 'A B' or '+ A + B', the event will just never trigger.
+* If the **eventName** is something invalid, like 'A B' or '+ A + B', the event will just never trigger
 * Spaces are completely optional
 
 ### Naming restrictions
@@ -251,6 +253,7 @@ Taken from the StateLog example:
 
 Stuff to do. Keep in mind these bullet points are in no particular order.
 
+* Add a new Rx module that uses [observable streams](https://github.com/Reactive-Extensions/RxJS)
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the module config and on refresh restore it
@@ -264,10 +267,3 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
   * eventModule.addEvent('A.justChanged', eventHandler) would trigger eventHandler when the A button is justChanged, pressed or not
   * eventModule.addEvent('!A.justChanged', eventHandler) would trigger eventHandler when the A button is not justChanged, pressed or not
   * eventModule.addEvent('A + !A.justChanged', eventHandler) would trigger eventHandler when the A button is pressed & not justChanged
-* Once some event handling is added, support [observable streams](https://github.com/Reactive-Extensions/RxJS)
-* Support multiple inputs on a single event handler
-  * This can get out of hand pretty quickly, but it certainly would be pretty neat
-  * This would improve **eventModule.addEvent** by allowing the syntax eventModule.addEvent('A + B') for combination of inputs
-  * eventModule.addEvent('A B') would be triggered by pressing A, releasing it and then pressing B
-  * Need to somehow figure out a timing configuration for the above example
-  * eventModule.addEvent('A + !B') would only trigger if A is pressed and B is not pressed
