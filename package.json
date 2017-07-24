@@ -13,7 +13,7 @@
     "canvas": "webpack-dev-server --hot --env.example=canvas",
     "fighting": "webpack-dev-server --hot --env.example=fighting",
     "build": "del-cli -f bin/* && babel src -d bin",
-    "test": "ava"
+    "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.babel.js"
   },
   "author": {
     "name": "Diego Doumecq",
@@ -32,23 +32,6 @@
     "type": "git",
     "url": "https://github.com/diegodoumecq/joymap"
   },
-  "ava": {
-    "require": [
-      "babel-register",
-      "./test/setup-browser-env.js"
-    ],
-    "babel": "inherit",
-    "files": [
-      "src/**/*.test.js",
-      "test/**/*.test.js"
-    ],
-    "source": [
-      "**/*.{js,jsx}",
-      "!node_modules/**/*"
-    ],
-    "concurrency": 5,
-    "failFast": true
-  },
   "license": "MIT",
   "dependencies": {
     "babel-polyfill": "6.23.0",
@@ -58,7 +41,6 @@
   },
   "devDependencies": {
     "autoprefixer": "6.7.2",
-    "ava": "0.18.1",
     "babel-cli": "6.24.1",
     "babel-core": "6.25",
     "babel-eslint": "7.2.3",
@@ -74,6 +56,7 @@
     "clean-webpack-plugin": "0.1.15",
     "color-hash": "1.0.3",
     "copy-webpack-plugin": "4.0.1",
+    "cross-env": "^5.0.1",
     "css-loader": "0.28.4",
     "del-cli": "1.0.0",
     "empty": "0.10.1",
@@ -93,7 +76,7 @@
     "tinycolor2": "1.4.1",
     "url-loader": "0.5.8",
     "webpack": "3.2.0",
-    "webpack-dev-server": "2.5.1",
+    "webpack-dev-server": "2.6.1",
     "webpack-hot-middleware": "2.18.2",
     "write-file-webpack-plugin": "4.1.0"
   }
