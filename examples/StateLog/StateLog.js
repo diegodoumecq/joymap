@@ -6,39 +6,40 @@ import {
 import '../main.styl';
 import './StateLog.styl';
 
-import createJoyMap from '../../src/JoyMap';
+import { createJoyMap, createQueryModule } from '../../src/index';
 
 // Populate the app div with some basic html
 document.getElementById('app').innerHTML = `
     <article class="examples-container">
         <header>
-            <h1 className="title">JoyMap input logging example</h1>
+            <h1 className="title">JoyMap input logging example using the query module</h1>
         </header>
         <div class="log-example">
             <p>The dev console is also used to store all the logged input</p>
         </div>
     </article>`;
 
-function createPlayer(joyMap, padId) {
-    const p = joyMap.addPlayer(padId);
+function setupModule(joyMap, padId) {
+    const m = createQueryModule({ padId });
+    joyMap.addModule(m);
 
     // Set custom buttons
-    p.setButton('Jump', p.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
-    p.setButton('Shoot', p.getButtonIndexes('B'));
-    p.setButton('LookUp', p.getButtonIndexes('dpadUp'));
-    p.setButton('LookDown', p.getButtonIndexes('dpadDown'));
-    p.setButton('LookLeft', p.getButtonIndexes('dpadLeft'));
-    p.setButton('LookRight', p.getButtonIndexes('dpadRight'));
-    p.setButton('StickAverage', p.getStickIndexes('L', 'R'));
+    m.setButton('Jump', m.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
+    m.setButton('Shoot', m.getButtonIndexes('B'));
+    m.setButton('LookUp', m.getButtonIndexes('dpadUp'));
+    m.setButton('LookDown', m.getButtonIndexes('dpadDown'));
+    m.setButton('LookLeft', m.getButtonIndexes('dpadLeft'));
+    m.setButton('LookRight', m.getButtonIndexes('dpadRight'));
+    m.setButton('StickAverage', m.getStickIndexes('L', 'R'));
 
     // Set mappers
-    p.setMapper('Move', player => player.getSticks('L').pressed);
-    p.setMapper('Point', player => player.getSticks('R').pressed);
-    p.setMapper('MovePoint', player => countPressed(player.getSticks('R', 'L')) === 2);
-    p.setMapper('CountFace', player => countPressed(player.getButtons('A', 'B', 'X', 'Y')));
-    p.setMapper('CountAll', player => {
-        const buttonCount = countPressed(player.getButtons());
-        const stickCount = countPressed(player.getSticks());
+    m.setMapper('Move', module => module.getSticks('L').pressed);
+    m.setMapper('Point', module => module.getSticks('R').pressed);
+    m.setMapper('MovePoint', module => countPressed(module.getSticks('R', 'L')) === 2);
+    m.setMapper('CountFace', module => countPressed(module.getButtons('A', 'B', 'X', 'Y')));
+    m.setMapper('CountAll', module => {
+        const buttonCount = countPressed(module.getButtons());
+        const stickCount = countPressed(module.getSticks());
 
         if (buttonCount || stickCount) {
             return `Btn:${buttonCount} Sticks:${stickCount}`;
@@ -48,8 +49,8 @@ function createPlayer(joyMap, padId) {
     });
 
     const element = document.createElement('section');
-    element.className = 'player';
-    const id = p.getPadId();
+    element.className = 'module';
+    const id = m.getPadId();
     element.innerHTML = `
         <div class="name">Gamepad: ${id}</div>
         <div id="${id}">Waiting for inputs...</div>
@@ -65,20 +66,19 @@ const showMappers = true;
 
 // Initial joyMap setup
 const joyMap = createJoyMap({
-    threshold: 0.2,
     onPoll() {
         const unusedIds = joyMap.getUnusedPadIds();
 
         if (unusedIds.length > 0) {
-            forEach(padId => createPlayer(joyMap, padId), unusedIds);
+            forEach(padId => setupModule(joyMap, padId), unusedIds);
         }
 
-        forEach(player => {
+        forEach(module => {
             // On each frame render to HTML and console.log the state of buttons, sticks and mappers
             const compilation = [
-                !showButtons ? '' : stringifyInputs(player.getButtons()),
-                !showSticks ? '' : stringifyInputs(player.getSticks()),
-                !showMappers ? '' : stringifyMappers(player.getMappers())
+                !showButtons ? '' : stringifyInputs(module.getButtons()),
+                !showSticks ? '' : stringifyInputs(module.getSticks()),
+                !showMappers ? '' : stringifyMappers(module.getMappers())
             ];
 
             const stringOutput = join(', ', compact(compilation));
@@ -88,7 +88,7 @@ const joyMap = createJoyMap({
                 console.log(stringOutput); // eslint-disable-line
 
                 // Re-render this last output into HTML
-                document.getElementById(player.getPadId()).innerHTML = renderRows(compact([
+                document.getElementById(module.getPadId()).innerHTML = renderRows(compact([
                     !showButtons ? null : {
                         inputType: 'buttons',
                         compilation: compilation[0],
@@ -106,7 +106,7 @@ const joyMap = createJoyMap({
                     }
                 ]));
             }
-        }, joyMap.getPlayers());
+        }, joyMap.getModules());
     }
 });
 

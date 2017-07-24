@@ -2,13 +2,9 @@
   "parser": "babel-eslint",
   "extends": [
     "airbnb-base",
-    "plugin:flowtype/recommended",
     "plugin:react/recommended"
   ],
-  "plugins": [
-    "flowtype",
-    "react"
-  ],
+  "plugins": ["react"],
   "rules": {
     "linebreak-style": 0,
     "no-param-reassign": 0,
@@ -27,7 +23,7 @@
               "componentWillUnmount",
               "componentWillUpdate",
               "render",
-              "shouldComponentUpdate",
+              "shouldComponentUpdate"
             ]
         }
     ]

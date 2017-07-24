@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import CSSModules from 'react-css-modules';
 
 import { map } from 'lodash/fp';
@@ -19,9 +20,9 @@ class Gamepad extends React.Component {
     static propTypes = {
         backgroundColor: PropTypes.string.isRequired,
         pressedColor: PropTypes.string.isRequired,
-        player: PropTypes.object.isRequired,
-        name: React.PropTypes.string.isRequired,
-        children: React.PropTypes.node
+        module: PropTypes.object.isRequired,
+        name: PropTypes.string.isRequired,
+        children: PropTypes.node
     };
 
     state = {
@@ -29,24 +30,24 @@ class Gamepad extends React.Component {
     };
 
     handleCancelRebind = () => {
-        this.props.player.cancelListen();
+        this.props.module.cancelListen();
         this.setState({ waiting: null });
     };
 
     renderStick(inputName) {
         const { pressedColor } = this.props;
-        const [x, y] = this.props.player.getSticks(inputName).value;
-        const { pressed } = this.props.player.getButtons(`${inputName}3`);
+        const [x, y] = this.props.module.getSticks(inputName).value;
+        const { pressed } = this.props.module.getButtons(`${inputName}3`);
 
         return (
             <div
                 key={inputName}
                 styleName={inputName}
                 onClick={() => {
-                    const { player } = this.props;
+                    const { module } = this.props;
 
-                    if (player.isConnected()) {
-                        player.stickBindOnPress(
+                    if (module.isConnected()) {
+                        module.stickBindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
                         );
@@ -61,17 +62,17 @@ class Gamepad extends React.Component {
 
     renderDigital(inputName) {
         const { pressedColor } = this.props;
-        const { pressed } = this.props.player.getButtons(inputName);
+        const { pressed } = this.props.module.getButtons(inputName);
 
         return (
             <div
                 key={inputName}
                 styleName={inputName}
                 onClick={() => {
-                    const { player } = this.props;
+                    const { module } = this.props;
 
-                    if (player.isConnected()) {
-                        player.buttonBindOnPress(
+                    if (module.isConnected()) {
+                        module.buttonBindOnPress(
                             inputName,
                             () => this.setState({ waiting: null })
                         );
@@ -84,7 +85,7 @@ class Gamepad extends React.Component {
     }
 
     renderShoulder(inputName) {
-        const { value } = this.props.player.getButtons(inputName);
+        const { value } = this.props.module.getButtons(inputName);
 
         return (
             <div
@@ -99,15 +100,15 @@ class Gamepad extends React.Component {
     }
 
     render() {
-        const { player, backgroundColor, pressedColor, children, name } = this.props;
+        const { module, backgroundColor, pressedColor, children, name } = this.props;
         const { waiting } = this.state;
 
         return (
             <div
-                styleName={classnames('gamepad', { disconnected: !player.isConnected(), waiting: !!waiting })}
+                styleName={classnames('gamepad', { disconnected: !module.isConnected(), waiting: !!waiting })}
                 style={{ backgroundColor }}>
                 <div styleName="react-inputs">
-                    <span styleName="player-name" style={{ color: pressedColor }}>{name}</span>
+                    <span styleName="module-name" style={{ color: pressedColor }}>{name}</span>
                     <div styleName="back" />
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                     {map(inputName => this.renderStick(inputName), analogInputs)}

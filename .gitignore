@@ -1,4 +1,5 @@
 .DS_STORE
+bin
 devBundle
 node_modules
 platforms

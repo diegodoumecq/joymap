@@ -1,8 +1,9 @@
 /*eslint-disable */
 
 // Simple canvas example that doesn't use any other library nor ES6 features
-
-var createJoyMap = require('../../src/JoyMap').default;
+var joyMap = require('../../src/index');
+var createJoyMap = joyMap.createJoyMap;
+var createQueryModule = joyMap.createQueryModule;
 
 require('../main.styl');
 require('./Canvas.styl');
@@ -23,8 +24,8 @@ function uniqueId(prefix) {
 // Populate the app div with a canvas
 document.getElementById('app').innerHTML = '<article class="examples-container">' +
         '<header>' +
-            '<h1 className="title">JoyMap Canvas example</h1>' +
-            '<h2>We create player characters whenever you connect a gamepad</h2>' +
+            '<h1 className="title">JoyMap Canvas example using query module</h1>' +
+            '<h2>We create characters whenever you connect a gamepad</h2>' +
             '<h3>We also DESTROY them when the gamepad gets unplugged</h3>' +
         '</header>' +
         '<div class="canvas-example">' +
@@ -38,7 +39,7 @@ gamepadImage.src = 'gamepad.png';
 function drawCharacter(ctx, character) {
     var x = character.x;
     var y = character.y;
-    var angle = character.angle + Math.PI * 0.1 * character.player.getMappers('LeftVsRight');
+    var angle = character.angle + Math.PI * 0.1 * character.module.getMappers('LeftVsRight');
 
     // Rotate whole canvas
     ctx.translate(x, y);
@@ -57,7 +58,7 @@ function drawCharacter(ctx, character) {
 }
 
 function updateCharacter(character) {
-    var sticks = character.player.getSticks('L', 'R');
+    var sticks = character.module.getSticks('L', 'R');
     var L = sticks.L;
     var R = sticks.R;
 
@@ -74,8 +75,6 @@ function updateCharacter(character) {
 var characters = [];
 
 var joyMap = createJoyMap({
-    threshold: 0.2,
-    autoConnect: false,
     onPoll: function onPoll() {
         // Get the canvas context so we can draw on it
         var ctx = document.getElementById('canvas').getContext('2d');
@@ -88,15 +87,17 @@ var joyMap = createJoyMap({
         if (unusedIds.length > 0) {
             unusedIds.forEach(function (padId) {
                 var c = {
-                    player: joyMap.addPlayer(padId),
+                    module: createQueryModule({ padId, autoConnect: false }),
                     id: uniqueId(),
                     x: Math.random() * SIZE.width,
                     y: Math.random() * SIZE.height,
                     angle: Math.random() * 2 * Math.PI
                 };
-                c.player.setMapper('LeftVsRight', function (player) {
-                    var rightButtons = player.getButtons('R1', 'R2', 'R3', 'A', 'B', 'X', 'Y', 'start');
-                    var leftButtons = player.getButtons(
+                joyMap.addModule(c.module);
+
+                c.module.setMapper('LeftVsRight', function (module) {
+                    var rightButtons = module.getButtons('R1', 'R2', 'R3', 'A', 'B', 'X', 'Y', 'start');
+                    var leftButtons = module.getButtons(
                         'dpadUp', 'dpadDown', 'dpadLeft', 'dpadRight', 'L1', 'L2', 'L3', 'select'
                     );
 
@@ -114,7 +115,7 @@ var joyMap = createJoyMap({
         }
 
         characters.forEach(function (c) {
-            if (c.player.isConnected()) {
+            if (c.module.isConnected()) {
                 updateCharacter(c);
                 drawCharacter(ctx, c);
             }

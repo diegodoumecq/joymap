@@ -1,9 +1,18 @@
-/* @flow */
-
 import 'babel-polyfill';
 
-// Ugly import and export because flow does not understand export X from 'path'
+import createBaseModule from './baseModule/base';
+import createQueryModule from './queryModule/query';
+import createEventModule from './eventModule/event';
+import createJoyMap from './JoyMap';
 
-import j from './JoyMap';
+export default {
+    createBaseModule,
+    createQueryModule,
+    createEventModule,
+    createJoyMap
+};
 
-export default j;
+export { createBaseModule };
+export { createQueryModule };
+export { createEventModule };
+export { createJoyMap };

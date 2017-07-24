@@ -11,8 +11,9 @@
     "react": "webpack-dev-server --hot --env.example=react",
     "log": "webpack-dev-server --hot --env.example=log",
     "canvas": "webpack-dev-server --hot --env.example=canvas",
-    "build": "del-cli -f bin/* && babel src -d bin && flow-copy-source -v src bin",
-    "test": "ava"
+    "fighting": "webpack-dev-server --hot --env.example=fighting",
+    "build": "del-cli -f bin/* && babel src -d bin",
+    "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.babel.js"
   },
   "author": {
     "name": "Diego Doumecq",
@@ -20,86 +21,63 @@
   },
   "tags": [
     "gamepad",
-    "joystick",
-    "flow",
-    "flowtype"
+    "joystick"
   ],
   "keywords": [
     "gamepad",
-    "joystick",
-    "flow",
-    "flowtype"
+    "joystick"
   ],
   "homepage": "https://github.com/diegodoumecq/joymap",
   "repository": {
     "type": "git",
     "url": "https://github.com/diegodoumecq/joymap"
   },
-  "ava": {
-    "require": [
-      "babel-register",
-      "./test/setup-browser-env.js"
-    ],
-    "babel": "inherit",
-    "files": [
-      "src/**/*.test.js",
-      "test/**/*.test.js"
-    ],
-    "source": [
-      "**/*.{js,jsx}",
-      "!node_modules/**/*"
-    ],
-    "concurrency": 5,
-    "failFast": true
-  },
   "license": "MIT",
   "dependencies": {
-    "babel-polyfill": "^6.22.0",
-    "babel-runtime": "^6.22.0",
-    "fast-memoize": "^2.2.0"
+    "babel-polyfill": "6.23.0",
+    "babel-runtime": "6.23.0",
+    "fast-memoize": "2.2.7",
+    "lodash": "4.17.4"
   },
   "devDependencies": {
-    "autoprefixer": "^6.7.2",
-    "ava": "^0.18.1",
-    "babel-cli": "^6.22.2",
-    "babel-core": "^6.22.1",
-    "babel-eslint": "^7.1.1",
-    "babel-loader": "^6.2.10",
-    "babel-plugin-lodash": "^3.2.11",
-    "babel-plugin-transform-runtime": "^6.22.0",
-    "babel-preset-latest": "^6.22.0",
-    "babel-preset-react": "^6.22.0",
-    "babel-preset-stage-0": "^6.22.0",
-    "babel-register": "^6.22.0",
-    "browser-env": "^2.0.19",
-    "classnames": "^2.2.5",
-    "clean-webpack-plugin": "^0.1.15",
-    "color-hash": "^1.0.3",
-    "copy-webpack-plugin": "^4.0.1",
-    "css-loader": "^0.26.1",
-    "del-cli": "^0.2.1",
-    "empty": "^0.10.1",
-    "eslint": "^3.15.0",
-    "eslint-config-airbnb-base": "^11.0.1",
-    "eslint-plugin-flowtype": "^2.30.0",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-react": "^6.9.0",
-    "file-loader": "^0.10.0",
-    "flow-bin": "^0.38.0",
-    "flow-copy-source": "^1.1.0",
-    "lodash": "^4.17.4",
-    "postcss-loader": "^1.2.2",
-    "react": "^15.4.2",
-    "react-css-modules": "^4.1.0",
-    "react-dom": "^15.4.2",
-    "style-loader": "^0.13.1",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^2.4.0",
-    "tinycolor2": "^1.4.1",
-    "url-loader": "^0.5.7",
-    "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.3.0",
-    "webpack-hot-middleware": "^2.16.1",
-    "write-file-webpack-plugin": "^3.4.2"
+    "autoprefixer": "6.7.2",
+    "babel-cli": "6.24.1",
+    "babel-core": "6.25",
+    "babel-eslint": "7.2.3",
+    "babel-loader": "7.0.0",
+    "babel-plugin-lodash": "3.2.11",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-preset-latest": "6.24.1",
+    "babel-preset-react": "6.24.1",
+    "babel-preset-stage-0": "6.24.1",
+    "babel-register": "6.24.1",
+    "browser-env": "2.0.31",
+    "classnames": "2.2.5",
+    "clean-webpack-plugin": "0.1.15",
+    "color-hash": "1.0.3",
+    "copy-webpack-plugin": "4.0.1",
+    "cross-env": "^5.0.1",
+    "css-loader": "0.28.4",
+    "del-cli": "1.0.0",
+    "empty": "0.10.1",
+    "eslint": "3.19.0",
+    "eslint-config-airbnb-base": "11.2.0",
+    "eslint-plugin-import": "2.3.0",
+    "eslint-plugin-react": "7.0.1",
+    "file-loader": "0.11.2",
+    "postcss-loader": "2.0.5",
+    "prop-types": "15.5.10",
+    "react": "16.0.0-alpha.13",
+    "react-css-modules": "4.3.0",
+    "react-dom": "16.0.0-alpha.13",
+    "style-loader": "0.18.2",
+    "stylus": "0.54.5",
+    "stylus-loader": "3.0.1",
+    "tinycolor2": "1.4.1",
+    "url-loader": "0.5.8",
+    "webpack": "3.2.0",
+    "webpack-dev-server": "2.6.1",
+    "webpack-hot-middleware": "2.18.2",
+    "write-file-webpack-plugin": "4.1.0"
   }
 }
