@@ -44,7 +44,7 @@ Run **yarn add joymap**
 
 ### Technologies
 
-JoyMap is developed using [webpack](https://webpack.js.org/) for the dev environment/bundling and [Babel](https://babeljs.io/) as a transpiler to support ES6 ([and beyond](https://babeljs.io/docs/plugins/preset-es2017/)) as well as [flow type handling](https://flowtype.org/).
+JoyMap is developed using [webpack](https://webpack.js.org/) for the dev environment/bundling and [Babel](https://babeljs.io/) as a transpiler to support ES6 ([and beyond](https://babeljs.io/docs/plugins/preset-es2017/)).
 
 There are four examples of usage, each of them showcasing the different ways to interact and use JoyMap and its modules while using different technologies.
 
@@ -202,23 +202,27 @@ Simple events are fairly easy to comprehend, press the **A** button and the corr
 
 There are two different operators available: **!** and **+**. The former being the classic **not** operator that basically lets you listen to something not being pressed. The latter being the **+** operator that is working as a boolean **&**, triggering only when two inputs are pressed.
 
+To prune down event calls even further, one can listen to only justChanged button states by appending '.justChanged' to button names.
+
 So you can do something like:
 
     import createJoyMap, { createEventModule } from 'joymap';
-
+    
     const joyMap = createJoyMap();
     const module = createEventModule();
-
-    joyMap.addModule(module);
-    joyMap.addButtonEvent('A + B + !X + !Y', () => console.log('copy command'))
-    joyMap.start();
     
-This will result in the 'copy command' message logged only when the user is pressing down on A and B at the same time but not pressing either X nor Y.
+    joyMap.addModule(module);
+    joyMap.addButtonEvent('A + B + !X + !Y', () => console.log('A & B pressed at the same time but not X nor Y'));
+    joyMap.addButtonEvent('X + X.justChanged + Y', () => console.log('X is pressed & justChanged and Y is pressed'));
+    joyMap.addButtonEvent('B + !B.justChanged', () => console.log('B pressed but not changed'));
+    joyMap.start();
 
-Also, please consider that:
 
-* If the **eventName** is something invalid, like 'A B' or '+ A + B', the event will just never trigger
+Also, note:
+
 * Spaces are completely optional
+* If the **eventName** is something invalid, like 'A B' or '+ A + B', the event will just never trigger
+* Something like **joyMap.addButtonEvent('!B.justChanged', cb)** will trigger at all times that the button has not changed, meaning, almost all the time
 
 ### Naming restrictions
 
@@ -262,8 +266,3 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
 * Implement rumble when it gets supported
   * [We do have vibration support but only for mobile devices](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API)
   * There's an [open issue](https://github.com/w3c/gamepad/issues/19) about this
-* More improvements to the event module
-  * Add the .justChanged modifier:
-  * eventModule.addEvent('A.justChanged', eventHandler) would trigger eventHandler when the A button is justChanged, pressed or not
-  * eventModule.addEvent('!A.justChanged', eventHandler) would trigger eventHandler when the A button is not justChanged, pressed or not
-  * eventModule.addEvent('A + !A.justChanged', eventHandler) would trigger eventHandler when the A button is pressed & not justChanged

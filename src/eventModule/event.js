@@ -59,13 +59,13 @@ export default function createEventModule(params = {}) {
                     }
                 } else if (verifyTokens(
                     // composite button event
-                    map(name => (!state.buttons[name] ? name : buttonMapMemoized(
+                    map(({ value, prop }) => (!state.buttons[value] ? value : buttonMapMemoized(
                         state.pad,
                         state.prevPad,
-                        state.buttons[name],
+                        state.buttons[value],
                         state.threshold,
                         state.clampThreshold
-                    ).pressed), event.tokens)
+                    )[prop]), event.tokens)
                 )) {
                     event.callback(true);
                 }

@@ -1,6 +1,6 @@
 {
   "name": "joymap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Gamepad API wrapper and mapping tool.",
   "main": "./bin/index.js",
   "files": [
@@ -12,7 +12,8 @@
     "log": "webpack-dev-server --hot --env.example=log",
     "canvas": "webpack-dev-server --hot --env.example=canvas",
     "fighting": "webpack-dev-server --hot --env.example=fighting",
-    "build": "del-cli -f bin/* && babel src -d bin",
+    "build": "npm run build-lib && npm run build-min",
+    "build-lib": "del-cli -f bin/* && babel src -d bin",
     "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.babel.js"
   },
   "author": {
