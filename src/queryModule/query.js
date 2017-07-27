@@ -1,4 +1,3 @@
-
 import memoize from 'fast-memoize';
 import { assignIn, mapValues, omit, forEach } from 'lodash/fp';
 

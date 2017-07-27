@@ -258,6 +258,7 @@ Taken from the StateLog example:
 Stuff to do. Keep in mind these bullet points are in no particular order.
 
 * Add a new Rx module that uses [observable streams](https://github.com/Reactive-Extensions/RxJS)
+* Add an event example
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the module config and on refresh restore it

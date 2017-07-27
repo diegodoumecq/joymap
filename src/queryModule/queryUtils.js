@@ -1,4 +1,3 @@
-
 import { mapValues, forEach } from 'lodash/fp';
 
 export function getEmptyMappers(mappers, mapperNames) {

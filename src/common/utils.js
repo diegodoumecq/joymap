@@ -1,4 +1,3 @@
-
 import { forEach, reduce, map } from 'lodash/fp';
 
 export function isConsecutive(target) {

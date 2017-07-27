@@ -1,4 +1,3 @@
-
 import {
     isButtonSignificant, findIndexes, isConsecutive,
     assignIn
