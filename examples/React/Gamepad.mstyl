@@ -53,7 +53,7 @@ shoulder(right)
     border dashed 1rem rgba(0,0,0,0.5)
     min-width 500px
 
-.react-inputs
+.reactInputs
     position relative
     width 484px
     height 300px
@@ -62,7 +62,7 @@ shoulder(right)
     > div
         position absolute
 
-.waiting-message
+.waitingMessage
     position absolute
     display flex
     justify-content center
@@ -76,7 +76,7 @@ shoulder(right)
     background: rgba(0,0,0,0.5)
 
 
-.module-name
+.moduleName
     position absolute
     top 70px
     width 100%

@@ -69,7 +69,6 @@
     "postcss-loader": "2.0.5",
     "prop-types": "15.5.10",
     "react": "16.0.0-alpha.13",
-    "react-css-modules": "4.3.0",
     "react-dom": "16.0.0-alpha.13",
     "style-loader": "0.18.2",
     "stylus": "0.54.5",

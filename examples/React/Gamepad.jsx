@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import CSSModules from 'react-css-modules';
 
 import { map } from 'lodash/fp';
 import classnames from 'classnames';
@@ -15,7 +14,7 @@ const digitalInputs = [
     'start', 'select', 'home'
 ];
 
-class Gamepad extends React.Component {
+export default class Gamepad extends React.Component {
 
     static propTypes = {
         backgroundColor: PropTypes.string.isRequired,
@@ -42,7 +41,7 @@ class Gamepad extends React.Component {
         return (
             <div
                 key={inputName}
-                styleName={inputName}
+                className={styles[inputName]}
                 onClick={() => {
                     const { module } = this.props;
 
@@ -57,7 +56,8 @@ class Gamepad extends React.Component {
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
                     backgroundColor: pressed ? pressedColor : ''
-                }} />);
+                }}
+            />);
     }
 
     renderDigital(inputName) {
@@ -67,7 +67,7 @@ class Gamepad extends React.Component {
         return (
             <div
                 key={inputName}
-                styleName={inputName}
+                className={styles[inputName]}
                 onClick={() => {
                     const { module } = this.props;
 
@@ -81,21 +81,20 @@ class Gamepad extends React.Component {
                 }}
                 style={{
                     backgroundColor: pressed ? pressedColor : ''
-                }} />);
+                }}
+            />);
     }
 
     renderShoulder(inputName) {
         const { value } = this.props.module.getButtons(inputName);
 
         return (
-            <div
-                key={inputName}
-                style={{
-                    transform: `translateY(${value * 10}px)`,
-                    width: '100%',
-                    height: '100%'
-                }}>
-                <div styleName={inputName} />
+            <div key={inputName} style={{
+                transform: `translateY(${value * 10}px)`,
+                width: '100%',
+                height: '100%'
+            }}>
+                <div className={styles[inputName]} />
             </div>);
     }
 
@@ -105,24 +104,26 @@ class Gamepad extends React.Component {
 
         return (
             <div
-                styleName={classnames('gamepad', { disconnected: !module.isConnected(), waiting: !!waiting })}
-                style={{ backgroundColor }}>
-                <div styleName="react-inputs">
-                    <span styleName="module-name" style={{ color: pressedColor }}>{name}</span>
-                    <div styleName="back" />
+                style={{ backgroundColor }}
+                className={classnames(styles.gamepad, {
+                    [styles.disconnected]: !module.isConnected(),
+                    [styles.waiting]: !!waiting
+                })}
+            >
+                <div className={styles.reactInputs}>
+                    <span className={styles.moduleName} style={{ color: pressedColor }}>
+                        {name}
+                    </span>
+                    <div className={styles.back} />
                     {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
                     {map(inputName => this.renderStick(inputName), analogInputs)}
                     {map(inputName => this.renderDigital(inputName), digitalInputs)}
                 </div>
                 {!waiting ? null :
-                    <div
-                        styleName="waiting-message"
-                        onClick={this.handleCancelRebind}>
+                    <div className={styles.waitingMessage} onClick={this.handleCancelRebind}>
                         Rebinding {waiting}
                     </div>}
                 {children}
             </div>);
     }
 }
-
-export default CSSModules(Gamepad, styles, { allowMultiple: true });

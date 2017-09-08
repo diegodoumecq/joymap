@@ -1,6 +1,6 @@
 @import '../main';
 
-.react-example
+.reactExample
     display flex
     flex-direction row
     flex-wrap wrap

@@ -1,6 +1,6 @@
+import { assignIn } from 'lodash/fp';
 import {
-    isButtonSignificant, findIndexes, isConsecutive,
-    assignIn
+    isButtonSignificant, findIndexes, isConsecutive
 } from '../common/utils';
 
 export const mockGamepad = {
