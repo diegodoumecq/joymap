@@ -12,6 +12,7 @@
     "log": "webpack-dev-server --hot --env.example=log",
     "canvas": "webpack-dev-server --hot --env.example=canvas",
     "fighting": "webpack-dev-server --hot --env.example=fighting",
+    "video": "webpack-dev-server --hot --env.example=video",
     "build": "npm run build-lib && npm run build-min",
     "build-lib": "del-cli -f bin/* && babel src -d bin",
     "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.babel.js"
@@ -38,7 +39,8 @@
     "babel-polyfill": "6.23.0",
     "babel-runtime": "6.23.0",
     "fast-memoize": "2.2.7",
-    "lodash": "4.17.4"
+    "lodash": "4.17.4",
+    "rxjs": "^5.4.3"
   },
   "devDependencies": {
     "autoprefixer": "6.7.2",
@@ -76,7 +78,7 @@
     "tinycolor2": "1.4.1",
     "url-loader": "0.5.8",
     "webpack": "3.2.0",
-    "webpack-dev-server": "2.6.1",
+    "webpack-dev-server": "2.9.7",
     "webpack-hot-middleware": "2.18.2",
     "write-file-webpack-plugin": "4.1.0"
   }
