@@ -121,8 +121,10 @@ export default function createModule(params = {}) {
 
         cancelListen: () => { listenOptions = null; },
 
-        listenButton: (callback, quantity, {
-            waitFor = [1, 'polls'], consecutive = false, allowOffset = true
+        listenButton: (callback, quantity = 1, {
+            waitFor = [1, 'polls'],
+            consecutive = false,
+            allowOffset = true
         } = {}) => {
             listenOptions = {
                 callback,
@@ -137,7 +139,9 @@ export default function createModule(params = {}) {
         },
 
         listenAxis: (callback, quantity = 2, {
-            waitFor = [100, 'ms'], consecutive = true, allowOffset = true
+            waitFor = [100, 'ms'],
+            consecutive = true,
+            allowOffset = true
         } = {}) => {
             listenOptions = {
                 callback,
@@ -175,7 +179,7 @@ export default function createModule(params = {}) {
             }
 
             module.listenAxis(indexesResult => {
-                const resultName = findKey(({ indexes }) => isEqual(indexes[0], indexesResult), state.sticks);
+                const resultName = findKey(({ indexes }) => isEqual(indexes, indexesResult), state.sticks);
 
                 if (!allowDuplication && resultName && state.sticks[inputName]) {
                     module.swapSticks(inputName, resultName);

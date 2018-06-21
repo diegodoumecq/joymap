@@ -137,15 +137,7 @@ export default function createQueryModule(params = {}) {
         clearMappers: () => { mappers = {}; },
 
         destroy: () => {
-            module.disconnect();
-            state.pad = {
-                buttons: [],
-                axes: []
-            };
-            state.prevPad = {
-                buttons: [],
-                axes: []
-            };
+            baseModule.destroy();
             module.clearMappers();
         }
     });

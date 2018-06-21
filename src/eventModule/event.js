@@ -86,6 +86,12 @@ export default function createEventModule(params = {}) {
                     event.callback(result);
                 }
             }, stickEvents);
+        },
+
+        destroy() {
+            baseModule.destroy();
+            buttonEvents = [];
+            stickEvents = [];
         }
     });
 
