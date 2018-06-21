@@ -25,15 +25,15 @@ export default class Gamepad extends React.Component {
     };
 
     state = {
-        waiting: null
+        waitingFor: null
     };
 
     handleCancelRebind = () => {
         this.props.module.cancelListen();
-        this.setState({ waiting: null });
+        this.setState({ waitingFor: null });
     };
 
-    renderStick(inputName) {
+    renderStick = inputName => {
         const { pressedColor } = this.props;
         const [x, y] = this.props.module.getSticks(inputName).value;
         const { pressed } = this.props.module.getButtons(`${inputName}3`);
@@ -48,19 +48,20 @@ export default class Gamepad extends React.Component {
                     if (module.isConnected()) {
                         module.stickBindOnPress(
                             inputName,
-                            () => this.setState({ waiting: null })
+                            () => this.setState({ waitingFor: null })
                         );
-                        this.setState({ waiting: inputName });
+                        this.setState({ waitingFor: inputName });
                     }
                 }}
                 style={{
                     transform: `translate(${x * 15}px, ${y * 15}px)`,
                     backgroundColor: pressed ? pressedColor : ''
                 }}
-            />);
+            />
+        );
     }
 
-    renderDigital(inputName) {
+    renderDigital = inputName => {
         const { pressedColor } = this.props;
         const { pressed } = this.props.module.getButtons(inputName);
 
@@ -68,26 +69,24 @@ export default class Gamepad extends React.Component {
             <div
                 key={inputName}
                 className={styles[inputName]}
+                style={{ backgroundColor: pressed ? pressedColor : '' }}
                 onClick={() => {
                     const { module } = this.props;
 
                     if (module.isConnected()) {
                         module.buttonBindOnPress(
                             inputName,
-                            () => this.setState({ waiting: null })
+                            () => this.setState({ waitingFor: null })
                         );
-                        this.setState({ waiting: inputName });
+                        this.setState({ waitingFor: inputName });
                     }
                 }}
-                style={{
-                    backgroundColor: pressed ? pressedColor : ''
-                }}
-            />);
+            />
+        );
     }
 
-    renderShoulder(inputName) {
+    renderShoulder = inputName => {
         const { value } = this.props.module.getButtons(inputName);
-
         return (
             <div key={inputName} style={{
                 transform: `translateY(${value * 10}px)`,
@@ -95,19 +94,20 @@ export default class Gamepad extends React.Component {
                 height: '100%'
             }}>
                 <div className={styles[inputName]} />
-            </div>);
+            </div>
+        );
     }
 
     render() {
         const { module, backgroundColor, pressedColor, children, name } = this.props;
-        const { waiting } = this.state;
+        const { waitingFor } = this.state;
 
         return (
             <div
                 style={{ backgroundColor }}
                 className={classnames(styles.gamepad, {
                     [styles.disconnected]: !module.isConnected(),
-                    [styles.waiting]: !!waiting
+                    [styles.waiting]: !!waitingFor
                 })}
             >
                 <div className={styles.reactInputs}>
@@ -115,15 +115,17 @@ export default class Gamepad extends React.Component {
                         {name}
                     </span>
                     <div className={styles.back} />
-                    {map(inputName => this.renderShoulder(inputName), shoulderInputs)}
-                    {map(inputName => this.renderStick(inputName), analogInputs)}
-                    {map(inputName => this.renderDigital(inputName), digitalInputs)}
+                    {map(this.renderShoulder, shoulderInputs)}
+                    {map(this.renderStick, analogInputs)}
+                    {map(this.renderDigital, digitalInputs)}
                 </div>
-                {!waiting ? null :
+                {!!waitingFor && (
                     <div className={styles.waitingMessage} onClick={this.handleCancelRebind}>
-                        Rebinding {waiting}
-                    </div>}
+                        Rebinding {waitingFor}
+                    </div>
+                )}
                 {children}
-            </div>);
+            </div>
+        );
     }
 }
