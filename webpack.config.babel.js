@@ -26,7 +26,11 @@ const entries = {
     },
     react: {
         path: path.resolve(__dirname, 'examples/React'),
-        file: 'React.jsx'
+        file: 'index.jsx'
+    },
+    video: {
+        path: path.resolve(__dirname, 'examples/Video'),
+        file: 'Video.js'
     }
 };
 

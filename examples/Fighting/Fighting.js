@@ -16,7 +16,7 @@ const buttons = [
 ];
 
 const players = [];
-const MOVES = 15;
+const MAX_MOVES = 15;
 
 // Populate the app div with some basic html
 document.getElementById('app').innerHTML = `
@@ -38,11 +38,11 @@ function getArrow([x, y]) {
 }
 
 // Utility function to avoid double ternary (?) operator
-function getAxis(minus, plus) {
-    if (minus) {
+function getAxis(negative, positive) {
+    if (negative) {
         return -1;
     }
-    if (plus) {
+    if (positive) {
         return 1;
     }
     return 0;
@@ -104,8 +104,7 @@ function createPlayer(joyMap, padId) {
     element.className = 'module';
     element.innerHTML = `
         <div class="name">Gamepad: ${padId}</div>
-        <div class="inputs" id="${padId}">Waiting for inputs...</div>
-    `;
+        <div class="inputs" id="${padId}">Waiting for inputs...</div>`;
 
     document.querySelector('.fighting-example').appendChild(element);
 
@@ -133,7 +132,7 @@ const joyMap = createJoyMap({
                 filter(name => buttonStates[name].pressed && buttonStates[name].justChanged),
                 concat(compact(Object.values(mapperStates))),
                 concat(player.history),
-                takeRight(MOVES)
+                takeRight(MAX_MOVES)
             )(buttonStates);
 
             const newRender = reduce((result, value) => {
