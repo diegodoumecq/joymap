@@ -1,5 +1,10 @@
 import memoize from 'fast-memoize';
-import { filter, forEach, assignIn, map } from 'lodash/fp';
+import {
+    filter,
+    forEach,
+    assignIn,
+    map
+} from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
 

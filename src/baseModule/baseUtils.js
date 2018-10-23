@@ -15,9 +15,11 @@ export function updateListenOptions(listenOptions, pad, threshold) {
         useTimeStamp, consecutive, allowOffset
     } = listenOptions;
 
-    const indexes = type === 'axes' ?
-        findIndexes(value => Math.abs(value) > threshold, pad.axes) :
-        findIndexes(value => isButtonSignificant(value, threshold), pad.buttons);
+    const indexes = type === 'axes' ? (
+        findIndexes(value => Math.abs(value) > threshold, pad.axes)
+    ) : (
+        findIndexes(value => isButtonSignificant(value, threshold), pad.buttons)
+    );
 
     if (indexes.length === quantity
     && (!consecutive || isConsecutive(indexes))

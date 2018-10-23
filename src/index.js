@@ -1,4 +1,4 @@
-import 'babel-polyfill';
+import '@babel/polyfill';
 
 import createBaseModule from './baseModule/base';
 import createQueryModule from './queryModule/query';

@@ -1,4 +1,5 @@
-import { DefinePlugin, optimize, LoaderOptionsPlugin } from 'webpack';
+import { DefinePlugin, LoaderOptionsPlugin } from 'webpack';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import path from 'path';
 
 const deployFolder = 'bin';
@@ -7,6 +8,8 @@ const entryPath = path.resolve(__dirname, 'src');
 
 export default {
     entry: path.resolve(entryPath, 'index.js'),
+
+    mode: 'production',
 
     output: {
         path: deployPath,
@@ -29,6 +32,20 @@ export default {
         }]
     },
 
+    optimization: {
+        minimizer: [
+            new UglifyJsPlugin({
+                parallel: true,
+                uglifyOptions: {
+                    mangle: {
+                        keep_fnames: true
+                    },
+                    compress: true
+                }
+            })
+        ]
+    },
+
     plugins: [
         new DefinePlugin({
             'process.env': {
@@ -39,18 +56,6 @@ export default {
         new LoaderOptionsPlugin({
             minimize: true,
             debug: false
-        }),
-
-        new optimize.UglifyJsPlugin({
-            beautify: false,
-            mangle: {
-                screw_ie8: true,
-                keep_fnames: true
-            },
-            compress: {
-                screw_ie8: true
-            },
-            comments: false
         })
     ]
 };

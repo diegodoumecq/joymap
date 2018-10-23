@@ -50,6 +50,8 @@ export default function (env = {}) {
 
         devtool: '#source-map',
 
+        mode: 'development',
+
         entry: path.resolve(entry.path, entry.file),
 
         output: {

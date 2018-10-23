@@ -13,9 +13,10 @@ export default class Root extends React.Component {
         joyMap: PropTypes.object
     };
 
-    componentWillMount = () => this.props.joyMap.setOnPoll(() => this.forceUpdate());
-
-    componentDidMount = () => this.props.joyMap.start();
+    componentDidMount = () => {
+        this.props.joyMap.setOnPoll(() => this.forceUpdate());
+        this.props.joyMap.start();
+    }
 
     componentWillUnmount = () => this.props.joyMap.stop();
 

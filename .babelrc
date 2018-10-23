@@ -1,5 +1,5 @@
 {
-    "presets": ["latest", "stage-0", "react"],
-    "plugins": ["lodash", "transform-runtime"],
+    "presets": ["@babel/env", "@babel/preset-react"],
+    "plugins": ["lodash", "@babel/plugin-proposal-class-properties"],
     "comments": false
 }

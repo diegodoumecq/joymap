@@ -1,7 +1,7 @@
 import { forEach, reduce, map } from 'lodash/fp';
 
 export function isConsecutive(target) {
-    const length = target.length;
+    const { length } = target;
 
     if (length <= 1) {
         return true;
@@ -19,7 +19,7 @@ export function isConsecutive(target) {
 }
 
 export function findIndexes(iterator, target) {
-    const length = target.length;
+    const { length } = target;
     const result = [];
     let i = 0;
 
@@ -63,7 +63,7 @@ export function isStickSignificant(stickValue, threshold) {
 }
 
 export function buttonMap(pad, prevPad, indexes, threshold, clampThreshold) {
-    const length = indexes.length;
+    const { length } = indexes;
 
     let prevPressed = false;
     let value = 0;

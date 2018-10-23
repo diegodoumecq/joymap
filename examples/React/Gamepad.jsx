@@ -15,7 +15,6 @@ const digitalInputs = [
 ];
 
 export default class Gamepad extends React.Component {
-
     static propTypes = {
         backgroundColor: PropTypes.string.isRequired,
         pressedColor: PropTypes.string.isRequired,
@@ -99,7 +98,13 @@ export default class Gamepad extends React.Component {
     }
 
     render() {
-        const { module, backgroundColor, pressedColor, children, name } = this.props;
+        const {
+            module,
+            backgroundColor,
+            pressedColor,
+            children,
+            name
+        } = this.props;
         const { waitingFor } = this.state;
 
         return (

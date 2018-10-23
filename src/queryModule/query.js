@@ -1,5 +1,10 @@
 import memoize from 'fast-memoize';
-import { assignIn, mapValues, omit, forEach } from 'lodash/fp';
+import {
+    assignIn,
+    mapValues,
+    omit,
+    forEach
+} from 'lodash/fp';
 
 import { buttonMap, stickMap } from '../common/utils';
 import createBaseModule from '../baseModule/base';
