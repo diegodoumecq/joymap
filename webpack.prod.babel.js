@@ -20,7 +20,7 @@ export default {
   },
 
   resolve: {
-    extensions: ['.ts'],
+    extensions: ['.wasm', '.ts', '.tsx', '.mjs', '.cjs', '.js', '.json'],
     modules: ['node_modules'],
   },
 
@@ -28,7 +28,7 @@ export default {
     rules: [
       {
         test: /\.ts$/,
-        rules: [{ loader: 'babel-loader' }],
+        rules: [{ loader: 'babel-loader' }, { loader: 'ts-loader', options: { configFile: 'tsconfig.prod.json'} }],
         include: entryPath,
       },
     ],

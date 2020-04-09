@@ -2,7 +2,8 @@
   "name": "joymap",
   "version": "2.0.0",
   "description": "A Gamepad API wrapper and mapping tool.",
-  "main": "./bin/index.js",
+  "main": "./bin/joymap.min.js",
+  "types": "./bin/source/index.d.ts",
   "files": [
     "bin",
     "src"
@@ -17,7 +18,7 @@
     "lint": "eslint --ignore-path .gitignore --ignore-path .prettierignore \"**/*.{js,jsx,ts,tsx}\"",
     "build": "npm run build-lib && npm run build-min",
     "build-lib": "del-cli -f bin/* && babel src -d bin",
-    "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.ts"
+    "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.babel.js"
   },
   "husky": {
     "hooks": {
@@ -64,7 +65,6 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/register": "^7.9.0",
     "@types/autoprefixer": "^9.7.2",
-    "@types/classnames": "^2.2.10",
     "@types/color-hash": "^1.0.0",
     "@types/copy-webpack-plugin": "^5.0.0",
     "@types/lodash": "^4.14.149",
@@ -82,7 +82,6 @@
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-styled-components": "^1.10.7",
     "browser-env": "^3.3.0",
-    "classnames": "^2.2.6",
     "clean-webpack-plugin": "^3.0.0",
     "color-hash": "^1.0.3",
     "copy-webpack-plugin": "^5.1.1",
