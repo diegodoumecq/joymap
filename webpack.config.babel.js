@@ -1,8 +1,8 @@
 import path from 'path';
-
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+// @ts-ignore-next-line
 import WriteFilePlugin from 'write-file-webpack-plugin';
-import CleanWebpackPlugin from 'clean-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import Autoprefixer from 'autoprefixer';
 
 const port = 9001;
@@ -12,149 +12,144 @@ const libPath = path.resolve(__dirname, 'src');
 const staticPath = path.resolve(__dirname, 'static');
 
 const entries = {
-    canvas: {
-        path: path.resolve(__dirname, 'examples/Canvas'),
-        file: 'Canvas.js'
-    },
-    fighting: {
-        path: path.resolve(__dirname, 'examples/Fighting'),
-        file: 'Fighting.js'
-    },
-    log: {
-        path: path.resolve(__dirname, 'examples/StateLog'),
-        file: 'StateLog.js'
-    },
-    react: {
-        path: path.resolve(__dirname, 'examples/React'),
-        file: 'index.jsx'
-    },
-    video: {
-        path: path.resolve(__dirname, 'examples/Video'),
-        file: 'Video.js'
-    }
+  canvas: {
+    path: path.resolve(__dirname, 'examples/Canvas'),
+    file: 'Canvas.ts',
+  },
+  fighting: {
+    path: path.resolve(__dirname, 'examples/Fighting'),
+    file: 'Fighting.ts',
+  },
+  log: {
+    path: path.resolve(__dirname, 'examples/StateLog'),
+    file: 'StateLog.ts',
+  },
+  react: {
+    path: path.resolve(__dirname, 'examples/ReactPad'),
+    file: 'index.tsx',
+  },
+  video: {
+    path: path.resolve(__dirname, 'examples/Video'),
+    file: 'Video.ts',
+  },
 };
 
+// type Env = { example?: keyof typeof entries };
+
 export default function (env = {}) {
-    const entry = entries[env.example];
+  const entry = entries[env.example];
 
-    return {
-        devServer: {
-            historyApiFallback: true,
-            hot: true,
-            port,
-            contentBase: entry.path,
-            host: '0.0.0.0'
+  return {
+    devServer: {
+      historyApiFallback: true,
+      hot: true,
+      port,
+      contentBase: entry.path,
+      host: '0.0.0.0',
+    },
+
+    performance: { hints: false },
+
+    devtool: '#source-map',
+
+    mode: 'development',
+
+    entry: path.resolve(entry.path, entry.file),
+
+    output: {
+      path: binPath,
+      filename: 'bundle.js',
+      futureEmitAssets: false,
+    },
+
+    resolve: {
+      extensions: ['.wasm', '.ts', '.tsx', '.mjs', '.cjs', '.js', '.json'],
+      modules: ['node_modules'],
+    },
+
+    module: {
+      rules: [
+        {
+          test: /\.ts[x]?$/,
+          rules: [{ loader: 'babel-loader' }, { loader: 'ts-loader' }],
+          include: [entry.path, libPath],
         },
-
-        performance: { hints: false },
-
-        devtool: '#source-map',
-
-        mode: 'development',
-
-        entry: path.resolve(entry.path, entry.file),
-
-        output: {
-            path: binPath,
-            filename: 'bundle.js'
+        {
+          test: /\.styl$/,
+          rules: [
+            {
+              loader: 'style-loader',
+            },
+            {
+              loader: 'css-loader',
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: true,
+                plugins: [Autoprefixer],
+              },
+            },
+            {
+              loader: 'stylus-loader',
+              query: {
+                'resolve url': true,
+                sourceMap: true,
+              },
+            },
+          ],
         },
-
-        resolve: {
-            extensions: ['.js', '.jsx'],
-            modules: ['node_modules']
+        {
+          test: /.*\.(gif|png|jpe?g|svg)$/i,
+          rules: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: '10000',
+                mimetype: 'application/png',
+              },
+            },
+          ],
         },
-
-        module: {
-            rules: [{
-                test: /\.js[x]?$/,
-                rules: [{ loader: 'babel-loader' }],
-                include: [entry.path, libPath]
-            }, {
-                test: /\.mstyl$/,
-                rules: [{
-                    loader: 'style-loader'
-                }, {
-                    loader: 'css-loader',
-                    query: {
-                        modules: true,
-                        importLoaders: 1,
-                        localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
-                    }
-                }, {
-                    loader: 'postcss-loader',
-                    options: {
-                        sourceMap: true,
-                        plugins: [Autoprefixer]
-                    }
-                }, {
-                    loader: 'stylus-loader',
-                    query: {
-                        'resolve url': true,
-                        sourceMap: true
-                    }
-                }]
-            }, {
-                test: /\.styl$/,
-                rules: [{
-                    loader: 'style-loader'
-                }, {
-                    loader: 'css-loader'
-                }, {
-                    loader: 'postcss-loader',
-                    options: {
-                        sourceMap: true,
-                        plugins: [Autoprefixer]
-                    }
-                }, {
-                    loader: 'stylus-loader',
-                    query: {
-                        'resolve url': true,
-                        sourceMap: true
-                    }
-                }]
-            }, {
-                test: /.*\.(gif|png|jpe?g|svg)$/i,
-                rules: [{
-                    loader: 'url-loader',
-                    options: {
-                        limit: '10000',
-                        mimetype: 'application/png'
-                    }
-                }]
-            }, {
-                test: /\.woff[2]?$/,
-                rules: [{
-                    loader: 'url-loader',
-                    options: {
-                        limit: '10000',
-                        mimetype: 'application/font-woff'
-                    }
-                }]
-            }, {
-                test: /\.ttf$/,
-                rules: [{
-                    loader: 'url-loader',
-                    options: {
-                        limit: '10000',
-                        mimetype: 'application/octet-stream'
-                    }
-                }]
-            }, {
-                test: /\.eot$/,
-                rules: [{ loader: 'file-loader' }]
-            }]
+        {
+          test: /\.woff[2]?$/,
+          rules: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: '10000',
+                mimetype: 'application/font-woff',
+              },
+            },
+          ],
         },
+        {
+          test: /\.ttf$/,
+          rules: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: '10000',
+                mimetype: 'application/octet-stream',
+              },
+            },
+          ],
+        },
+        {
+          test: /\.eot$/,
+          rules: [{ loader: 'file-loader' }],
+        },
+      ],
+    },
 
-        plugins: [
-            new WriteFilePlugin(),
+    plugins: [
+      new WriteFilePlugin(),
 
-            new CleanWebpackPlugin([bundleFolder], {
-                root: __dirname,
-                verbose: true,
-                dry: false
-            }),
+      new CleanWebpackPlugin({
+        verbose: true,
+      }),
 
-            new CopyWebpackPlugin([{ from: staticPath }])
-        ]
-    };
+      new CopyWebpackPlugin([{ from: staticPath }]),
+    ],
+  };
 }

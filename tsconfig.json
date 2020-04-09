@@ -1,0 +1,42 @@
+{
+  "link": "https://www.typescriptlang.org/docs/handbook/compiler-options.html",
+  "include": ["./src", "./types", "./examples"],
+  "exclude": ["./node_modules"],
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "importHelpers": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "rootDir": "./",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noErrorTruncation": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "allowJs": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./src/*", "./node_modules/*", "./examples/*"]
+    },
+    "typeRoots": ["./types/", "./node_modules/@types"],
+    "jsx": "react",
+    "esModuleInterop": true,
+    "types": ["webpack-env"],
+    "plugins": [
+      {
+        "name": "typescript-styled-plugin",
+        "lint": {
+          "validProperties": []
+        }
+      }
+    ]
+  }
+}

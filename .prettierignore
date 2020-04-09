@@ -1,0 +1,6 @@
+src/assets
+node_modules
+.gitlab
+ios
+android
+i18n

@@ -1,5 +1,22 @@
 {
-    "presets": ["@babel/env", "@babel/preset-react"],
-    "plugins": ["lodash", "@babel/plugin-proposal-class-properties"],
-    "comments": false
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": "last 2 versions"
+      }
+    ],
+    "@babel/preset-react",
+    "@babel/preset-typescript"
+  ],
+  "plugins": [
+    [
+      "babel-plugin-styled-components",
+      {
+        "pure": true
+      }
+    ],
+    "lodash"
+  ],
+  "comments": false
 }
