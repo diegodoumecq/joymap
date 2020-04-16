@@ -1,6 +1,8 @@
 # JOYMAP
 
-## A Javascript Gamepad browser API wrapper that chops, slices and dices
+A Javascript Gamepad browser API wrapper that chops, slices and dices
+
+## Table of contents
 
 **[Key features](#key-features)** |
 **[How to install](#how-to-install)** |
@@ -128,7 +130,7 @@ Right now the library offers rumble suport based on Chrome's implementation of t
 * **addRumble(effect: Effect | (Effect | number)[], channelName?: string) => void** lets you play a single effect or a timeline of different effects and pauses. The channelName is used to distinguish from various sources of rumbling, so they don't cancel each other. If a channelName is not provided then the 'default' channel is used.
 * **stopRumble(channelName?: string) => void** lets you stop all rumbling from a particular channel. If a channelName is not provided then the 'default' channel is used.
 
-We have an example of use in the examples folder. See **[How to run all the things](#how-to-run-all-the-things)** section.
+We have an example of use in the examples folder. See **[How to run the examples](#how-to-run-the-examples)** section.
 
 ### Naming restrictions
 
@@ -138,6 +140,7 @@ Throughout the library you're invited to name things. Like events, buttons, stic
 
 Stuff to do. Keep in mind these bullet points are in no particular order.
 
+* Add support for hapticActuators (seems to work on some VR gamepads apparently, need to get my hands on some)
 * Add an event example or change some of the existing query ones to use events
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or whatever else is in fashion
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
