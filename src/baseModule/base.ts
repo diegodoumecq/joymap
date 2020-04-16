@@ -10,7 +10,7 @@ import {
   uniqBy,
   toString,
 } from 'lodash/fp';
-import { nameIsValid } from '../common/utils';
+import { nameIsValid, Button, Stick } from '../common/utils';
 
 import {
   mockGamepad,
@@ -18,26 +18,57 @@ import {
   getDefaultSticks,
   updateListenOptions,
   ListenOptions,
+  RawGamepad,
+  Effect,
+  CustomGamepad,
 } from './baseUtils';
+import {
+  stopRumble,
+  addRumble,
+  applyRumble,
+  getCurrentEffect,
+  updateChannels,
+  MAX_DURATION,
+} from './rumble';
 
-export interface Params {
+export interface BaseParams {
   padId?: string;
   threshold?: number;
   clampThreshold?: boolean;
 }
 
+export interface State {
+  threshold: number;
+  clampThreshold: boolean;
+  pad: CustomGamepad;
+  prevPad: CustomGamepad;
+  prevRumble: Effect;
+  lastRumbleUpdate: number;
+  lastUpdate: number;
+
+  buttons: Record<string, Button>;
+  sticks: Record<string, Stick>;
+}
+
 export type BaseModule = ReturnType<typeof createModule>;
 
-export default function createModule(params: Params = {}) {
+export default function createModule(params: BaseParams = {}) {
   let listenOptions: ListenOptions | null = null;
   let gamepadId = params.padId ? params.padId : null;
   let connected = !!params.padId;
 
-  const state = {
+  const state: State = {
     threshold: params.threshold || 0.2,
     clampThreshold: params.clampThreshold !== false,
     pad: mockGamepad,
     prevPad: mockGamepad,
+    prevRumble: {
+      duration: 0,
+      weakMagnitude: 0,
+      strongMagnitude: 0,
+    },
+    lastRumbleUpdate: Date.now(),
+    lastUpdate: Date.now(),
 
     buttons: getDefaultButtons(),
     sticks: getDefaultSticks(),
@@ -111,8 +142,9 @@ export default function createModule(params: Params = {}) {
         if (stick.inverts.length === inverts.length) {
           stick.inverts = inverts;
         } else {
-          throw new Error(`On invertStick(inverts, [..., ${inputName}, ...]):
-                        given argument inverts' length does not match '${inputName}' axis' length`);
+          throw new Error(
+            `On invertSticks(inverts, [..., ${inputName}, ...]): given argument inverts' length does not match '${inputName}' axis' length`,
+          );
         }
       }, inputNames);
     },
@@ -134,16 +166,35 @@ export default function createModule(params: Params = {}) {
       }
     },
 
-    update: (gamepad: Gamepad) => {
+    update: (gamepad: RawGamepad) => {
       state.prevPad = state.pad;
       state.pad = {
         axes: gamepad.axes as number[],
         buttons: map((a) => a.value, gamepad.buttons),
+        rawPad: gamepad,
       };
 
       if (listenOptions) {
         listenOptions = updateListenOptions(listenOptions, state.pad, state.threshold);
       }
+
+      // Update rumble state
+
+      const now = Date.now();
+      const currentRumble = getCurrentEffect(gamepad.id);
+      updateChannels(gamepad.id, now - state.lastUpdate);
+
+      if (
+        state.prevRumble.weakMagnitude !== currentRumble.weakMagnitude ||
+        state.prevRumble.strongMagnitude !== currentRumble.strongMagnitude ||
+        now - state.lastRumbleUpdate >= MAX_DURATION / 2
+      ) {
+        applyRumble(gamepad, currentRumble);
+        state.prevRumble = currentRumble;
+        state.lastRumbleUpdate = now;
+      }
+
+      state.lastUpdate = now;
     },
 
     cancelListen: () => {
@@ -240,16 +291,32 @@ export default function createModule(params: Params = {}) {
       });
     },
 
+    isRumbleSupported: (rawPad?: RawGamepad) => {
+      const padToTest = rawPad || state.pad.rawPad;
+      if (padToTest) {
+        return !!padToTest.vibrationActuator && !!padToTest.vibrationActuator.playEffect;
+      } else {
+        return null;
+      }
+    },
+
+    stopRumble: (channelName?: string) => {
+      if (state.pad.rawPad) {
+        stopRumble(state.pad.rawPad.id, channelName);
+      }
+    },
+
+    addRumble: (effect: Effect | (Effect | number)[], channelName?: string) => {
+      if (state.pad.rawPad) {
+        // TODO: add checks for wrong magnitude values and invalid durations
+        addRumble(state.pad.rawPad.id, effect, channelName);
+      }
+    },
+
     destroy: () => {
       module.disconnect();
-      state.pad = {
-        buttons: [],
-        axes: [],
-      };
-      state.prevPad = {
-        buttons: [],
-        axes: [],
-      };
+      state.pad = mockGamepad;
+      state.prevPad = mockGamepad;
     },
   };
 

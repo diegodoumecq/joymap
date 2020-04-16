@@ -2,6 +2,7 @@ import memoize from 'fast-memoize';
 import { filter, forEach, assignIn, map } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
+import { RawGamepad } from '../baseModule/baseUtils';
 
 import { buttonMap, stickMap, nameIsValid, ButtonResult, StickResult } from '../common/utils';
 import { eventIsValid, getEventTokens, verifyTokens, EventToken } from './eventUtils';
@@ -58,7 +59,7 @@ export default function createEventModule(params = {}) {
       );
     },
 
-    update: (gamepad: Gamepad) => {
+    update: (gamepad: RawGamepad) => {
       baseModule.update(gamepad);
 
       forEach((event) => {

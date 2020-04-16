@@ -1,6 +1,5 @@
 import path from 'path';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
-// @ts-ignore-next-line
 import WriteFilePlugin from 'write-file-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import Autoprefixer from 'autoprefixer';
@@ -9,7 +8,7 @@ const port = 9001;
 const bundleFolder = 'devBundle';
 const binPath = path.resolve(__dirname, bundleFolder);
 const libPath = path.resolve(__dirname, 'src');
-const staticPath = path.resolve(__dirname, 'static');
+const staticPath = path.resolve(__dirname, 'assets');
 
 const entries = {
   canvas: {
@@ -32,9 +31,11 @@ const entries = {
     path: path.resolve(__dirname, 'examples/Video'),
     file: 'Video.ts',
   },
+  rumble: {
+    path: path.resolve(__dirname, 'examples/Rumble'),
+    file: 'Rumble.ts',
+  },
 };
-
-// type Env = { example?: keyof typeof entries };
 
 export default function (env = {}) {
   const entry = entries[env.example];

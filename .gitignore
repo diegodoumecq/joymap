@@ -1,7 +1,5 @@
 .DS_STORE
-bin
 devBundle
 node_modules
-platforms
 .module-cache
 *.log*

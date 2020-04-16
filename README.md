@@ -1,21 +1,16 @@
-**[How to install](#how-to-install)** |
-**[Key features](#key-features)** |
-**[How to run all the things](#how-to-run-all-the-things)** |
-**[Default export API](#default-export-api)** |
-**[Modules](#modules)** |
-**[Simple example of usage](#simple-example-of-usage)** |
-**[Naming restrictions](#naming-restrictions)** |
-**[Roadmap](#roadmap)**
-
 # JOYMAP
 
-A Javascript Gamepad browser API wrapper
+## A Javascript Gamepad browser API wrapper that chops, slices and dices
 
-For the simple cases use [the browser API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API). Otherwise, continue reading.
-
-### How to install
-
-Run **yarn add joymap**
+**[Key features](#key-features)** |
+**[How to install](#how-to-install)** |
+**[How to run the examples](#how-to-run-the-examples)** |
+**[How to use](#how-to-use)** |
+**[Modules](#modules)** |
+**[Simple example of usage](#simple-example-of-usage)** |
+**[Rumble support](#rumble-support)** |
+**[Naming restrictions](#naming-restrictions)** |
+**[Roadmap](#roadmap)**
 
 ### Key features
 
@@ -27,27 +22,34 @@ Run **yarn add joymap**
 * Button bindings are set by default to the standard defined by the spec, but all possible inputs are supported
 * Can group buttons together (create a 'Jump' button from the A, B, L1 and R1 inputs)
 * Can group sticks together (create one Analog stick from the average of L and R)
+* Supports Chrome's implementation of rumble/haptic feedback
 * Has typescript types
 
-### How to run all the things
+### How to install
 
-* Install all the dependencies with **yarn**
+Run **yarn add joymap**
+
+### How to run the examples
+
+* Clone/download this repo
+* Install all the dependencies with **yarn** in the console
 * Run a single example at a time on localhost:9001
   * For the React example, run **yarn react**
   * For the canvas example, run **yarn canvas**
   * For the HTML state log example, run **yarn log**
   * For the "fighting game training mode"-style input display example, run **yarn fighting**
-  * For the video stream example, run **yarn video**
+  * For the video stream example (using the Rx module), run **yarn video**
+  * For the rumble example, run **yarn rumble**
 
-### Default export API
+### How to use
 
 Joymap exports an object with a few creation functions:
 
+* createJoyMap
 * createBaseModule
 * createQueryModule
 * createStreamModule
 * createEventModule
-* createJoyMap
 
 From among them, the initial point of interaction with the library is **createJoyMap**. It is necessary to use this function since it handles polling the browser's Gamepad API and passes that data along to the different assigned modules. It does not, however, parse or map anything by itself: the modules are the ones that handle that responsibility.
 
@@ -87,7 +89,7 @@ The three modules mentioned above work in similar ways, taking an options argume
     import createJoyMap, { createQueryModule } from 'joymap';
     
     function stepFunction() {
-      // do stuff immediately after each Poll
+      // do stuff immediately after each Gamepad Poll
     }
 
     const joyMap = createJoyMap({
@@ -107,7 +109,7 @@ The three modules mentioned above work in similar ways, taking an options argume
     // ... later on in a player-handling file
     //////
     
-    const AButton = mario.module.getButton('A'); // mario.module may be module1 from above
+    const AButton = mario.module.getButton('A'); // mario.module could be module1 from above
     if (AButton.pressed && AButton.justChanged && mario.isOnFloor()) {
       mario.jump();
     }
@@ -115,6 +117,18 @@ The three modules mentioned above work in similar ways, taking an options argume
 As you can see in the example above, you can create as many modules as you'd like. Each of them will be automatically assigned a gamepad if available (because we passed autoConnect: true) and each of them will stay assigned to that same gamepad even when plugged and unplugged multiple times.
 
 For more a in-depth view on what the modules support and how, do please look at the examples in /examples.
+
+### Rumble support
+
+Right now the library offers rumble suport based on Chrome's implementation of the Gamepad's **vibrationActuator.playEffect** function. To use this feature you can simply access any module and use the following methods:
+
+  Note: An *Effect* is an object of type *{ duration: number; weakMagnitude?: number; strongMagnitude?: number; }*
+
+* **isRumbleSupported(rawPad?: RawGamepad) => boolean | null** gives you whether the module's gamepad (or the one being passed as argument) supports rumble or not. Will return null only if called without arguments and no game pad has been assigned to the module.
+* **addRumble(effect: Effect | (Effect | number)[], channelName?: string) => void** lets you play a single effect or a timeline of different effects and pauses. The channelName is used to distinguish from various sources of rumbling, so they don't cancel each other. If a channelName is not provided then the 'default' channel is used.
+* **stopRumble(channelName?: string) => void** lets you stop all rumbling from a particular channel. If a channelName is not provided then the 'default' channel is used.
+
+We have an example of use in the examples folder. See **[How to run all the things](#how-to-run-all-the-things)** section.
 
 ### Naming restrictions
 
@@ -125,10 +139,7 @@ Throughout the library you're invited to name things. Like events, buttons, stic
 Stuff to do. Keep in mind these bullet points are in no particular order.
 
 * Add an event example or change some of the existing query ones to use events
-* Implement rumble
-  * This codepen shows how chrome supports it https://codepen.io/anon/pen/yKgYGz
-  * Firefox [technically supports it too](https://developer.mozilla.org/es/docs/Web/API/Gamepad/hapticActuators), but I've yet to see it work, even with the gamepad extension flag set to true
-* Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js)
+* Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or whatever else is in fashion
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the module config and on refresh restore it
   * It should also offer a "RESET" button for these module configs

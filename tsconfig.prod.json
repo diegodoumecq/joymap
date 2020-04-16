@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "rootDir": "./",
     "outDir": "./bin",
-    "lib": ["es2015", "dom"],
+    "lib": ["esnext", "dom"],
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -31,6 +31,6 @@
     },
     "typeRoots": ["./types/", "./node_modules/@types"],
     "esModuleInterop": true,
-    "types": ["webpack-env"],
+    "types": ["webpack-env"]
   }
 }

@@ -28,7 +28,10 @@ export default {
     rules: [
       {
         test: /\.ts$/,
-        rules: [{ loader: 'babel-loader' }, { loader: 'ts-loader', options: { configFile: 'tsconfig.prod.json'} }],
+        rules: [
+          { loader: 'babel-loader' },
+          { loader: 'ts-loader', options: { configFile: 'tsconfig.prod.json' } },
+        ],
         include: entryPath,
       },
     ],
@@ -38,6 +41,7 @@ export default {
     minimizer: [
       new UglifyJsPlugin({
         parallel: true,
+        sourceMap: true,
         uglifyOptions: {
           mangle: {
             keep_fnames: true,

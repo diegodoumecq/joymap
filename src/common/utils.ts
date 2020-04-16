@@ -1,5 +1,5 @@
 import { forEach, reduce, map } from 'lodash/fp';
-import { CustomGamepad } from '../baseModule/baseUtils';
+import { CustomGamepad, RawGamepad } from '../baseModule/baseUtils';
 
 export type Button = number[];
 
@@ -61,14 +61,14 @@ export function findIndexes(iterator: (a: number) => boolean, target: number[]) 
   return result;
 }
 
-export function getRawGamepads() {
+export function getRawGamepads(): (RawGamepad | null)[] {
   if (navigator && navigator.getGamepads) {
     return Array.from(navigator.getGamepads());
   }
   return [];
 }
 
-export function gamepadIsValid(rawGamepad: Gamepad | null) {
+export function gamepadIsValid(rawGamepad: RawGamepad | null) {
   return (
     !!rawGamepad &&
     !!rawGamepad.connected &&

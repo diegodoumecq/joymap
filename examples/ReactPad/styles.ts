@@ -99,99 +99,6 @@ export const WaitingMessage = styled.div`
   background: rgba(0, 0, 0, 0.5);
 `;
 
-export const L = styled(stick)`
-  left: 150px;
-`;
-
-export const R = styled(stick)`
-  right: 150px;
-`;
-
-export const L1 = styled(leftShoulder)`
-  background-image: url(/L1.png);
-`;
-
-export const L2 = styled(leftShoulder)`
-  background-image: url(/L2.png);
-`;
-
-export const R1 = styled(rightShoulder)`
-  background-image: url(/L1.png);
-`;
-
-export const R2 = styled(rightShoulder)`
-  background-image: url(/L2.png);
-`;
-
-export const A = styled(button)`
-  transform: translate(-25px, 49px);
-`;
-
-export const B = styled(button)`
-  transform: translateY(25px);
-`;
-
-export const X = styled(button)`
-  transform: translate(-50px, 25px);
-`;
-
-export const Y = styled(button)`
-  transform: translateX(-25px);
-`;
-
-export const DpadLeft = styled(dpad)`
-  transform: translateY(30px);
-  width: 40px;
-`;
-
-export const DpadRight = styled(dpad)`
-  transform: translate(55px, 30px);
-  width: 40px;
-`;
-
-export const DpadDown = styled(dpad)`
-  transform: translate(32px, 50px);
-  height: 40px;
-`;
-
-export const DpadUp = styled(dpad)`
-  transform: translateX(30px);
-  height: 40px;
-`;
-
-export const Start = styled.div`
-  position: absolute;
-  background-color: gray;
-  border-radius: 10px;
-  top: 106px;
-  width: 30px;
-  height: 30px;
-  right: 170px;
-  cursor: pointer;
-`;
-
-export const Select = styled.div`
-  position: absolute;
-  background-color: gray;
-  border-radius: 10px;
-  top: 106px;
-  width: 30px;
-  height: 30px;
-  left: 170px;
-  cursor: pointer;
-`;
-
-export const Home = styled.div`
-  position: absolute;
-  background-color: gray;
-  border-radius: 10px;
-  top: 144px;
-  width: 40px;
-  height: 40px;
-  left: 223px;
-  cursor: pointer;
-`;
-
 export const ReactExample = styled.section`
   display: flex;
   flex-direction: row;
@@ -199,3 +106,98 @@ export const ReactExample = styled.section`
   justify-content: center;
   width: 100%;
 `;
+
+export const inputs = {
+  L: styled(stick)`
+    left: 150px;
+  `,
+
+  R: styled(stick)`
+    right: 150px;
+  `,
+
+  L1: styled(leftShoulder)`
+    background-image: url(/L1.png);
+  `,
+
+  L2: styled(leftShoulder)`
+    background-image: url(/L2.png);
+  `,
+
+  R1: styled(rightShoulder)`
+    background-image: url(/L1.png);
+  `,
+
+  R2: styled(rightShoulder)`
+    background-image: url(/L2.png);
+  `,
+
+  A: styled(button)`
+    transform: translate(-25px, 49px);
+  `,
+
+  B: styled(button)`
+    transform: translateY(25px);
+  `,
+
+  X: styled(button)`
+    transform: translate(-50px, 25px);
+  `,
+
+  Y: styled(button)`
+    transform: translateX(-25px);
+  `,
+
+  DpadLeft: styled(dpad)`
+    transform: translateY(30px);
+    width: 40px;
+  `,
+
+  DpadRight: styled(dpad)`
+    transform: translate(55px, 30px);
+    width: 40px;
+  `,
+
+  DpadDown: styled(dpad)`
+    transform: translate(32px, 50px);
+    height: 40px;
+  `,
+
+  DpadUp: styled(dpad)`
+    transform: translateX(30px);
+    height: 40px;
+  `,
+
+  Start: styled.div`
+    position: absolute;
+    background-color: gray;
+    border-radius: 10px;
+    top: 106px;
+    width: 30px;
+    height: 30px;
+    right: 170px;
+    cursor: pointer;
+  `,
+
+  Select: styled.div`
+    position: absolute;
+    background-color: gray;
+    border-radius: 10px;
+    top: 106px;
+    width: 30px;
+    height: 30px;
+    left: 170px;
+    cursor: pointer;
+  `,
+
+  Home: styled.div`
+    position: absolute;
+    background-color: gray;
+    border-radius: 10px;
+    top: 144px;
+    width: 40px;
+    height: 40px;
+    left: 223px;
+    cursor: pointer;
+  `,
+};

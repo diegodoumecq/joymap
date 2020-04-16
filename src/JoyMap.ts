@@ -15,6 +15,7 @@ import { BaseModule } from './baseModule/base';
 import { QueryModule } from './queryModule/query';
 import { StreamModule } from './streamModule/stream';
 import { EventModule } from './eventModule/event';
+import { RawGamepad } from 'baseModule/baseUtils';
 
 export interface Params {
   onPoll?: () => void;
@@ -24,7 +25,7 @@ export interface Params {
 export interface State {
   onPoll: () => void;
   autoConnect: boolean;
-  gamepads: Gamepad[];
+  gamepads: RawGamepad[];
   modules: AnyModule[];
 }
 
@@ -122,20 +123,20 @@ export default function createJoyMap(params: Params = {}) {
     },
 
     poll: () => {
-      state.gamepads = filter(gamepadIsValid, getRawGamepads()) as Gamepad[];
+      state.gamepads = filter(gamepadIsValid, getRawGamepads()) as RawGamepad[];
 
       forEach((module) => {
         if (state.autoConnect && !module.getPadId()) {
           const padId = joyMap.getUnusedPadId();
           if (padId) {
             module.connect(padId);
-            const pad = find({ id: module.getPadId() }, state.gamepads) as Gamepad | undefined;
+            const pad = find({ id: module.getPadId() }, state.gamepads) as RawGamepad | undefined;
             if (pad) {
               module.update(pad);
             }
           }
         } else {
-          const gamepad = find({ id: module.getPadId() }, state.gamepads) as Gamepad | undefined;
+          const gamepad = find({ id: module.getPadId() }, state.gamepads) as RawGamepad | undefined;
 
           if (gamepad) {
             if (!module.isConnected()) {

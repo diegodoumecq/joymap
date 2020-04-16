@@ -1,25 +1,26 @@
 import React, { ReactNode, useState } from 'react';
-import { map, upperFirst } from 'lodash/fp';
+import { map } from 'lodash/fp';
 
 import { QueryModule } from '../../src/index';
 
-import * as styles from './styles';
-import { PadContainer, ReactInputs, ModuleName, Back, WaitingMessage } from './styles';
+import { PadContainer, ReactInputs, ModuleName, Back, WaitingMessage, inputs } from './styles';
 
-const analogInputs = ['L', 'R'];
-const shoulderInputs = ['L2', 'L1', 'R2', 'R1'];
-const digitalInputs = [
-  'dpadUp',
-  'dpadDown',
-  'dpadLeft',
-  'dpadRight',
+type InputNames = keyof typeof inputs;
+
+const analogInputs: InputNames[] = ['L', 'R'];
+const shoulderInputs: InputNames[] = ['L2', 'L1', 'R2', 'R1'];
+const digitalInputs: InputNames[] = [
+  'DpadUp',
+  'DpadDown',
+  'DpadLeft',
+  'DpadRight',
   'A',
   'B',
   'X',
   'Y',
-  'start',
-  'select',
-  'home',
+  'Start',
+  'Select',
+  'Home',
 ];
 
 interface GamepadProps {
@@ -31,7 +32,7 @@ interface GamepadProps {
 }
 
 interface ButtonProps {
-  inputName: string;
+  inputName: keyof typeof inputs;
   pressedColor: string;
   module: QueryModule;
   setWaitingFor: (value: string | null) => void;
@@ -40,8 +41,7 @@ interface ButtonProps {
 function Stick({ inputName, pressedColor, module, setWaitingFor }: ButtonProps) {
   const [x, y] = module.getStick(inputName).value;
   const { pressed } = module.getButton(`${inputName}3`);
-  // @ts-ignore-next-line
-  const StickComponent = styles[upperFirst(inputName)];
+  const StickComponent = inputs[inputName];
 
   return (
     <StickComponent
@@ -61,8 +61,7 @@ function Stick({ inputName, pressedColor, module, setWaitingFor }: ButtonProps) 
 
 function Digital({ inputName, pressedColor, module, setWaitingFor }: ButtonProps) {
   const { pressed } = module.getButton(inputName);
-  // @ts-ignore-next-line
-  const DigitalComponent = styles[upperFirst(inputName)];
+  const DigitalComponent = inputs[inputName];
 
   return (
     <DigitalComponent
@@ -77,10 +76,9 @@ function Digital({ inputName, pressedColor, module, setWaitingFor }: ButtonProps
   );
 }
 
-function Shoulder({ inputName, module }: { inputName: string; module: QueryModule }) {
+function Shoulder({ inputName, module }: { inputName: InputNames; module: QueryModule }) {
   const { value } = module.getButton(inputName);
-  // @ts-ignore-next-line
-  const ShoulderComponent = styles[upperFirst(inputName)];
+  const ShoulderComponent = inputs[inputName];
 
   return (
     <div

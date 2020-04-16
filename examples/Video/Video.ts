@@ -1,6 +1,8 @@
 // Due to the example's babel config, we need to setup the regenerator dep for video to work
 // see this issue for more info https://github.com/babel/babel/issues/9849
 import 'regenerator-runtime/runtime.js';
+import * as rxjs from 'rxjs';
+import * as operators from 'rxjs/operators';
 
 import { createJoyMap, createStreamModule } from '../../src/index';
 
@@ -17,7 +19,7 @@ app.innerHTML = `
 `;
 
 const joyMap = createJoyMap();
-const module = createStreamModule({ padId: joyMap.getUnusedPadId() });
+const module = createStreamModule({ rxjs, operators, padId: joyMap.getUnusedPadId() });
 joyMap.addModule(module);
 joyMap.start();
 

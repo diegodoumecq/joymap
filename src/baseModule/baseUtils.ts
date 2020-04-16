@@ -2,9 +2,24 @@ import { assignIn } from 'lodash/fp';
 
 import { isButtonSignificant, findIndexes, isConsecutive, Button, Stick } from '../common/utils';
 
+export interface Effect {
+  duration: number;
+  weakMagnitude?: number;
+  strongMagnitude?: number;
+}
+
+// Only implemented by chrome, this api seems to be the spec from 2017
+export interface RawGamepad extends Gamepad {
+  vibrationActuator?: {
+    playEffect: (type: 'dual-rumble', effect: Effect) => Promise<string>;
+    reset: () => Promise<string>;
+  };
+}
+
 export interface CustomGamepad {
   axes: number[];
   buttons: number[];
+  rawPad?: RawGamepad;
 }
 
 export interface ListenOptions {
@@ -21,6 +36,7 @@ export interface ListenOptions {
 export const mockGamepad: CustomGamepad = {
   axes: [],
   buttons: [],
+  rawPad: undefined,
 };
 
 export function updateListenOptions(

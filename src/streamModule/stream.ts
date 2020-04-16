@@ -1,35 +1,45 @@
 import memoize from 'fast-memoize';
 import { assignIn, mapValues, forEach } from 'lodash/fp';
-import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import type * as rxjs from 'rxjs';
+import type * as operators from 'rxjs/operators';
 
-import createBaseModule from '../baseModule/base';
+import createBaseModule, { BaseParams } from '../baseModule/base';
+import { RawGamepad } from '../baseModule/baseUtils';
 
 import { buttonMap, stickMap, ButtonResult, StickResult } from '../common/utils';
 
 export type StreamModule = ReturnType<typeof createStreamModule>;
 
 export interface ButtonStreamMapValue {
-  stream: Subject<() => ButtonResult>;
+  stream: rxjs.Subject<() => ButtonResult>;
   updateFn: () => ButtonResult;
 }
 
 export interface StickStreamMapValue {
-  stream: Subject<() => StickResult>;
+  stream: rxjs.Subject<() => StickResult>;
   updateFn: () => StickResult;
 }
 
-export default function createStreamModule(params = {}) {
+export interface StreamParams extends BaseParams {
+  rxjs: typeof rxjs;
+  operators: typeof operators;
+}
+
+export default function createStreamModule(params: StreamParams) {
+  if (!params.rxjs || !params.operators) {
+    throw new Error(`createStreamModule called without rxjs and/or it's operators`);
+  }
+
   const { state, module: baseModule } = createBaseModule(params);
 
   const buttonMapMemoized = memoize(buttonMap);
   const stickMapMemoized = memoize(stickMap);
 
-  const allButtonStream = new Subject<() => Record<string, ButtonResult>>();
-  allButtonStream.pipe(map((a: () => Record<string, ButtonResult>) => a()));
+  const allButtonStream = new params.rxjs.Subject<() => Record<string, ButtonResult>>();
+  allButtonStream.pipe(params.operators.map((a: () => Record<string, ButtonResult>) => a()));
 
-  const allStickStream = new Subject<() => Record<string, StickResult>>();
-  allStickStream.pipe(map((a: () => Record<string, StickResult>) => a()));
+  const allStickStream = new params.rxjs.Subject<() => Record<string, StickResult>>();
+  allStickStream.pipe(params.operators.map((a: () => Record<string, StickResult>) => a()));
 
   const buttonStreamMap: Record<string, ButtonStreamMapValue> = {};
   const stickStreamMap: Record<string, StickStreamMapValue> = {};
@@ -74,8 +84,8 @@ export default function createStreamModule(params = {}) {
 
     getButtonStream: (buttonName: string) => {
       if (!buttonStreamMap[buttonName]) {
-        const buttonStream = new Subject<() => ButtonResult>();
-        buttonStream.pipe(map((a: () => ButtonResult) => a()));
+        const buttonStream = new params.rxjs.Subject<() => ButtonResult>();
+        buttonStream.pipe(params.operators.map((a: () => ButtonResult) => a()));
 
         buttonStreamMap[buttonName] = {
           stream: buttonStream,
@@ -95,8 +105,8 @@ export default function createStreamModule(params = {}) {
 
     getStickStream: (stickName: string) => {
       if (!stickStreamMap[stickName]) {
-        const stickStream = new Subject<() => StickResult>();
-        stickStream.pipe(map((a: () => StickResult) => a()));
+        const stickStream = new params.rxjs.Subject<() => StickResult>();
+        stickStream.pipe(params.operators.map((a: () => StickResult) => a()));
 
         stickStreamMap[stickName] = {
           stream: stickStream,
@@ -115,7 +125,7 @@ export default function createStreamModule(params = {}) {
       return stickStreamMap[stickName].stream;
     },
 
-    update: (gamepad: Gamepad) => {
+    update: (gamepad: RawGamepad) => {
       baseModule.update(gamepad);
 
       allButtonStream.next(mapButtons);
