@@ -1,18 +1,31 @@
-// Based on https://github.com/stewdio/THREE.VRController/blob/master/VRController.js
-// and https://codepen.io/anon/pen/yKgYGz
-
 import { isArray, mapValues } from 'lodash/fp';
 
-import { RawGamepad, Effect } from './baseUtils';
+import { RawGamepad, Effect, StrictEffect } from './baseUtils';
 
 type GamepadId = string;
 type ChannelName = string;
 
 export const MAX_DURATION = 5000;
 const defaultChannel = 'default';
-const allChannels: Record<GamepadId, Record<ChannelName, (Effect | number)[]>> = {};
+const allChannels: Record<GamepadId, Record<ChannelName, StrictEffect[]>> = {};
 
-export function applyRumble(pad: RawGamepad, effect: Effect) {
+export function makeEffectStrict(effect: Effect | number): StrictEffect {
+  if (typeof effect === 'number') {
+    return {
+      duration: effect,
+      weakMagnitude: 0,
+      strongMagnitude: 0,
+    };
+  }
+
+  return {
+    duration: Math.max(0, effect.duration),
+    weakMagnitude: Math.min(1, Math.max(0, effect.weakMagnitude || 0)),
+    strongMagnitude: Math.min(1, Math.max(0, effect.strongMagnitude || 0)),
+  };
+}
+
+export function applyRumble(pad: RawGamepad, effect: StrictEffect) {
   if (!pad.vibrationActuator) {
     return Promise.reject(
       `Joymap rumble applyRumble: Gamepad ${pad.id} does not support haptic feedback`,
@@ -39,10 +52,12 @@ export function addRumble(
     allChannels[padId] = {};
   }
 
-  allChannels[padId][channelName] = isArray(effect) ? effect : [effect];
+  allChannels[padId][channelName] = isArray(effect)
+    ? effect.map(makeEffectStrict)
+    : [makeEffectStrict(effect)];
 }
 
-export function getCurrentEffect(padId: string): Effect {
+export function getCurrentEffect(padId: string): StrictEffect {
   if (!allChannels[padId]) {
     allChannels[padId] = {};
   }
@@ -80,12 +95,6 @@ export function updateChannels(padId: string, timeElapsed: number) {
     return channels
       .map((channelValue) => {
         if (curr > 0) {
-          if (typeof channelValue === 'number') {
-            const result = Math.max(0, channelValue - curr);
-            curr -= channelValue;
-            return result;
-          }
-
           const result = Math.max(0, channelValue.duration - curr);
           curr -= channelValue.duration;
           channelValue.duration = result;
@@ -94,9 +103,6 @@ export function updateChannels(padId: string, timeElapsed: number) {
         return channelValue;
       })
       .filter((channelValue) => {
-        if (typeof channelValue === 'number') {
-          return channelValue > 0;
-        }
         return channelValue.duration > 0;
       });
   }, allChannels[padId]);

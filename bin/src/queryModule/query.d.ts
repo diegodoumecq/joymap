@@ -36,7 +36,11 @@ export default function createQueryModule(params?: {}): {
     stickBindOnPress: (inputName: string, callback: (stickName?: string | undefined) => void, allowDuplication?: boolean) => void;
     isRumbleSupported: (rawPad?: import("../baseModule/baseUtils").RawGamepad | undefined) => boolean | null;
     stopRumble: (channelName?: string | undefined) => void;
-    addRumble: (effect: import("../baseModule/baseUtils").Effect | (number | import("../baseModule/baseUtils").Effect)[], channelName?: string | undefined) => void;
+    addRumble: (effect: number | {
+        duration: number;
+        weakMagnitude?: number | undefined;
+        strongMagnitude?: number | undefined;
+    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
     destroy: () => void;
 } & {
     getButton: (inputName: string) => ButtonResult;

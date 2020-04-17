@@ -17,9 +17,7 @@
     "rumble": "webpack-dev-server --hot --env.example=rumble",
     "format": "prettier \"**/*.{js,jsx,json,tsx,ts}\" --write",
     "lint": "eslint --ignore-path .gitignore --ignore-path .prettierignore \"**/*.{js,jsx,ts,tsx}\"",
-    "build": "npm run build-lib && npm run build-min",
-    "build-lib": "del-cli -f bin/* && babel src -d bin",
-    "build-min": "cross-env NODE_ENV=production webpack -p --config webpack.prod.babel.js"
+    "build": "del-cli -f bin/* && webpack -p --config webpack.prod.babel.js"
   },
   "husky": {
     "hooks": {
@@ -83,10 +81,8 @@
     "clean-webpack-plugin": "^3.0.0",
     "color-hash": "^1.0.3",
     "copy-webpack-plugin": "^5.1.1",
-    "cross-env": "^7.0.2",
     "css-loader": "^3.4.2",
     "del-cli": "^3.0.0",
-    "empty": "^0.10.1",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-prettier": "^6.10.1",
@@ -98,7 +94,6 @@
     "lint-staged": "^10.1.1",
     "postcss-loader": "^3.0.0",
     "prettier": "^2.0.2",
-    "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "regenerator-runtime": "^0.13.5",

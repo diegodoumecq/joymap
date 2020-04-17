@@ -31,7 +31,11 @@ export default function createEventModule(params?: {}): {
     stickBindOnPress: (inputName: string, callback: (stickName?: string | undefined) => void, allowDuplication?: boolean) => void;
     isRumbleSupported: (rawPad?: RawGamepad | undefined) => boolean | null;
     stopRumble: (channelName?: string | undefined) => void;
-    addRumble: (effect: import("../baseModule/baseUtils").Effect | (number | import("../baseModule/baseUtils").Effect)[], channelName?: string | undefined) => void;
+    addRumble: (effect: number | {
+        duration: number;
+        weakMagnitude?: number | undefined;
+        strongMagnitude?: number | undefined;
+    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
     destroy: () => void;
 } & {
     addButtonEvent: (eventName: string, callback: (button: true | ButtonResult) => void) => void;
@@ -68,5 +72,9 @@ export default function createEventModule(params?: {}): {
     stickBindOnPress: (inputName: string, callback: (stickName?: string | undefined) => void, allowDuplication?: boolean) => void;
     isRumbleSupported: (rawPad?: RawGamepad | undefined) => boolean | null;
     stopRumble: (channelName?: string | undefined) => void;
-    addRumble: (effect: import("../baseModule/baseUtils").Effect | (number | import("../baseModule/baseUtils").Effect)[], channelName?: string | undefined) => void;
+    addRumble: (effect: number | {
+        duration: number;
+        weakMagnitude?: number | undefined;
+        strongMagnitude?: number | undefined;
+    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
 };

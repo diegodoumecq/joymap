@@ -20,6 +20,7 @@ import {
   ListenOptions,
   RawGamepad,
   Effect,
+  StrictEffect,
   CustomGamepad,
 } from './baseUtils';
 import {
@@ -42,7 +43,7 @@ export interface State {
   clampThreshold: boolean;
   pad: CustomGamepad;
   prevPad: CustomGamepad;
-  prevRumble: Effect;
+  prevRumble: StrictEffect;
   lastRumbleUpdate: number;
   lastUpdate: number;
 
@@ -306,9 +307,8 @@ export default function createModule(params: BaseParams = {}) {
       }
     },
 
-    addRumble: (effect: Effect | (Effect | number)[], channelName?: string) => {
+    addRumble: (effect: Effect | Effect[], channelName?: string) => {
       if (state.pad.rawPad) {
-        // TODO: add checks for wrong magnitude values and invalid durations
         addRumble(state.pad.rawPad.id, effect, channelName);
       }
     },

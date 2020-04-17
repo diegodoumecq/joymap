@@ -1,12 +1,17 @@
 import { Button, Stick } from '../common/utils';
-export interface Effect {
+export declare type Effect = number | {
     duration: number;
     weakMagnitude?: number;
     strongMagnitude?: number;
+};
+export interface StrictEffect {
+    duration: number;
+    weakMagnitude: number;
+    strongMagnitude: number;
 }
 export interface RawGamepad extends Gamepad {
     vibrationActuator?: {
-        playEffect: (type: 'dual-rumble', effect: Effect) => Promise<string>;
+        playEffect: (type: 'dual-rumble', effect: StrictEffect) => Promise<string>;
         reset: () => Promise<string>;
     };
 }

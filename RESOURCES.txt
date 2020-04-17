@@ -1,0 +1,11 @@
+Nodejs api:
+
+https://github.com/infusion/node-gamecontroller/blob/master/gamecontroller.js using https://github.com/node-hid/node-hid
+
+HapticActuators api:
+
+https://github.com/stewdio/THREE.VRController/blob/master/VRController.js
+
+VibrationActuators api:
+
+https://codepen.io/anon/pen/yKgYGz

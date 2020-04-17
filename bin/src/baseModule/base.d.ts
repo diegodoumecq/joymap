@@ -1,5 +1,5 @@
 import { Button, Stick } from '../common/utils';
-import { RawGamepad, Effect, CustomGamepad } from './baseUtils';
+import { RawGamepad, Effect, StrictEffect, CustomGamepad } from './baseUtils';
 export interface BaseParams {
     padId?: string;
     threshold?: number;
@@ -10,7 +10,7 @@ export interface State {
     clampThreshold: boolean;
     pad: CustomGamepad;
     prevPad: CustomGamepad;
-    prevRumble: Effect;
+    prevRumble: StrictEffect;
     lastRumbleUpdate: number;
     lastUpdate: number;
     buttons: Record<string, Button>;
@@ -48,7 +48,11 @@ export default function createModule(params?: BaseParams): {
         stickBindOnPress: (inputName: string, callback: (stickName?: string | undefined) => void, allowDuplication?: boolean) => void;
         isRumbleSupported: (rawPad?: RawGamepad | undefined) => boolean | null;
         stopRumble: (channelName?: string | undefined) => void;
-        addRumble: (effect: Effect | (number | Effect)[], channelName?: string | undefined) => void;
+        addRumble: (effect: number | {
+            duration: number;
+            weakMagnitude?: number | undefined;
+            strongMagnitude?: number | undefined;
+        } | Effect[], channelName?: string | undefined) => void;
         destroy: () => void;
     };
     state: State;
