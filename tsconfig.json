@@ -1,6 +1,13 @@
 {
   "link": "https://www.typescriptlang.org/docs/handbook/compiler-options.html",
-  "include": ["./src", "./types", "./examples", "webpack.config.babel.js", "webpack.prod.babel.js"],
+  "include": [
+    "./src",
+    "./types",
+    "./examples",
+    "webpack.config.babel.js",
+    "webpack.prod.babel.js",
+    "docs/index.js"
+  ],
   "exclude": ["./node_modules"],
   "compilerOptions": {
     "target": "esnext",
