@@ -13,8 +13,8 @@
     "format": "prettier \"**/*.{js,jsx,json,tsx,ts}\" --write",
     "lint": "eslint --ignore-path .prettierignore \"**/*.{js,jsx,ts,tsx}\"",
     "build": "yarn build-lib && yarn build-docs",
-    "build-docs": "del-cli -f docs/* && webpack -p --env.mode=prod",
-    "build-lib": "del-cli -f bin/* && webpack -p --config webpack.prod.babel.js"
+    "build-lib": "del-cli -f bin/* && webpack -p --config webpack.prod.babel.js",
+    "build-docs": "del-cli -f docs/* && webpack -p --env.mode=docs"
   },
   "husky": {
     "hooks": {

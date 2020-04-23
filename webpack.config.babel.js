@@ -23,9 +23,9 @@ export default function (env = {}) {
 
     performance: { hints: false },
 
-    devtool: env.mode === 'prod' ? false : 'source-map',
+    devtool: env.mode === 'docs' ? false : 'source-map',
 
-    mode: env.mode === 'prod' ? 'production' : 'development',
+    mode: env.mode === 'docs' ? 'production' : 'development',
 
     entry: {
       main: path.resolve(__dirname, 'examples/Main/index.tsx'),
@@ -39,7 +39,7 @@ export default function (env = {}) {
     },
 
     output: {
-      path: env.mode === 'prod' ? docPath : devBundlePath,
+      path: env.mode === 'docs' ? docPath : devBundlePath,
       filename: '[name].bundle.js',
       futureEmitAssets: false,
     },

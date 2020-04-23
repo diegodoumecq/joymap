@@ -6,7 +6,7 @@ A Javascript Gamepad browser API wrapper that chops, slices and dices
 
 **[Key features](#key-features)** |
 **[How to install](#how-to-install)** |
-**[How to run the examples](#how-to-run-the-examples)** |
+**[Examples](#examples)** |
 **[How to use](#how-to-use)** |
 **[Modules](#modules)** |
 **[Simple example of usage](#simple-example-of-usage)** |
@@ -21,27 +21,21 @@ A Javascript Gamepad browser API wrapper that chops, slices and dices
 * Modules can be query-based, event-based or Rx-based
 * Supports button/stick mapping and remapping
 * Supports user-oriented rebinding methods
+* [Lots of handy examples](https://diegodoumecq.github.io/joymap/)
 * Button bindings are set by default to the standard defined by the spec, but all possible inputs are supported
 * Can group buttons together (create a 'Jump' button from the A, B, L1 and R1 inputs)
 * Can group sticks together (create one Analog stick from the average of L and R)
 * Supports Chrome's implementation of rumble/haptic feedback
-* Has typescript types
+* Uses and exports Typescript types
 
 ### How to install
 
-Run **yarn add joymap**
+You can install it with npm/yarn or just add a `<script>` tag with the joymap.min.js file and access the library through the joymap global var
 
-### How to run the examples
+### Examples
 
-* Clone/download this repo
-* Install all the dependencies with **yarn** in the console
-* Run a single example at a time on localhost:9001
-  * For the React example, run **yarn react**
-  * For the canvas example, run **yarn canvas**
-  * For the HTML state log example, run **yarn log**
-  * For the "fighting game training mode"-style input display example, run **yarn fighting**
-  * For the video stream example (using the Rx module), run **yarn video**
-  * For the rumble example, run **yarn rumble**
+* You can play with our examples here: https://diegodoumecq.github.io/joymap/ (includes handy links to codesandbox and the github source code)
+* Alternatively, you can also clone/download the repo and after installing dependencies use **yarn dev** to mount it all on localhost:9001
 
 ### How to use
 
@@ -88,37 +82,39 @@ The three modules mentioned above work in similar ways, taking an options argume
 
 ### Simple example of usage
 
-    import createJoymap, { createQueryModule } from 'joymap';
-    
-    function stepFunction() {
-      // do stuff immediately after each Gamepad Poll
-    }
+```javascript
+import createJoymap, { createQueryModule } from 'joymap';
 
-    const joymap = createJoymap({
-      onPoll: stepFunction,
-      autoConnect: true
-    });
-    const module1 = createQueryModule({ threshold: 0.2, clampThreshold: true });
-    const module2 = createQueryModule({ threshold: 0.2, clampThreshold: true });
-    const module3 = createQueryModule({ threshold: 0.2, clampThreshold: true });
-    
-    joymap.addModule(module1);
-    joymap.addModule(module2);
-    joymap.addModule(module3);
-    joymap.start();
-    
-    //////
-    // ... later on in a player-handling file
-    //////
-    
-    const AButton = mario.module.getButton('A'); // mario.module could be module1 from above
-    if (AButton.pressed && AButton.justChanged && mario.isOnFloor()) {
-      mario.jump();
-    }
+function stepFunction() {
+  // do stuff immediately after each Gamepad Poll
+}
+
+const joymap = createJoymap({
+  onPoll: stepFunction,
+  autoConnect: true
+});
+const module1 = createQueryModule({ threshold: 0.2, clampThreshold: true });
+const module2 = createQueryModule({ threshold: 0.2, clampThreshold: true });
+const module3 = createQueryModule({ threshold: 0.2, clampThreshold: true });
+
+joymap.addModule(module1);
+joymap.addModule(module2);
+joymap.addModule(module3);
+joymap.start();
+
+//////
+// ... later on in a player-handling file
+//////
+
+const AButton = mario.module.getButton('A'); // mario.module could be module1 from above
+if (AButton.pressed && AButton.justChanged && mario.isOnFloor()) {
+  mario.jump();
+}
+```
 
 As you can see in the example above, you can create as many modules as you'd like. Each of them will be automatically assigned a gamepad if available (because we passed autoConnect: true) and each of them will stay assigned to that same gamepad even when plugged and unplugged multiple times.
 
-For more a in-depth view on what the modules support and how, do please look at the examples in /examples.
+For more a in-depth view on what the modules support and how, do please look at the examples.
 
 ### Rumble support
 
@@ -126,11 +122,9 @@ Right now the library offers rumble suport based on Chrome's implementation of t
 
   Note: An *Effect* is an object of type *{ duration: number; weakMagnitude?: number; strongMagnitude?: number; }*
 
-* **isRumbleSupported(rawPad?: RawGamepad) => boolean | null** gives you whether the module's gamepad (or the one being passed as argument) supports rumble or not. Will return null only if called without arguments and no game pad has been assigned to the module.
+* **isRumbleSupported(rawPad?: RawGamepad) => boolean | null** gives you whether the module's gamepad (or the one being passed as argument) supports rumble or not. Will return null only if called without arguments and no gamepad has been assigned to the module.
 * **addRumble(effect: Effect | (Effect | number)[], channelName?: string) => void** lets you play a single effect or a timeline of different effects and pauses. The channelName is used to distinguish from various sources of rumbling, so they don't cancel each other. If a channelName is not provided then the 'default' channel is used.
 * **stopRumble(channelName?: string) => void** lets you stop all rumbling from a particular channel. If a channelName is not provided then the 'default' channel is used.
-
-We have an example of use in the examples folder. See **[How to run the examples](#how-to-run-the-examples)** section.
 
 ### Naming restrictions
 
@@ -142,8 +136,9 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
 
 * Add support for hapticActuators (seems to work on some VR gamepads apparently, need to get my hands on some)
 * Add an event example or change some of the existing query ones to use events
+* Add routing to the examples page
 * Refactor/replace the canvas example with something more visually interesting
-* Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or whatever else is in fashion
+* Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or [playcanvas](https://github.com/playcanvas/engine)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the module config and on refresh restore it
   * It should also offer a "RESET" button for these module configs
