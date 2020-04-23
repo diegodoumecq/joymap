@@ -37,7 +37,7 @@ interface Page {
 
 const docs: Record<string, Page> = {
   readme: {
-    html: '/readme.html',
+    html: 'readme.html',
     title: 'Readme',
     gitPath: '',
     icon: <MaterialCommunityIcons name="book-open-page-variant" />,
@@ -46,42 +46,42 @@ const docs: Record<string, Page> = {
 
 const examples: Record<string, Page> = {
   react: {
-    html: '/react.html',
+    html: 'react.html',
     title: 'React Example',
     gitPath: 'tree/master/examples/React',
     params: reactResources,
     icon: <MaterialCommunityIcons name="react" />,
   },
   canvas: {
-    html: '/canvas.html',
+    html: 'canvas.html',
     title: 'Canvas Example',
     gitPath: 'tree/master/examples/Canvas',
     params: canvasResources,
     icon: <MaterialCommunityIcons name="format-paint" />,
   },
   fighting: {
-    html: '/fighting.html',
+    html: 'fighting.html',
     title: 'Fighting Example',
     gitPath: 'tree/master/examples/Fighting',
     params: fightingResources,
     icon: <MaterialCommunityIcons name="arrow-decision" />,
   },
   rumble: {
-    html: '/rumble.html',
+    html: 'rumble.html',
     title: 'Rumble Example',
     gitPath: 'tree/master/examples/Rumble',
     params: rumbleResources,
     icon: <MaterialCommunityIcons name="test-tube" />,
   },
   log: {
-    html: '/log.html',
+    html: 'log.html',
     title: 'Log Example',
     gitPath: 'tree/master/examples/Log',
     params: logResources,
     icon: <MaterialCommunityIcons name="clipboard-text-outline" />,
   },
   video: {
-    html: '/video.html',
+    html: 'video.html',
     title: 'Video Example',
     gitPath: 'tree/master/examples/Video',
     params: videoResources,
