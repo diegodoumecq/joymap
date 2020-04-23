@@ -1,13 +1,9 @@
 import { split, reduce, includes, filter, flow, map, endsWith } from 'lodash/fp';
 
 import { nameIsValid } from '../common/utils';
+import { EventToken } from '../types';
 
 export const operators = ['+', '!'];
-
-export interface EventToken {
-  value: string;
-  prop: 'justChanged' | 'pressed';
-}
 
 export function getEventTokens(name: string) {
   return flow(

@@ -1,5 +1,4 @@
-import { RawGamepad } from '../baseModule/baseUtils';
-import { ButtonResult, StickResult } from '../common/utils';
+import { RawGamepad } from '../types';
 export declare type EventModule = ReturnType<typeof createEventModule>;
 export default function createEventModule(params?: {}): {
     getPadId: () => string | null;
@@ -35,13 +34,13 @@ export default function createEventModule(params?: {}): {
         duration: number;
         weakMagnitude?: number | undefined;
         strongMagnitude?: number | undefined;
-    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
+    } | import("../types").Effect[], channelName?: string | undefined) => void;
     destroy: () => void;
 } & {
-    addButtonEvent: (eventName: string, callback: (button: true | ButtonResult) => void) => void;
-    removeButtonEvent: (eventName: string, callback: (button: true | ButtonResult) => void) => void;
-    addStickEvent: (name: string, callback: (stick: StickResult) => void) => void;
-    removeStickEvent: (eventName: string, callback: (stick: StickResult) => void) => void;
+    addButtonEvent: (eventName: string, callback: (button: true | import("../types").ButtonResult) => void) => void;
+    removeButtonEvent: (eventName: string, callback: (button: true | import("../types").ButtonResult) => void) => void;
+    addStickEvent: (name: string, callback: (stick: import("../types").StickResult) => void) => void;
+    removeStickEvent: (eventName: string, callback: (stick: import("../types").StickResult) => void) => void;
     update: (gamepad: RawGamepad) => void;
     destroy(): void;
     getPadId: () => string | null;
@@ -76,5 +75,5 @@ export default function createEventModule(params?: {}): {
         duration: number;
         weakMagnitude?: number | undefined;
         strongMagnitude?: number | undefined;
-    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
+    } | import("../types").Effect[], channelName?: string | undefined) => void;
 };

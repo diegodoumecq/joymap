@@ -1,7 +1,6 @@
 import React, { ReactNode, useState } from 'react';
-import { map } from 'lodash/fp';
-
 import { QueryModule } from '../../src/index';
+import { map } from 'lodash/fp';
 
 import { PadContainer, ReactInputs, ModuleName, Back, WaitingMessage, inputs } from './styles';
 
@@ -10,17 +9,17 @@ type InputNames = keyof typeof inputs;
 const analogInputs: InputNames[] = ['L', 'R'];
 const shoulderInputs: InputNames[] = ['L2', 'L1', 'R2', 'R1'];
 const digitalInputs: InputNames[] = [
-  'DpadUp',
-  'DpadDown',
-  'DpadLeft',
-  'DpadRight',
+  'dpadUp',
+  'dpadDown',
+  'dpadLeft',
+  'dpadRight',
   'A',
   'B',
   'X',
   'Y',
-  'Start',
-  'Select',
-  'Home',
+  'start',
+  'select',
+  'home',
 ];
 
 interface GamepadProps {

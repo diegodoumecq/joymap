@@ -10,19 +10,9 @@ import {
   uniqBy,
   toString,
 } from 'lodash/fp';
-import { nameIsValid, Button, Stick } from '../common/utils';
 
-import {
-  mockGamepad,
-  getDefaultButtons,
-  getDefaultSticks,
-  updateListenOptions,
-  ListenOptions,
-  RawGamepad,
-  Effect,
-  StrictEffect,
-  CustomGamepad,
-} from './baseUtils';
+import { nameIsValid } from '../common/utils';
+import { mockGamepad, getDefaultButtons, getDefaultSticks, updateListenOptions } from './baseUtils';
 import {
   stopRumble,
   addRumble,
@@ -31,14 +21,20 @@ import {
   updateChannels,
   MAX_DURATION,
 } from './rumble';
+import {
+  ListenOptions,
+  RawGamepad,
+  Effect,
+  BaseParams,
+  CustomGamepad,
+  StrictEffect,
+  Button,
+  Stick,
+} from '../types';
 
-export interface BaseParams {
-  padId?: string;
-  threshold?: number;
-  clampThreshold?: boolean;
-}
+export type BaseModule = ReturnType<typeof createModule>;
 
-export interface State {
+interface BaseState {
   threshold: number;
   clampThreshold: boolean;
   pad: CustomGamepad;
@@ -51,14 +47,12 @@ export interface State {
   sticks: Record<string, Stick>;
 }
 
-export type BaseModule = ReturnType<typeof createModule>;
-
 export default function createModule(params: BaseParams = {}) {
   let listenOptions: ListenOptions | null = null;
   let gamepadId = params.padId ? params.padId : null;
   let connected = !!params.padId;
 
-  const state: State = {
+  const state: BaseState = {
     threshold: params.threshold || 0.2,
     clampThreshold: params.clampThreshold !== false,
     pad: mockGamepad,

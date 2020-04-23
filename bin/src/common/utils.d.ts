@@ -1,20 +1,4 @@
-import { CustomGamepad, RawGamepad } from '../baseModule/baseUtils';
-export declare type Button = number[];
-export declare type Stick = {
-    indexes: number[][];
-    inverts: boolean[];
-};
-export interface ButtonResult {
-    value: number;
-    pressed: boolean;
-    justChanged: boolean;
-}
-export interface StickResult {
-    value: number[];
-    pressed: boolean;
-    justChanged: boolean;
-    inverts: boolean[];
-}
+import { CustomGamepad, RawGamepad, ButtonResult, StickResult } from '../types';
 export declare type Expand<T> = T extends infer O ? {
     [K in keyof O]: O[K];
 } : never;

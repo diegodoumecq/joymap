@@ -1,8 +1,6 @@
 import type * as rxjs from 'rxjs';
 import type * as operators from 'rxjs/operators';
-import { BaseParams } from '../baseModule/base';
-import { RawGamepad } from '../baseModule/baseUtils';
-import { ButtonResult, StickResult } from '../common/utils';
+import { BaseParams, ButtonResult, StickResult, RawGamepad } from '../types';
 export declare type StreamModule = ReturnType<typeof createStreamModule>;
 export interface ButtonStreamMapValue {
     stream: rxjs.Subject<() => ButtonResult>;
@@ -50,7 +48,7 @@ export default function createStreamModule(params: StreamParams): {
         duration: number;
         weakMagnitude?: number | undefined;
         strongMagnitude?: number | undefined;
-    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
+    } | import("../types").Effect[], channelName?: string | undefined) => void;
     destroy: () => void;
 } & {
     getAllButtonsStream: () => rxjs.Subject<() => Record<string, ButtonResult>>;
@@ -91,5 +89,5 @@ export default function createStreamModule(params: StreamParams): {
         duration: number;
         weakMagnitude?: number | undefined;
         strongMagnitude?: number | undefined;
-    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
+    } | import("../types").Effect[], channelName?: string | undefined) => void;
 };

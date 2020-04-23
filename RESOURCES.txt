@@ -1,11 +1,11 @@
-Nodejs api:
+Nodejs api example:
 
 https://github.com/infusion/node-gamecontroller/blob/master/gamecontroller.js using https://github.com/node-hid/node-hid
 
-HapticActuators api:
+HapticActuators api example:
 
 https://github.com/stewdio/THREE.VRController/blob/master/VRController.js
 
-VibrationActuators api:
+VibrationActuators api example:
 
 https://codepen.io/anon/pen/yKgYGz

@@ -1,8 +1,9 @@
 import memoize from 'fast-memoize';
 import { assignIn, mapValues, omit, forEach } from 'lodash/fp';
 
-import { buttonMap, stickMap, ButtonResult, StickResult } from '../common/utils';
+import { buttonMap, stickMap } from '../common/utils';
 import createBaseModule from '../baseModule/base';
+import { StickResult, ButtonResult } from '../types';
 
 // the following definition allows for the circular Mapper type
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -41,7 +42,7 @@ export default function createQueryModule(params = {}) {
         return emptyButton;
       }
 
-      return buttonMapMemoized(
+      return buttonMap(
         state.pad,
         state.prevPad,
         state.buttons[inputName],

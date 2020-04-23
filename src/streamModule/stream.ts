@@ -3,10 +3,10 @@ import { assignIn, mapValues, forEach } from 'lodash/fp';
 import type * as rxjs from 'rxjs';
 import type * as operators from 'rxjs/operators';
 
-import createBaseModule, { BaseParams } from '../baseModule/base';
-import { RawGamepad } from '../baseModule/baseUtils';
+import createBaseModule from '../baseModule/base';
 
-import { buttonMap, stickMap, ButtonResult, StickResult } from '../common/utils';
+import { buttonMap, stickMap } from '../common/utils';
+import { BaseParams, ButtonResult, StickResult, RawGamepad } from '../types';
 
 export type StreamModule = ReturnType<typeof createStreamModule>;
 

@@ -47,18 +47,18 @@ Run **yarn add joymap**
 
 Joymap exports an object with a few creation functions:
 
-* createJoyMap
+* createJoymap
 * createBaseModule
 * createQueryModule
 * createStreamModule
 * createEventModule
 
-From among them, the initial point of interaction with the library is **createJoyMap**. It is necessary to use this function since it handles polling the browser's Gamepad API and passes that data along to the different assigned modules. It does not, however, parse or map anything by itself: the modules are the ones that handle that responsibility.
+From among them, the initial point of interaction with the library is **createJoymap**. It is necessary to use this function since it handles polling the browser's Gamepad API and passes that data along to the different assigned modules. It does not, however, parse or map anything by itself: the modules are the ones that handle that responsibility.
 
-* **createJoyMap(params?: Object) => JoyMap** takes a single optional argument in the form of an object with the following possible values:
+* **createJoymap(params?: Object) => Joymap** takes a single optional argument in the form of an object with the following possible values:
   * **onPoll** is a function that will be called at the end of each polling
   * **autoConnect** is a boolean that if true, will connect all newly created Modules with an unused gamepad if present at the moment of module creation
-* When **createJoyMap** gets called, it returns an instance of JoyMap that has a bunch of functions:
+* When **createJoymap** gets called, it returns an instance of Joymap that has a bunch of functions:
   * **isSupported() => boolean** returns if gamepads are supported by the browser
   * **start() => void** repeatedly calls **poll()** using requestAnimationFrame
   * **stop() => void** stops calling **poll()**
@@ -68,16 +68,16 @@ From among them, the initial point of interaction with the library is **createJo
   * **getModules() => AnyModule[]** returns an array of Modules (see the Modules section for more details)
   * **getUnusedPadIds() => string[]** Returns an array of Gamepad ids that are not currently assigned to a Module
   * **getUnusedPadId() => string | undefined** Same as above but returns only one if present
-  * **addModule(module: AnyModule) => void** Adds an instanced module to JoyMap's Module array so that it can receive JoyMap updates
-  * **removeModule(module: AnyModule) => void** Removes an instanced module from JoyMap's Module array
-  * **clearModules() => void** Removes all modules from JoyMap's Module array
+  * **addModule(module: AnyModule) => void** Adds an instanced module to Joymap's Module array so that it can receive Joymap updates
+  * **removeModule(module: AnyModule) => void** Removes an instanced module from Joymap's Module array
+  * **clearModules() => void** Removes all modules from Joymap's Module array
   * **poll() => void** Polls the browser gamepad API and updates all Modules with the data. Can be called manually or indirectly by using **start** and **stop**
 
 The other functions are used to create ...
 
 ### Modules
 
-JoyMap's gamepad-accessing API is divided into modules. Each of these implement a basic interface but differ in the way that the input information can be extracted. Three of these modules are implemented for now: QueryModule, StreamModule and EventModule.
+Joymap's gamepad-accessing API is divided into modules. Each of these implement a basic interface but differ in the way that the input information can be extracted. Three of these modules are implemented for now: QueryModule, StreamModule and EventModule.
 
 The three modules mentioned above work in similar ways, taking an options argument and returning the corresponding module. All of these use the createBaseModule function as a basis to build on top of it.
 
@@ -88,13 +88,13 @@ The three modules mentioned above work in similar ways, taking an options argume
 
 ### Simple example of usage
 
-    import createJoyMap, { createQueryModule } from 'joymap';
+    import createJoymap, { createQueryModule } from 'joymap';
     
     function stepFunction() {
       // do stuff immediately after each Gamepad Poll
     }
 
-    const joyMap = createJoyMap({
+    const joymap = createJoymap({
       onPoll: stepFunction,
       autoConnect: true
     });
@@ -102,10 +102,10 @@ The three modules mentioned above work in similar ways, taking an options argume
     const module2 = createQueryModule({ threshold: 0.2, clampThreshold: true });
     const module3 = createQueryModule({ threshold: 0.2, clampThreshold: true });
     
-    joyMap.addModule(module1);
-    joyMap.addModule(module2);
-    joyMap.addModule(module3);
-    joyMap.start();
+    joymap.addModule(module1);
+    joymap.addModule(module2);
+    joymap.addModule(module3);
+    joymap.start();
     
     //////
     // ... later on in a player-handling file
@@ -142,6 +142,7 @@ Stuff to do. Keep in mind these bullet points are in no particular order.
 
 * Add support for hapticActuators (seems to work on some VR gamepads apparently, need to get my hands on some)
 * Add an event example or change some of the existing query ones to use events
+* Refactor/replace the canvas example with something more visually interesting
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or whatever else is in fashion
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the module config and on refresh restore it

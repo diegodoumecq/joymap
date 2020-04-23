@@ -2,21 +2,10 @@ import memoize from 'fast-memoize';
 import { filter, forEach, assignIn, map } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
-import { RawGamepad } from '../baseModule/baseUtils';
+import { buttonMap, stickMap, nameIsValid } from '../common/utils';
+import { eventIsValid, getEventTokens, verifyTokens } from './eventUtils';
 
-import { buttonMap, stickMap, nameIsValid, ButtonResult, StickResult } from '../common/utils';
-import { eventIsValid, getEventTokens, verifyTokens, EventToken } from './eventUtils';
-
-interface ButtonEvent {
-  name: string;
-  callback: (button: ButtonResult | true) => void;
-  tokens: EventToken[];
-}
-
-interface StickEvent {
-  name: string;
-  callback: (stick: StickResult) => void;
-}
+import { RawGamepad, ButtonEvent, StickEvent } from '../types';
 
 export type EventModule = ReturnType<typeof createEventModule>;
 

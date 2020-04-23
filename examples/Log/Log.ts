@@ -1,27 +1,45 @@
+import { createJoymap, createQueryModule, Joymap, QueryModule } from '../../src/index';
 import { join, compact, forEach } from 'lodash/fp';
 import { stringifyInputs, countPressed, renderRows, stringifyMappers } from './utils';
 
-import '../main.styl';
-import './StateLog.styl';
-
-import { createJoyMap, createQueryModule, JoyMap, QueryModule } from '../../src/index';
+import './Log.styl';
 
 // Populate the app div with some basic html
 const app = document.getElementById('app') as HTMLElement;
 app.innerHTML = `
-  <article class="examples-container">
+  <div class="main-container">
     <header>
-      <h1 className="title">JoyMap input logging example using the query module</h1>
+      <h3>Let's log all gamepad inputs</h3>
     </header>
     <div class="log-example">
-      <p>The dev console is also used to store all the logged input</p>
+      <div class="log">
+      </div>
     </div>
-  </article>
+  </div>
 `;
 
-function setupModule(joyMap: JoyMap, padId: string) {
+function log(info: string) {
+  const logElement = document.querySelector('.log') as HTMLElement;
+  const first = logElement.firstChild as HTMLElement;
+
+  if (first && first.children && first.children[1].innerHTML === info) {
+    const count = parseInt(first.children[0].innerHTML, 10);
+    first.children[0].innerHTML = `${count + 1} frames`;
+  } else {
+    const element = document.createElement('div');
+    element.className = 'log-line';
+    element.innerHTML = `<span class="log-count">1 frame</span><span>${info}</span>`;
+
+    logElement.insertBefore(element, logElement.firstChild);
+    if (logElement.children.length > 20 && logElement.lastChild) {
+      logElement.removeChild(logElement.lastChild);
+    }
+  }
+}
+
+function setupModule(joymap: Joymap, padId: string) {
   const m = createQueryModule({ padId });
-  joyMap.addModule(m);
+  joymap.addModule(m);
 
   // Set custom buttons
   m.setButton('Jump', m.getButtonIndexes('A', 'X', 'Y', 'L2', 'R2'));
@@ -57,7 +75,7 @@ function setupModule(joyMap: JoyMap, padId: string) {
     <div id="${id}">Waiting for inputs...</div>
   `;
   const mainElement = document.querySelector('.log-example') as HTMLElement;
-  mainElement.appendChild(element);
+  mainElement.insertBefore(element, mainElement.firstChild);
 }
 
 // Flags used to show/hide output separated by input type
@@ -65,17 +83,16 @@ const showButtons = true;
 const showSticks = true;
 const showMappers = true;
 
-// Initial joyMap setup
-const joyMap = createJoyMap({
+// Initial joymap setup
+const joymap = createJoymap({
   onPoll() {
-    const unusedIds = joyMap.getUnusedPadIds();
+    const unusedIds = joymap.getUnusedPadIds();
 
     if (unusedIds.length > 0) {
-      forEach((padId) => setupModule(joyMap, padId), unusedIds);
+      forEach((padId) => setupModule(joymap, padId), unusedIds);
     }
 
     forEach((module) => {
-      // On each frame render to HTML and console.log the state of buttons, sticks and mappers
       const compilation = [
         !showButtons ? '' : stringifyInputs(module.getAllButtons()),
         !showSticks ? '' : stringifyInputs(module.getAllSticks()),
@@ -85,10 +102,8 @@ const joyMap = createJoyMap({
       const stringOutput = join(', ', compact(compilation));
 
       if (stringOutput) {
-        // Log string output to dev console
-        console.log(stringOutput); // eslint-disable-line
+        log(stringOutput);
 
-        // Re-render this last output into HTML
         const padElement = document.getElementById(module.getPadId() || '') as HTMLElement;
         padElement.innerHTML = renderRows(
           compact([
@@ -116,19 +131,8 @@ const joyMap = createJoyMap({
           ]),
         );
       }
-    }, joyMap.getModules() as QueryModule[]);
+    }, joymap.getModules() as QueryModule[]);
   },
 });
 
-console.log(
-  // eslint-disable-line
-  '%c Welcome to the console, we got fun and games.',
-  'color: green; font-weight: bold; font-size: 1.5em;',
-);
-console.log(
-  // eslint-disable-line
-  "%c We got everything you want honey, as long as it's printing all of your gamepad's input",
-  'color: green; font-weight: bold; font-size: 1.5em;',
-);
-
-joyMap.start();
+joymap.start();

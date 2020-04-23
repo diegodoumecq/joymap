@@ -1,23 +1,14 @@
 {
   "link": "https://www.typescriptlang.org/docs/handbook/compiler-options.html",
-  "include": [
-    "./src",
-    "./types",
-    "./examples",
-    "webpack.config.babel.js",
-    "webpack.prod.babel.js",
-    "docs/index.js"
-  ],
-  "exclude": ["./node_modules"],
+  "include": ["./src", "./types", "./examples"],
+  "exclude": ["./node_modules", "./docs", "./bin"],
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
     "importHelpers": true,
     "sourceMap": true,
-    "declaration": true,
     "allowSyntheticDefaultImports": true,
     "rootDir": "./",
-    "outDir": "./bin",
     "lib": ["esnext", "dom"],
     "strict": true,
     "noImplicitAny": true,

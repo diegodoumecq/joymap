@@ -73,7 +73,7 @@ export const ModuleName = styled.span`
   width: 100%;
   text-align: center;
   z-index: 15;
-  font-size: 3rem;
+  font-size: 2rem;
 `;
 
 export const Back = styled.div`
@@ -81,7 +81,7 @@ export const Back = styled.div`
   width: 100%;
   height: 100%;
   z-index: 10;
-  background-image: url(/gamepad.png);
+  background-image: url(gamepad.png);
   pointer-events: none;
 `;
 
@@ -117,19 +117,19 @@ export const inputs = {
   `,
 
   L1: styled(leftShoulder)`
-    background-image: url(/L1.png);
+    background-image: url(L1.png);
   `,
 
   L2: styled(leftShoulder)`
-    background-image: url(/L2.png);
+    background-image: url(L2.png);
   `,
 
   R1: styled(rightShoulder)`
-    background-image: url(/L1.png);
+    background-image: url(L1.png);
   `,
 
   R2: styled(rightShoulder)`
-    background-image: url(/L2.png);
+    background-image: url(L2.png);
   `,
 
   A: styled(button)`
@@ -148,27 +148,27 @@ export const inputs = {
     transform: translateX(-25px);
   `,
 
-  DpadLeft: styled(dpad)`
+  dpadLeft: styled(dpad)`
     transform: translateY(30px);
     width: 40px;
   `,
 
-  DpadRight: styled(dpad)`
+  dpadRight: styled(dpad)`
     transform: translate(55px, 30px);
     width: 40px;
   `,
 
-  DpadDown: styled(dpad)`
+  dpadDown: styled(dpad)`
     transform: translate(32px, 50px);
     height: 40px;
   `,
 
-  DpadUp: styled(dpad)`
+  dpadUp: styled(dpad)`
     transform: translateX(30px);
     height: 40px;
   `,
 
-  Start: styled.div`
+  start: styled.div`
     position: absolute;
     background-color: gray;
     border-radius: 10px;
@@ -179,7 +179,7 @@ export const inputs = {
     cursor: pointer;
   `,
 
-  Select: styled.div`
+  select: styled.div`
     position: absolute;
     background-color: gray;
     border-radius: 10px;
@@ -190,7 +190,7 @@ export const inputs = {
     cursor: pointer;
   `,
 
-  Home: styled.div`
+  home: styled.div`
     position: absolute;
     background-color: gray;
     border-radius: 10px;

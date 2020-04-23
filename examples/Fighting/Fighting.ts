@@ -1,9 +1,7 @@
+import { createJoymap, createQueryModule, QueryModule, Joymap } from '../../src/index';
 import { forEach, reduce, compact, flow, concat, takeRight, filter } from 'lodash/fp';
 
-import '../main.styl';
 import './Fighting.styl';
-
-import { createJoyMap, createQueryModule, QueryModule, JoyMap } from '../../src/index';
 
 interface Player {
   id: string;
@@ -21,13 +19,12 @@ const MAX_MOVES = 15;
 // Populate the app div with some basic html
 const app = document.getElementById('app') as HTMLElement;
 app.innerHTML = `
-  <article class="examples-container">
+  <div class="main-container" >
     <header>
-      <h1 className="title">Display gamepad input like a fighting game's training mode</h1>
-      <h2>(Using the query module)</h2>
+      <h3>Display gamepad input like a fighting game's training mode</h3>
     </header>
     <div class="fighting-example"></div>
-  </article>
+  </div>
 `;
 
 function getArrow([x, y]: number[]) {
@@ -92,10 +89,10 @@ function createStickMapper(module: QueryModule, stickName: string) {
   });
 }
 
-function createPlayer(joyMap: JoyMap, padId: string) {
+function createPlayer(joymap: Joymap, padId: string) {
   const history: string[] = [];
   const module: QueryModule = createQueryModule({ padId });
-  joyMap.addModule(module);
+  joymap.addModule(module);
 
   createStickMapper(module, 'L');
   createStickMapper(module, 'R');
@@ -117,13 +114,13 @@ function createPlayer(joyMap: JoyMap, padId: string) {
   };
 }
 
-// Initial joyMap setup
-const joyMap = createJoyMap({
+// Initial joymap setup
+const joymap = createJoymap({
   onPoll() {
-    const unusedIds = joyMap.getUnusedPadIds();
+    const unusedIds = joymap.getUnusedPadIds();
 
     if (unusedIds.length > 0) {
-      forEach((padId) => players.push(createPlayer(joyMap, padId)), unusedIds);
+      forEach((padId) => players.push(createPlayer(joymap, padId)), unusedIds);
     }
 
     forEach((player) => {
@@ -154,4 +151,4 @@ const joyMap = createJoyMap({
   },
 });
 
-joyMap.start();
+joymap.start();

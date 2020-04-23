@@ -1,4 +1,4 @@
-import { RawGamepad, Effect, StrictEffect } from './baseUtils';
+import { RawGamepad, Effect, StrictEffect } from '../types';
 export declare const MAX_DURATION = 5000;
 export declare function makeEffectStrict(effect: Effect | number): StrictEffect;
 export declare function applyRumble(pad: RawGamepad, effect: StrictEffect): Promise<string>;

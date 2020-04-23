@@ -1,4 +1,7 @@
-src/assets
 node_modules
+assets
 bin
 devBundle
+docs
+webpack.config.babel.js
+webpack.prod.babel.js

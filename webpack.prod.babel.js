@@ -2,8 +2,7 @@ import { DefinePlugin, LoaderOptionsPlugin } from 'webpack';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import path from 'path';
 
-const deployFolder = 'bin';
-const deployPath = path.resolve(__dirname, deployFolder);
+const deployPath = path.resolve(__dirname, 'bin');
 const entryPath = path.resolve(__dirname, 'src');
 
 export default {

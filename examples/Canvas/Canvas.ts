@@ -1,9 +1,4 @@
-// Simple canvas example that doesn't use any other library nor ES6 features
-
-import { createJoyMap, createQueryModule, QueryModule } from '../../src/index';
-
-import '../main.styl';
-import './Canvas.styl';
+import { createJoymap, createQueryModule, QueryModule } from '../../src/index';
 
 interface Character {
   module: QueryModule;
@@ -13,9 +8,11 @@ interface Character {
   angle: number;
 }
 
+const characters: Character[] = [];
+
 const SIZE = {
-  width: 800,
-  height: 600,
+  width: 640,
+  height: 480,
   centerX: 400,
   centerY: 300,
 };
@@ -29,16 +26,14 @@ function uniqueId(prefix = '') {
 // Populate the app div with a canvas
 const app = document.getElementById('app') as HTMLElement;
 app.innerHTML = `
-  <article class="examples-container">
+  <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
     <header>
-      <h1 className="title">JoyMap Canvas example using query module</h1>
-      <h2>We create characters whenever you connect a gamepad</h2>
-      <h3>We also DESTROY them when the gamepad gets unplugged</h3>
+      <h3>Plug/unplug gamepads to add/destroy players</h3>
     </header>
-    <div class="canvas-example">
-      <canvas id="canvas" width="${SIZE.width}" height="${SIZE.height}" />
+    <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+      <canvas id="canvas" width="${SIZE.width}" height="${SIZE.height}" style="margin-top: 1rem;" />
     </div>
-  </article>
+  </div>
 `;
 
 const gamepadImage = new Image();
@@ -78,9 +73,44 @@ function updateCharacter(character: Character) {
   }
 }
 
-const characters: Character[] = [];
+function createCharacter(padId: string) {
+  const c = {
+    module: createQueryModule({ padId, autoConnect: false }),
+    id: uniqueId(),
+    x: Math.random() * SIZE.width,
+    y: Math.random() * SIZE.height,
+    angle: Math.random() * 2 * Math.PI,
+  };
+  joymap.addModule(c.module);
 
-const joyMap = createJoyMap({
+  c.module.setMapper('LeftVsRight', (module) => {
+    const rightButtons = module.getButtons('R1', 'R2', 'R3', 'A', 'B', 'X', 'Y', 'start');
+    const leftButtons = module.getButtons(
+      'dpadUp',
+      'dpadDown',
+      'dpadLeft',
+      'dpadRight',
+      'L1',
+      'L2',
+      'L3',
+      'select',
+    );
+
+    const rightResult = Object.keys(rightButtons).reduce(
+      (result, name) => result + rightButtons[name].value,
+      0,
+    );
+    const leftResult = Object.keys(leftButtons).reduce(
+      (result, name) => result + leftButtons[name].value,
+      0,
+    );
+
+    return rightResult - leftResult;
+  });
+  characters.push(c);
+}
+
+const joymap = createJoymap({
   onPoll: function onPoll() {
     // Get the canvas context so we can draw on it
     const ctx = (document.getElementById('canvas') as HTMLCanvasElement).getContext(
@@ -90,46 +120,9 @@ const joyMap = createJoyMap({
     // Draw background color, clearing the canvas
     ctx.fillStyle = '#EEE';
     ctx.fillRect(0, 0, SIZE.width, SIZE.height);
-    const unusedIds = joyMap.getUnusedPadIds();
+    const unusedIds = joymap.getUnusedPadIds();
 
-    if (unusedIds.length > 0) {
-      unusedIds.forEach((padId) => {
-        const c = {
-          module: createQueryModule({ padId, autoConnect: false }),
-          id: uniqueId(),
-          x: Math.random() * SIZE.width,
-          y: Math.random() * SIZE.height,
-          angle: Math.random() * 2 * Math.PI,
-        };
-        joyMap.addModule(c.module);
-
-        c.module.setMapper('LeftVsRight', (module) => {
-          const rightButtons = module.getButtons('R1', 'R2', 'R3', 'A', 'B', 'X', 'Y', 'start');
-          const leftButtons = module.getButtons(
-            'dpadUp',
-            'dpadDown',
-            'dpadLeft',
-            'dpadRight',
-            'L1',
-            'L2',
-            'L3',
-            'select',
-          );
-
-          const rightResult = Object.keys(rightButtons).reduce(
-            (result, name) => result + rightButtons[name].value,
-            0,
-          );
-          const leftResult = Object.keys(leftButtons).reduce(
-            (result, name) => result + leftButtons[name].value,
-            0,
-          );
-
-          return rightResult - leftResult;
-        });
-        characters.push(c);
-      });
-    }
+    unusedIds.forEach(createCharacter);
 
     characters.forEach((c) => {
       if (c.module.isConnected()) {
@@ -140,4 +133,4 @@ const joyMap = createJoyMap({
   },
 });
 
-joyMap.start();
+joymap.start();

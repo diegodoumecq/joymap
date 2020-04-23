@@ -1,21 +1,11 @@
+import { RawGamepad, JoymapParams } from './types';
 import { BaseModule } from './baseModule/base';
 import { QueryModule } from './queryModule/query';
 import { StreamModule } from './streamModule/stream';
 import { EventModule } from './eventModule/event';
-import { RawGamepad } from 'baseModule/baseUtils';
-export interface Params {
-    onPoll?: () => void;
-    autoConnect?: boolean;
-}
-export interface State {
-    onPoll: () => void;
-    autoConnect: boolean;
-    gamepads: RawGamepad[];
-    modules: AnyModule[];
-}
 export declare type AnyModule = BaseModule['module'] | QueryModule | StreamModule | EventModule;
-export declare type JoyMap = ReturnType<typeof createJoyMap>;
-export default function createJoyMap(params?: Params): {
+export declare type Joymap = ReturnType<typeof createJoymap>;
+export default function createJoymap(params?: JoymapParams): {
     isSupported: () => boolean;
     start: () => void;
     stop: () => void;

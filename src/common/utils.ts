@@ -1,22 +1,5 @@
 import { forEach, reduce, map } from 'lodash/fp';
-import { CustomGamepad, RawGamepad } from '../baseModule/baseUtils';
-
-export type Button = number[];
-
-export type Stick = { indexes: number[][]; inverts: boolean[] };
-
-export interface ButtonResult {
-  value: number;
-  pressed: boolean;
-  justChanged: boolean;
-}
-
-export interface StickResult {
-  value: number[];
-  pressed: boolean;
-  justChanged: boolean;
-  inverts: boolean[];
-}
+import { CustomGamepad, RawGamepad, ButtonResult, StickResult } from '../types';
 
 // dev-helper type: expands object types one level deep
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;

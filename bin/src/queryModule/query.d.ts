@@ -1,4 +1,4 @@
-import { ButtonResult, StickResult } from '../common/utils';
+import { StickResult, ButtonResult } from '../types';
 export interface QueryModule extends ReturnType<typeof createQueryModule> {
 }
 export declare type MapperResult = any;
@@ -20,7 +20,7 @@ export default function createQueryModule(params?: {}): {
     invertSticks: (inverts: boolean[], ...inputNames: string[]) => void;
     swapButtons: (btn1: string, btn2: string) => void;
     swapSticks: (stick1: string, stick2: string, includeInverts?: boolean) => void;
-    update: (gamepad: import("../baseModule/baseUtils").RawGamepad) => void;
+    update: (gamepad: import("../types").RawGamepad) => void;
     cancelListen: () => void;
     listenButton: (callback: (indexes: number[]) => void, quantity?: number, { waitFor, consecutive, allowOffset, }?: {
         waitFor?: [number, "polls" | "ms"] | undefined;
@@ -34,13 +34,13 @@ export default function createQueryModule(params?: {}): {
     }) => void;
     buttonBindOnPress: (inputName: string, callback: (buttonName?: string | undefined) => void, allowDuplication?: boolean) => void;
     stickBindOnPress: (inputName: string, callback: (stickName?: string | undefined) => void, allowDuplication?: boolean) => void;
-    isRumbleSupported: (rawPad?: import("../baseModule/baseUtils").RawGamepad | undefined) => boolean | null;
+    isRumbleSupported: (rawPad?: import("../types").RawGamepad | undefined) => boolean | null;
     stopRumble: (channelName?: string | undefined) => void;
     addRumble: (effect: number | {
         duration: number;
         weakMagnitude?: number | undefined;
         strongMagnitude?: number | undefined;
-    } | import("../baseModule/baseUtils").Effect[], channelName?: string | undefined) => void;
+    } | import("../types").Effect[], channelName?: string | undefined) => void;
     destroy: () => void;
 } & {
     getButton: (inputName: string) => ButtonResult;

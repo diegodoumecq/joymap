@@ -1,6 +1,5 @@
+import { Mapper, StickResult, ButtonResult } from '../../src/index';
 import { reduce, isNumber, flow, split, map, join, compact } from 'lodash/fp';
-import { Mapper } from '../../src/queryModule/query';
-import { StickResult, ButtonResult } from '../../src/common/utils';
 
 // Utility function to count the number of pressed inputs of the given collection
 export function countPressed(inputs: Record<string, { pressed: boolean }>) {
@@ -40,14 +39,14 @@ export function stringifyInputs(inputs: Record<string, StickResult | ButtonResul
       if (input.pressed || input.justChanged) {
         if (isNumber(input.value)) {
           return `${result} ${inputName}: ${input.pressed ? 'pressed' : 'released'}(${
-            input.value
+            Math.round(input.value * 100) / 100
           }),`;
         }
 
         const [x, y] = input.value;
-        return `${result} ${inputName}: ${
-          input.pressed ? 'pressed' : 'released'
-        }(x: ${x}, y: ${y}),`;
+        return `${result} ${inputName}: ${input.pressed ? 'pressed' : 'released'}(x: ${
+          Math.round(x * 100) / 100
+        }, y: ${Math.round(y * 100) / 100}),`;
       }
 
       return result;

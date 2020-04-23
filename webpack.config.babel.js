@@ -5,61 +5,42 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import Autoprefixer from 'autoprefixer';
 
 const port = 9001;
-const bundleFolder = 'devBundle';
-const binPath = path.resolve(__dirname, bundleFolder);
+const devBundlePath = path.resolve(__dirname, 'devBundle');
+const devPath = path.resolve(__dirname, 'examples');
 const libPath = path.resolve(__dirname, 'src');
 const staticPath = path.resolve(__dirname, 'assets');
-
-const entries = {
-  canvas: {
-    path: path.resolve(__dirname, 'examples/Canvas'),
-    file: 'Canvas.ts',
-  },
-  fighting: {
-    path: path.resolve(__dirname, 'examples/Fighting'),
-    file: 'Fighting.ts',
-  },
-  log: {
-    path: path.resolve(__dirname, 'examples/StateLog'),
-    file: 'StateLog.ts',
-  },
-  react: {
-    path: path.resolve(__dirname, 'examples/ReactPad'),
-    file: 'index.tsx',
-  },
-  video: {
-    path: path.resolve(__dirname, 'examples/Video'),
-    file: 'Video.ts',
-  },
-  rumble: {
-    path: path.resolve(__dirname, 'examples/Rumble'),
-    file: 'Rumble.ts',
-  },
-};
+const docPath = path.resolve(__dirname, 'docs');
 
 export default function (env = {}) {
-  const entry = entries[env.example];
-
   return {
     devServer: {
       historyApiFallback: true,
       hot: true,
       port,
-      contentBase: entry.path,
+      contentBase: devPath,
       host: '0.0.0.0',
     },
 
     performance: { hints: false },
 
-    devtool: '#source-map',
+    devtool: env.mode === 'prod' ? false : 'source-map',
 
-    mode: 'development',
+    mode: env.mode === 'prod' ? 'production' : 'development',
 
-    entry: path.resolve(entry.path, entry.file),
+    entry: {
+      main: path.resolve(__dirname, 'examples/Main/index.tsx'),
+      readme: path.resolve(__dirname, 'examples/Main/Readme/index.ts'),
+      canvas: path.resolve(__dirname, 'examples/Canvas/Canvas.ts'),
+      fighting: path.resolve(__dirname, 'examples/Fighting/Fighting.ts'),
+      log: path.resolve(__dirname, 'examples/Log/Log.ts'),
+      react: path.resolve(__dirname, 'examples/React/React.tsx'),
+      video: path.resolve(__dirname, 'examples/Video/Video.ts'),
+      rumble: path.resolve(__dirname, 'examples/Rumble/Rumble.ts'),
+    },
 
     output: {
-      path: binPath,
-      filename: 'bundle.js',
+      path: env.mode === 'prod' ? docPath : devBundlePath,
+      filename: '[name].bundle.js',
       futureEmitAssets: false,
     },
 
@@ -73,7 +54,7 @@ export default function (env = {}) {
         {
           test: /\.ts[x]?$/,
           rules: [{ loader: 'babel-loader' }, { loader: 'ts-loader' }],
-          include: [entry.path, libPath],
+          include: [devPath, libPath],
         },
         {
           test: /\.styl$/,
@@ -106,8 +87,7 @@ export default function (env = {}) {
             {
               loader: 'url-loader',
               options: {
-                limit: '10000',
-                mimetype: 'application/png',
+                limit: false,
               },
             },
           ],
@@ -118,7 +98,7 @@ export default function (env = {}) {
             {
               loader: 'url-loader',
               options: {
-                limit: '10000',
+                limit: false,
                 mimetype: 'application/font-woff',
               },
             },
@@ -128,9 +108,10 @@ export default function (env = {}) {
           test: /\.ttf$/,
           rules: [
             {
-              loader: 'url-loader',
+              loader: 'file-loader',
               options: {
-                limit: '10000',
+                limit: false,
+                name: './fonts/[name].[ext]',
                 mimetype: 'application/octet-stream',
               },
             },
@@ -139,6 +120,10 @@ export default function (env = {}) {
         {
           test: /\.eot$/,
           rules: [{ loader: 'file-loader' }],
+        },
+        {
+          test: /\.md$/,
+          rules: [{ loader: 'raw-loader' }],
         },
       ],
     },

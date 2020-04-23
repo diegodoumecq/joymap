@@ -1,46 +1,7 @@
 import { assignIn } from 'lodash/fp';
 
-import { isButtonSignificant, findIndexes, isConsecutive, Button, Stick } from '../common/utils';
-
-export type Effect =
-  | number
-  | {
-      duration: number;
-      weakMagnitude?: number;
-      strongMagnitude?: number;
-    };
-
-// StrictEffect means all values are valid (duration > 0, magnitudes between 0 and 1)
-export interface StrictEffect {
-  duration: number;
-  weakMagnitude: number;
-  strongMagnitude: number;
-}
-
-// Only implemented by chrome, this api seems to be the spec from 2017
-export interface RawGamepad extends Gamepad {
-  vibrationActuator?: {
-    playEffect: (type: 'dual-rumble', effect: StrictEffect) => Promise<string>;
-    reset: () => Promise<string>;
-  };
-}
-
-export interface CustomGamepad {
-  axes: number[];
-  buttons: number[];
-  rawPad?: RawGamepad;
-}
-
-export interface ListenOptions {
-  callback: (indexes: number[] | number[][]) => void;
-  quantity: number;
-  type: 'buttons' | 'axes';
-  currentValue: number;
-  useTimeStamp: boolean;
-  targetValue: number;
-  consecutive: boolean;
-  allowOffset: boolean;
-}
+import { isButtonSignificant, findIndexes, isConsecutive } from '../common/utils';
+import { CustomGamepad, ListenOptions, Button, Stick } from '../types';
 
 export const mockGamepad: CustomGamepad = {
   axes: [],

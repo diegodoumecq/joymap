@@ -1,11 +1,6 @@
-import { Button, Stick } from '../common/utils';
-import { RawGamepad, Effect, StrictEffect, CustomGamepad } from './baseUtils';
-export interface BaseParams {
-    padId?: string;
-    threshold?: number;
-    clampThreshold?: boolean;
-}
-export interface State {
+import { RawGamepad, Effect, BaseParams, CustomGamepad, StrictEffect, Button, Stick } from '../types';
+export declare type BaseModule = ReturnType<typeof createModule>;
+interface BaseState {
     threshold: number;
     clampThreshold: boolean;
     pad: CustomGamepad;
@@ -16,7 +11,6 @@ export interface State {
     buttons: Record<string, Button>;
     sticks: Record<string, Stick>;
 }
-export declare type BaseModule = ReturnType<typeof createModule>;
 export default function createModule(params?: BaseParams): {
     module: {
         getPadId: () => string | null;
@@ -55,5 +49,6 @@ export default function createModule(params?: BaseParams): {
         } | Effect[], channelName?: string | undefined) => void;
         destroy: () => void;
     };
-    state: State;
+    state: BaseState;
 };
+export {};

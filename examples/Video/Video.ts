@@ -4,24 +4,24 @@ import 'regenerator-runtime/runtime.js';
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 
-import { createJoyMap, createStreamModule } from '../../src/index';
+import { createJoymap, createStreamModule } from '../../src/index';
 
 const app = document.getElementById('app') as HTMLElement;
 app.innerHTML = `
-  <article class="examples-container">
-    <header>
-      <h1 className="title">JoyMap video fun times example using the stream module</h1>
-      <h2 className="title">We only use the left stick and the A button</h2>
+  <div style="padding-left: 2rem; padding-right: 2rem; display: flex; flex-direction: column; align-items: center;">
+    <header style="text-align: center;">
+      <h3>Video feed manipulation using left stick and the A button</h3>
     </header>
+    <div style="align-items: center; display: flex; flex-wrap: wrap; justify-content: center;">
     <canvas class="photo"></canvas>
-    <video class="player"></video>
-  </article>
+    <video class="player"></video></div>
+  </div>
 `;
 
-const joyMap = createJoyMap();
-const module = createStreamModule({ rxjs, operators, padId: joyMap.getUnusedPadId() });
-joyMap.addModule(module);
-joyMap.start();
+const joymap = createJoymap();
+const module = createStreamModule({ rxjs, operators, padId: joymap.getUnusedPadId() });
+joymap.addModule(module);
+joymap.start();
 
 const video = document.querySelector('.player') as HTMLVideoElement;
 const canvas = document.querySelector('.photo') as HTMLCanvasElement;
