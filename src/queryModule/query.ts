@@ -42,7 +42,7 @@ export default function createQueryModule(params = {}) {
         return emptyButton;
       }
 
-      return buttonMap(
+      return buttonMapMemoized(
         state.pad,
         state.prevPad,
         state.buttons[inputName],
