@@ -1,5 +1,5 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-// @ts-ignore
+
 import VideoCode from '!raw-loader!../../Video/Video.ts';
 import VideoHTML from '!raw-loader!../../../assets/video.html';
 import { cleanupCode, tsconfig, makePckJson } from './utils';

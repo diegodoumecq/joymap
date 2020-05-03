@@ -53,7 +53,15 @@ export default function (env = {}) {
       rules: [
         {
           test: /\.ts[x]?$/,
-          rules: [{ loader: 'babel-loader' }, { loader: 'ts-loader' }],
+          rules: [
+            { loader: 'babel-loader' },
+            {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true,
+              },
+            },
+          ],
           include: [devPath, libPath],
         },
         {

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 
-function getPage(navParam: string) {
+function getPage(navParam: string): string {
   return (window.history.state || {})[navParam] || '';
 }
 
-export function useParamNav(navParam: string = 'page'): [string, (page: string) => void] {
+export function useParamNav(navParam = 'page'): [string, (page: string) => void] {
   const [page, setPage] = useState(getPage(navParam));
 
   function navigate(newPage: string) {

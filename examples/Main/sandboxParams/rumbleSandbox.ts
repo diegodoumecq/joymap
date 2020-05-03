@@ -1,6 +1,5 @@
 import { getParameters } from 'codesandbox/lib/api/define';
 
-// @ts-ignore
 import RumbleCode from '!raw-loader!../../Rumble/Rumble.ts';
 import RumbleHTML from '!raw-loader!../../../assets/rumble.html';
 import { cleanupCode, tsconfig, makePckJson } from './utils';

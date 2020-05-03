@@ -144,14 +144,28 @@ export default function Main() {
         <Divider />
         <List>
           {Object.entries(docs).map(([id, page]) => (
-            <ListItem button key={id} onClick={(e) => { e.preventDefault(); navigate(id); }}>
+            <ListItem
+              button
+              key={id}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(id);
+              }}
+            >
               <ListItemIcon>{page.icon}</ListItemIcon>
               <ListItemText primary={page.title} />
             </ListItem>
           ))}
           <Divider />
           {Object.entries(examples).map(([id, page]) => (
-            <ListItem button key={id} onClick={(e) => { e.preventDefault(); navigate(id); }}>
+            <ListItem
+              button
+              key={id}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(id);
+              }}
+            >
               <ListItemIcon>{page.icon}</ListItemIcon>
               <ListItemText primary={upperFirst(id)} />
             </ListItem>
@@ -160,15 +174,15 @@ export default function Main() {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbarSpacer} />
-          <Iframe
-            key={page.html}
-            url={page.html}
-            width="100%"
-            height="100%"
-            className={classes.iframe}
-            display="block"
-            position="relative"
-          />
+        <Iframe
+          key={page.html}
+          url={page.html}
+          width="100%"
+          height="100%"
+          className={classes.iframe}
+          display="block"
+          position="relative"
+        />
       </main>
     </div>
   );

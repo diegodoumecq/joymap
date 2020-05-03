@@ -4,10 +4,7 @@ export { packageJson };
 
 const codeTransforms: [RegExp, string][] = [
   [new RegExp('../../src/index', 'g'), 'joymap'],
-  [
-    new RegExp('../rotatingLogo', 'g'),
-    './rotatingLogo',
-  ],
+  [new RegExp('../rotatingLogo', 'g'), './rotatingLogo'],
   [
     new RegExp('bullet.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/bullet.png',

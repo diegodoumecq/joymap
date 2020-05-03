@@ -3,14 +3,14 @@ export type Button = number[];
 export type Stick = { indexes: number[][]; inverts: boolean[] };
 
 export interface ButtonResult {
-  type: 'button',
+  type: 'button';
   value: number;
   pressed: boolean;
   justChanged: boolean;
 }
 
 export interface StickResult {
-  type: 'stick',
+  type: 'stick';
   value: number[];
   pressed: boolean;
   justChanged: boolean;

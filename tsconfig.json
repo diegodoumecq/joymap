@@ -9,6 +9,8 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "rootDir": "./",
+    "noEmit": true,
+    "outDir": "",
     "lib": ["esnext", "dom"],
     "strict": true,
     "noImplicitAny": true,
@@ -26,7 +28,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
     "paths": {
-      "*": ["./src/*", "./node_modules/*", "./examples/*"]
+      "*": ["./node_modules/*"]
     },
     "typeRoots": ["./types/", "./node_modules/@types"],
     "jsx": "react",

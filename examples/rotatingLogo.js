@@ -1,4 +1,4 @@
-// TODO pass to typescript and fix the missing types from playcanvas
+// TODO refactor into typescript and fix the missing types from playcanvas
 
 import playcanvas from 'playcanvas';
 
@@ -30,7 +30,7 @@ export default function setupRotatingLogo(canvas) {
 
   const camera = new playcanvas.Entity();
   camera.addComponent('camera', {
-    clearColor: new playcanvas.Color(0.98,0.98,0.98),
+    clearColor: new playcanvas.Color(0.98, 0.98, 0.98),
   });
   camera.setPosition(0, 0, 3);
   app.root.addChild(camera);
@@ -47,9 +47,9 @@ export default function setupRotatingLogo(canvas) {
   light.setPosition(0, 0, 2);
   app.root.addChild(light);
 
-  let timer = 0;
+  // let timer = 0;
   app.on('update', function (dt) {
-    timer += dt;
+    // timer += dt;
     cube.rotate(dt * 10, dt * 20, dt * 30);
   });
 }

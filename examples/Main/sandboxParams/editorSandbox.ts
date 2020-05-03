@@ -1,8 +1,6 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-// @ts-ignore
 import EditorCode from '!raw-loader!../../Editor/Editor.jsx';
 import commandsCode from '!raw-loader!../../Editor/commands.js';
-// @ts-ignore
 import ckHelpersCode from '!raw-loader!../../Editor/ckHelpers.js';
 import EditorHTML from '!raw-loader!../../../assets/react.html';
 
@@ -15,7 +13,6 @@ export default getParameters({
       isBinary: false,
     },
     'commands.js': {
-      // @ts-ignore
       content: cleanupCode(commandsCode),
       isBinary: false,
     },
@@ -35,9 +32,10 @@ export default getParameters({
         hasReact: true,
         dependencies: {
           '@ckeditor/ckeditor5-react': packageJson.devDependencies['@ckeditor/ckeditor5-react'],
-          '@ckeditor/ckeditor5-build-classic': packageJson.devDependencies['@ckeditor/ckeditor5-build-classic'],
+          '@ckeditor/ckeditor5-build-classic':
+            packageJson.devDependencies['@ckeditor/ckeditor5-build-classic'],
           'lorem-ipsum': packageJson.devDependencies['lorem-ipsum'],
-        }
+        },
       }),
     },
     'tsconfig.json': tsconfig,

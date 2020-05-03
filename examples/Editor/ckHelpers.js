@@ -30,14 +30,14 @@ export function setSelection(editorRef, direction) {
     } else {
       // move selection cursor to start or end of doc
       // TODO: figure out how to actually move the selection only one line at a time
-      const start = direction === 'downward' ? writer.model.document.selection.getFirstPosition() : writer.createPositionAt(
-        editorRef.current.model.document.getRoot(),
-       0
-      );
-      const end = direction === 'downward' ? writer.createPositionAt(
-        editorRef.current.model.document.getRoot(),
-       'end'
-      ) : writer.model.document.selection.getLastPosition();
+      const start =
+        direction === 'downward'
+          ? writer.model.document.selection.getFirstPosition()
+          : writer.createPositionAt(editorRef.current.model.document.getRoot(), 0);
+      const end =
+        direction === 'downward'
+          ? writer.createPositionAt(editorRef.current.model.document.getRoot(), 'end')
+          : writer.model.document.selection.getLastPosition();
       const range = writer.createRange(start, end);
 
       writer.setSelection(range);

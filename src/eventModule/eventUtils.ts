@@ -5,8 +5,8 @@ import shuntingYard, { operators } from './shuntingYard';
 import { EventToken } from '../types';
 
 /**
-  * Returns EventToken[] in reverse polish notation (RPN)
-  */
+ * Returns EventToken[] in reverse polish notation (RPN)
+ */
 export function getEventTokens(name: string) {
   return flow(
     split(/([^a-zA-Z0-9.&&||])/g),
@@ -20,7 +20,7 @@ export function getEventTokens(name: string) {
       return {
         inputName: split('.', value)[0],
         inputState: split('.', value)[1] || 'pressed',
-      }
+      };
     }),
   )(name) as EventToken[];
 }
@@ -48,7 +48,7 @@ export function eventIsValid(inputs: EventToken[]) {
 export function verifyTokens(arr: (string | boolean)[]) {
   const stack: boolean[] = [];
 
-  arr.forEach(token => {
+  arr.forEach((token) => {
     if (typeof token === 'boolean') {
       stack.push(token);
     } else {
@@ -63,7 +63,6 @@ export function verifyTokens(arr: (string | boolean)[]) {
         throw new Error(`verifyTokens: invalid operator ${token} was used`);
       }
     }
-
   });
 
   return stack[0];

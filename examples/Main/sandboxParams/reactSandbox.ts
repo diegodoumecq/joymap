@@ -1,9 +1,6 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-// @ts-ignore
 import ReactCode from '!raw-loader!../../React/React.tsx';
-// @ts-ignore
 import GamepadCode from '!raw-loader!../../React/Gamepad.tsx';
-// @ts-ignore
 import StylesCode from '!raw-loader!../../React/styles.ts';
 import ReactHTML from '!raw-loader!../../../assets/react.html';
 
@@ -16,7 +13,6 @@ export default getParameters({
       isBinary: false,
     },
     'Gamepad.tsx': {
-      // @ts-ignore
       content: cleanupCode(GamepadCode),
       isBinary: false,
     },
@@ -43,7 +39,7 @@ export default getParameters({
           '@types/color-hash': packageJson.devDependencies['@types/color-hash'],
           '@types/styled-components': packageJson.devDependencies['@types/styled-components'],
           '@types/tinycolor2': packageJson.devDependencies['@types/tinycolor2'],
-        }
+        },
       }),
     },
     'tsconfig.json': tsconfig,

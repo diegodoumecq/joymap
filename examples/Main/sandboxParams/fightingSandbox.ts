@@ -1,5 +1,4 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-// @ts-ignore
 import FightingCode from '!raw-loader!../../Fighting/Fighting.ts';
 import rotatingLogoCode from '!raw-loader!../../rotatingLogo.js';
 import FightingStyl from '!raw-loader!../../Fighting/Fighting.styl';
@@ -14,7 +13,6 @@ export default getParameters({
       isBinary: false,
     },
     'rotatingLogo.js': {
-      // @ts-ignore
       content: cleanupCode(rotatingLogoCode),
       isBinary: false,
     },
@@ -34,7 +32,7 @@ export default getParameters({
         hasReact: false,
         dependencies: {
           playcanvas: packageJson.devDependencies['playcanvas'],
-        }
+        },
       }),
     },
     'tsconfig.json': tsconfig,

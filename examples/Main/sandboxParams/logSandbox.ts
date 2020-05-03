@@ -1,7 +1,5 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-// @ts-ignore
 import LogCode from '!raw-loader!../../Log/Log.ts';
-// @ts-ignore
 import LogUtils from '!raw-loader!../../Log/utils.ts';
 import rotatingLogoCode from '!raw-loader!../../rotatingLogo.js';
 import LogStyl from '!raw-loader!../../Log/Log.styl';
@@ -16,7 +14,6 @@ export default getParameters({
       isBinary: false,
     },
     'rotatingLogo.js': {
-      // @ts-ignore
       content: cleanupCode(rotatingLogoCode),
       isBinary: false,
     },
@@ -40,7 +37,7 @@ export default getParameters({
         hasReact: false,
         dependencies: {
           playcanvas: packageJson.devDependencies['playcanvas'],
-        }
+        },
       }),
     },
     'tsconfig.json': tsconfig,

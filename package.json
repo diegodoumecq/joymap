@@ -12,13 +12,14 @@
     "dev": "webpack-dev-server --hot",
     "format": "prettier \"**/*.{js,jsx,json,tsx,ts}\" --write",
     "lint": "eslint --ignore-path .prettierignore \"**/*.{js,jsx,ts,tsx}\"",
+    "tslint": "tsc -p tsconfig.json",
     "build": "yarn build-lib && yarn build-docs",
     "build-lib": "del-cli -f bin/* && webpack -p --config webpack.prod.babel.js",
     "build-docs": "del-cli -f docs/* && webpack -p --env.mode=docs"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "yarn tslint && lint-staged"
     }
   },
   "lint-staged": {

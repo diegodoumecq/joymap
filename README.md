@@ -23,9 +23,9 @@ A Javascript Gamepad browser API wrapper that chops, slices and dices
 * Supports user-oriented rebinding methods
 * [Lots of handy examples](https://diegodoumecq.github.io/joymap/)
 * Button bindings are set by default to the standard defined by the spec, but all possible inputs are supported
-* Can group buttons together (create a 'Jump' button from the A, B, L1 and R1 inputs)
+* Can group buttons together (create a `'Jump'` button from the A, B, L1 and R1 inputs)
 * Can group sticks together (create one Analog stick from the average of L and R)
-* Allows for event operators with the event module, for example: 'L1.justPressed && L.released && (A || B || customButtonDefinedPreviously)'
+* Provides event selectors with the event module, for example: `L1.justPressed && L.released && (A || B || customButton)`
 * Supports Chrome's implementation of rumble/haptic feedback
 * Uses and exports Typescript types
 
