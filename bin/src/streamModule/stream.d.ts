@@ -1,5 +1,5 @@
-import type * as rxjs from 'rxjs';
-import type * as operators from 'rxjs/operators';
+import * as rxjs from 'rxjs';
+import * as operators from 'rxjs/operators';
 import { BaseParams, ButtonResult, StickResult, RawGamepad } from '../types';
 export declare type StreamModule = ReturnType<typeof createStreamModule>;
 export interface ButtonStreamMapValue {
