@@ -1,7 +1,7 @@
 import memoize from 'fast-memoize';
 import { assignIn, mapValues, forEach } from 'lodash/fp';
-import type * as rxjs from 'rxjs';
-import type * as operators from 'rxjs/operators';
+import * as rxjs from 'rxjs';
+import * as operators from 'rxjs/operators';
 
 import createBaseModule from '../baseModule/base';
 
