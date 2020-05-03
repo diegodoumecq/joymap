@@ -25,6 +25,7 @@ A Javascript Gamepad browser API wrapper that chops, slices and dices
 * Button bindings are set by default to the standard defined by the spec, but all possible inputs are supported
 * Can group buttons together (create a 'Jump' button from the A, B, L1 and R1 inputs)
 * Can group sticks together (create one Analog stick from the average of L and R)
+* Allows for event operators with the event module, for example: 'L1.justPressed && L.released && (A || B || customButtonDefinedPreviously)'
 * Supports Chrome's implementation of rumble/haptic feedback
 * Uses and exports Typescript types
 
@@ -134,10 +135,8 @@ Throughout the library you're invited to name things. Like events, buttons, stic
 
 Stuff to do. Keep in mind these bullet points are in no particular order.
 
-* Add support for hapticActuators (seems to work on some VR gamepads apparently, need to get my hands on some)
-* Add an event example or change some of the existing query ones to use events
-* Add routing to the examples page
-* Refactor/replace the canvas example with something more visually interesting
+* Improve event module: add more event operator
+* Add support for hapticActuators in firefox (seems to work on some VR gamepads apparently, need to get my hands on some)
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or [playcanvas](https://github.com/playcanvas/engine)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
   * It should also store in the sessionStorage the module config and on refresh restore it

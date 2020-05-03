@@ -1,8 +1,9 @@
 import { getParameters } from 'codesandbox/lib/api/define';
 
-import RumbleCode from '!raw-loader!../Rumble/Rumble.ts';
-import RumbleHTML from '!raw-loader!../../assets/rumble.html';
-import { cleanupCode, tsconfig } from './utils';
+// @ts-ignore
+import RumbleCode from '!raw-loader!../../Rumble/Rumble.ts';
+import RumbleHTML from '!raw-loader!../../../assets/rumble.html';
+import { cleanupCode, tsconfig, makePckJson } from './utils';
 
 export default getParameters({
   files: {
@@ -16,15 +17,10 @@ export default getParameters({
     },
     'package.json': {
       isBinary: false,
-      content: JSON.stringify({
-        dependencies: {
-          joymap: 'latest',
-          lodash: '^4.17.15',
-        },
-        devDependencies: {
-          '@types/lodash': '^4.14.149',
-          'parcel-bundler': '^1.6.1',
-        },
+      content: makePckJson({
+        isTs: true,
+        hasLodash: true,
+        hasReact: false,
       }),
     },
     'tsconfig.json': tsconfig,

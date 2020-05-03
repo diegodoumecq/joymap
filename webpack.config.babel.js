@@ -30,12 +30,12 @@ export default function (env = {}) {
     entry: {
       main: path.resolve(__dirname, 'examples/Main/index.tsx'),
       readme: path.resolve(__dirname, 'examples/Main/Readme/index.ts'),
-      canvas: path.resolve(__dirname, 'examples/Canvas/Canvas.ts'),
       fighting: path.resolve(__dirname, 'examples/Fighting/Fighting.ts'),
       log: path.resolve(__dirname, 'examples/Log/Log.ts'),
       react: path.resolve(__dirname, 'examples/React/React.tsx'),
       video: path.resolve(__dirname, 'examples/Video/Video.ts'),
       rumble: path.resolve(__dirname, 'examples/Rumble/Rumble.ts'),
+      editor: path.resolve(__dirname, 'examples/Editor/Editor.jsx'),
     },
 
     output: {
@@ -54,6 +54,11 @@ export default function (env = {}) {
         {
           test: /\.ts[x]?$/,
           rules: [{ loader: 'babel-loader' }, { loader: 'ts-loader' }],
+          include: [devPath, libPath],
+        },
+        {
+          test: /\.js[x]?$/,
+          rules: [{ loader: 'babel-loader' }],
           include: [devPath, libPath],
         },
         {

@@ -1,5 +1,13 @@
+import packageJson from '../../../package.json';
+
+export { packageJson };
+
 const codeTransforms: [RegExp, string][] = [
   [new RegExp('../../src/index', 'g'), 'joymap'],
+  [
+    new RegExp('../rotatingLogo', 'g'),
+    './rotatingLogo',
+  ],
   [
     new RegExp('bullet.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/bullet.png',
@@ -46,3 +54,46 @@ export const tsconfig = {
     },
   }),
 };
+
+type Deps = Record<string, string>;
+type makePckJsonOptions = {
+  dependencies?: Deps;
+  devDependencies?: Deps;
+  isTs?: boolean;
+  hasReact?: boolean;
+  hasLodash?: boolean;
+};
+
+export function makePckJson({
+  dependencies = {},
+  devDependencies = {},
+  isTs = true,
+  hasLodash = true,
+  hasReact = false,
+}: makePckJsonOptions = {}) {
+  return JSON.stringify({
+    dependencies: {
+      joymap: packageJson.version,
+      ...(isTs ? { tslib: 'latest' } : {}),
+      ...(hasLodash ? { lodash: packageJson.dependencies.lodash } : {}),
+      ...(hasReact
+        ? {
+            react: packageJson.devDependencies.react,
+            'react-dom': packageJson.devDependencies['react-dom'],
+          }
+        : {}),
+      ...dependencies,
+    },
+    devDependencies: {
+      'parcel-bundler': '^1.6.1',
+      ...(hasLodash ? { '@types/lodash': packageJson.devDependencies['@types/lodash'] } : {}),
+      ...(hasReact
+        ? {
+            '@types/react': packageJson.devDependencies['@types/react'],
+            '@types/react-dom': packageJson.devDependencies['@types/react-dom'],
+          }
+        : {}),
+      ...devDependencies,
+    },
+  });
+}

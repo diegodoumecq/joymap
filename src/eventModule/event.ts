@@ -1,11 +1,11 @@
 import memoize from 'fast-memoize';
-import { filter, forEach, assignIn, map } from 'lodash/fp';
+import { filter, forEach, assignIn, map, isString } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
-import { buttonMap, stickMap, nameIsValid } from '../common/utils';
+import { buttonMap, stickMap } from '../common/utils';
 import { eventIsValid, getEventTokens, verifyTokens } from './eventUtils';
 
-import { RawGamepad, ButtonEvent, StickEvent } from '../types';
+import { RawGamepad, InputEvent, InputResult } from '../types';
 
 export type EventModule = ReturnType<typeof createEventModule>;
 
@@ -15,36 +15,23 @@ export default function createEventModule(params = {}) {
   const buttonMapMemoized = memoize(buttonMap);
   const stickMapMemoized = memoize(stickMap);
 
-  let buttonEvents: ButtonEvent[] = [];
-  let stickEvents: StickEvent[] = [];
+  let inputEvents: InputEvent[] = [];
 
   const module = assignIn(baseModule, {
     ...baseModule,
 
-    addButtonEvent: (eventName: string, callback: ButtonEvent['callback']) => {
+    addEvent: (eventName: string, callback: InputEvent['callback']) => {
       const tokens = getEventTokens(eventName);
+      console.log(tokens);
       if (eventIsValid(tokens)) {
-        buttonEvents.push({ name: eventName, callback, tokens });
+        inputEvents.push({ name: eventName, callback, tokens });
       }
     },
 
-    removeButtonEvent: (eventName: string, callback: ButtonEvent['callback']) => {
-      buttonEvents = filter(
+    removeEvent: (eventName: string, callback: InputEvent['callback']) => {
+      inputEvents = filter(
         (event) => event.name !== eventName || event.callback !== callback,
-        buttonEvents,
-      );
-    },
-
-    addStickEvent: (name: string, callback: StickEvent['callback']) => {
-      if (nameIsValid(name)) {
-        stickEvents.push({ name, callback });
-      }
-    },
-
-    removeStickEvent: (eventName: string, callback: StickEvent['callback']) => {
-      stickEvents = filter(
-        (event) => event.name !== eventName || event.callback !== callback,
-        stickEvents,
+        inputEvents,
       );
     },
 
@@ -63,52 +50,87 @@ export default function createEventModule(params = {}) {
           );
 
           if (result.pressed) {
-            event.callback(result);
+            event.callback([result]);
           }
-        } else if (
-          verifyTokens(
-            // composite button event
-            map(
-              ({ value, prop }) =>
-                !state.buttons[value]
-                  ? value
-                  : buttonMapMemoized(
-                      state.pad,
-                      state.prevPad,
-                      state.buttons[value],
-                      state.threshold,
-                      state.clampThreshold,
-                    )[prop],
-              event.tokens,
-            ),
-          )
-        ) {
-          event.callback(true);
-        }
-      }, buttonEvents);
+        } else if (state.sticks[event.name]) {
+          // simple stick event
+          const { indexes, inverts } = state.sticks[event.name];
+          const result = stickMapMemoized(
+            state.pad,
+            state.prevPad,
+            indexes,
+            inverts,
+            state.threshold,
+            state.clampThreshold,
+          );
 
-      forEach((event) => {
-        // simple stick event
-        const stick = state.sticks[event.name];
-        const result = stickMapMemoized(
-          state.pad,
-          state.prevPad,
-          stick.indexes,
-          stick.inverts,
-          state.threshold,
-          state.clampThreshold,
-        );
+          if (result.pressed) {
+            event.callback([result]);
+          }
+        } else {
+          // composite event with operators
+          const resultCopy: InputResult[] = [];
+          const results: (string | boolean)[] = map((token) => {
+            if (isString(token)) {
+              return token;
+            }
 
-        if (result.pressed) {
-          event.callback(result);
+            let result;
+            if (state.buttons[token.inputName]) {
+              result = buttonMapMemoized(
+                state.pad,
+                state.prevPad,
+                state.buttons[token.inputName],
+                state.threshold,
+                state.clampThreshold,
+              );
+            } else if (state.sticks[token.inputName]) {
+              const { indexes, inverts } = state.sticks[token.inputName];
+              result = stickMapMemoized(
+                state.pad,
+                state.prevPad,
+                indexes,
+                inverts,
+                state.threshold,
+                state.clampThreshold,
+              );
+            }
+
+            if (result) {
+              if (!resultCopy.includes(result)) {
+                // we save the input result for the callback (avoiding repetition)
+                // TODO: maybe there's a cleaner way of doing this?
+                resultCopy.push(result);
+              }
+
+              if (token.inputState === 'pressed') {
+                return result.pressed;
+              }
+
+              if (token.inputState === 'justPressed') {
+                return result.pressed && result.justChanged;
+              }
+
+              if (token.inputState === 'justReleased') {
+                return !result.pressed && result.justChanged;
+              }
+
+              return !result.pressed;
+            }
+
+            return false;
+          }, event.tokens);
+
+          if (verifyTokens(results)) {
+            event.callback(resultCopy);
+          }
         }
-      }, stickEvents);
+      }, inputEvents);
     },
 
     destroy() {
       baseModule.destroy();
-      buttonEvents = [];
-      stickEvents = [];
+      inputEvents = [];
     },
   });
 

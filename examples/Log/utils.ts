@@ -1,5 +1,5 @@
-import { Mapper, StickResult, ButtonResult } from '../../src/index';
-import { reduce, isNumber, flow, split, map, join, compact } from 'lodash/fp';
+import { Mapper, InputResult } from '../../src/index';
+import { reduce, flow, split, map, join, compact } from 'lodash/fp';
 
 // Utility function to count the number of pressed inputs of the given collection
 export function countPressed(inputs: Record<string, { pressed: boolean }>) {
@@ -31,13 +31,13 @@ export function renderRows(
 }
 
 // Utility function to print the state of all activated inputs of a type
-export function stringifyInputs(inputs: Record<string, StickResult | ButtonResult>) {
+export function stringifyInputs(inputs: Record<string, InputResult>) {
   return reduce(
     (result, inputName) => {
       const input = inputs[inputName];
 
       if (input.pressed || input.justChanged) {
-        if (isNumber(input.value)) {
+        if (input.type === 'button') {
           return `${result} ${inputName}: ${input.pressed ? 'pressed' : 'released'}(${
             Math.round(input.value * 100) / 100
           }),`;

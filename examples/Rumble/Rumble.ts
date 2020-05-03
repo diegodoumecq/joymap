@@ -268,8 +268,11 @@ const joymap = createJoymap({
       ctx.fillText(`To haptic feedback`, SIZE.centerX, SIZE.centerY);
       ctx.fillText(`Please connect gamepad/s`, SIZE.centerX, SIZE.centerY + 48);
     } else {
-      ctx.fillText(`Use sticks to move and aim`, SIZE.centerX, SIZE.centerY - 24);
-      ctx.fillText(`Shoulders and triggers to shoot`, SIZE.centerX, SIZE.centerY + 24);
+      ctx.fillText(`Use sticks to move and aim`, SIZE.centerX, SIZE.centerY - 48);
+      ctx.fillText(`Shoulders and triggers to shoot`, SIZE.centerX, SIZE.centerY);
+      if (window.navigator.vendor !== 'Google Inc.') {
+        ctx.fillText(`Rumble is only supported by chrome (as of may 2020)`, SIZE.centerX, SIZE.centerY + 48);
+      }
     }
     const unusedIds = joymap.getUnusedPadIds();
 

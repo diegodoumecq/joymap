@@ -33,7 +33,7 @@ const players: Player[] = map((name) => {
 }, names);
 
 // Invert both of the first player's sticks
-players[0].module.invertSticks([true, true], 'L', 'R');
+// players[0].module.invertSticks([true, true], 'L', 'R');
 
 function Root() {
   const [, updateState] = useState();

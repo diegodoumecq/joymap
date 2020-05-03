@@ -34,12 +34,8 @@ export const useStyles = makeStyles((theme) => ({
     marginLeft: '0.5rem',
   },
   headerButton: {
-    background: 'transparent',
-    border: 'none',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    cursor: 'pointer',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
     height: '34px',
   },
   iframe: {

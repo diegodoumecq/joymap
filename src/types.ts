@@ -3,17 +3,21 @@ export type Button = number[];
 export type Stick = { indexes: number[][]; inverts: boolean[] };
 
 export interface ButtonResult {
+  type: 'button',
   value: number;
   pressed: boolean;
   justChanged: boolean;
 }
 
 export interface StickResult {
+  type: 'stick',
   value: number[];
   pressed: boolean;
   justChanged: boolean;
   inverts: boolean[];
 }
+
+export type InputResult = ButtonResult | StickResult;
 
 // Only implemented by chrome, vibrationActuator seems to be the spec from 2017
 export interface RawGamepad extends Gamepad {
@@ -66,18 +70,17 @@ export interface ListenOptions {
   allowOffset: boolean;
 }
 
-export interface EventToken {
-  value: string;
-  prop: 'justChanged' | 'pressed';
+export interface InputToken {
+  inputName: string;
+  inputState: 'justPressed' | 'justReleased' | 'pressed' | 'released';
 }
 
-export interface ButtonEvent {
+export type OperatorToken = string;
+
+export type EventToken = InputToken | OperatorToken;
+
+export interface InputEvent {
   name: string;
-  callback: (button: ButtonResult | true) => void;
+  callback: (button: InputResult[]) => void;
   tokens: EventToken[];
-}
-
-export interface StickEvent {
-  name: string;
-  callback: (stick: StickResult) => void;
 }

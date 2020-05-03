@@ -1,5 +1,6 @@
 import { createJoymap, createQueryModule, QueryModule, Joymap } from '../../src/index';
 import { forEach, reduce, compact, flow, concat, takeRight, filter } from 'lodash/fp';
+import setupRotatingLogo from '../rotatingLogo';
 
 import './Fighting.styl';
 
@@ -23,9 +24,17 @@ app.innerHTML = `
     <header>
       <h3>Display gamepad input like a fighting game's training mode</h3>
     </header>
-    <div class="fighting-example"></div>
+    <div class="fighting-example">
+      <div class="unplugged">
+        <canvas id="unplugged-canvas" width="300" height="300"></canvas>
+        <h3>Waiting for gamepad/s to be connected</h3>
+      </div>
+    </div>
   </div>
 `;
+
+const unpluggedCanvas = document.getElementById('unplugged-canvas');
+setupRotatingLogo(unpluggedCanvas);
 
 function getArrow([x, y]: number[]) {
   const radians = Math.atan2(y * -1, x);
@@ -106,6 +115,11 @@ function createPlayer(joymap: Joymap, padId: string) {
 
   const mainElement = document.querySelector('.fighting-example') as HTMLElement;
   mainElement.appendChild(element);
+
+  const unplugged = document.querySelector('.unplugged');
+  if (unplugged) {
+    mainElement.removeChild(unplugged);
+  }
 
   return {
     id: padId,

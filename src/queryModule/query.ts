@@ -16,6 +16,7 @@ export type Mapper = (module: QueryModule) => MapperResult;
 export const emptyMapper: MapperResult = null;
 
 export const emptyStick: StickResult = {
+  type: 'stick',
   value: [0, 0],
   pressed: false,
   justChanged: false,
@@ -23,6 +24,7 @@ export const emptyStick: StickResult = {
 };
 
 export const emptyButton: ButtonResult = {
+  type: 'button',
   value: 0,
   pressed: false,
   justChanged: false,

@@ -175,21 +175,23 @@ export default function createModule(params: BaseParams = {}) {
 
       // Update rumble state
 
-      const now = Date.now();
-      const currentRumble = getCurrentEffect(gamepad.id);
-      updateChannels(gamepad.id, now - state.lastUpdate);
+      if (module.isRumbleSupported()) {
+        const now = Date.now();
+        const currentRumble = getCurrentEffect(gamepad.id);
+        updateChannels(gamepad.id, now - state.lastUpdate);
 
-      if (
-        state.prevRumble.weakMagnitude !== currentRumble.weakMagnitude ||
-        state.prevRumble.strongMagnitude !== currentRumble.strongMagnitude ||
-        now - state.lastRumbleUpdate >= MAX_DURATION / 2
-      ) {
-        applyRumble(gamepad, currentRumble);
-        state.prevRumble = currentRumble;
-        state.lastRumbleUpdate = now;
+        if (
+          state.prevRumble.weakMagnitude !== currentRumble.weakMagnitude ||
+          state.prevRumble.strongMagnitude !== currentRumble.strongMagnitude ||
+          now - state.lastRumbleUpdate >= MAX_DURATION / 2
+        ) {
+          applyRumble(gamepad, currentRumble);
+          state.prevRumble = currentRumble;
+          state.lastRumbleUpdate = now;
+        }
+
+        state.lastUpdate = now;
       }
-
-      state.lastUpdate = now;
     },
 
     cancelListen: () => {

@@ -1,6 +1,7 @@
 import { createJoymap, createQueryModule, Joymap, QueryModule } from '../../src/index';
 import { join, compact, forEach } from 'lodash/fp';
 import { stringifyInputs, countPressed, renderRows, stringifyMappers } from './utils';
+import setupRotatingLogo from '../rotatingLogo';
 
 import './Log.styl';
 
@@ -14,9 +15,16 @@ app.innerHTML = `
     <div class="log-example">
       <div class="log">
       </div>
+      <div class="unplugged">
+        <canvas id="unplugged-canvas" width="300" height="300"></canvas>
+        <h3>Waiting for gamepad/s to be connected</h3>
+      </div>
     </div>
   </div>
 `;
+
+const unpluggedCanvas = document.getElementById('unplugged-canvas');
+setupRotatingLogo(unpluggedCanvas);
 
 function log(info: string) {
   const logElement = document.querySelector('.log') as HTMLElement;
@@ -76,6 +84,11 @@ function setupModule(joymap: Joymap, padId: string) {
   `;
   const mainElement = document.querySelector('.log-example') as HTMLElement;
   mainElement.insertBefore(element, mainElement.firstChild);
+
+  const unplugged = document.querySelector('.unplugged');
+  if (unplugged) {
+    mainElement.removeChild(unplugged);
+  }
 }
 
 // Flags used to show/hide output separated by input type

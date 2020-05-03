@@ -1,53 +1,70 @@
-import { split, reduce, includes, filter, flow, map, endsWith } from 'lodash/fp';
+import { split, reduce, filter, flow, map, isString } from 'lodash/fp';
 
 import { nameIsValid } from '../common/utils';
+import shuntingYard, { operators } from './shuntingYard';
 import { EventToken } from '../types';
 
-export const operators = ['+', '!'];
-
+/**
+  * Returns EventToken[] in reverse polish notation (RPN)
+  */
 export function getEventTokens(name: string) {
   return flow(
-    split(/([^a-zA-Z0-9.])/g),
+    split(/([^a-zA-Z0-9.&&||])/g),
     filter((value) => !!value && value !== ' '),
-    map((value) => ({
-      value: split('.', value)[0],
-      prop: endsWith('.justChanged', value) ? 'justChanged' : 'pressed',
-    })),
+    shuntingYard,
+    map((value) => {
+      if (operators.includes(value)) {
+        return value;
+      }
+
+      return {
+        inputName: split('.', value)[0],
+        inputState: split('.', value)[1] || 'pressed',
+      }
+    }),
   )(name) as EventToken[];
 }
 
-export function eventIsValid(inputs: string | EventToken[]) {
+export function eventIsValid(inputs: EventToken[]) {
   const eventTokens = Array.isArray(inputs) ? inputs : getEventTokens(inputs);
 
   return reduce(
-    (result, { value }) => {
+    (result, token) => {
       if (!result) {
         return result;
       }
 
-      if (includes(value, operators) || nameIsValid(value)) {
-        return true;
+      if (isString(token)) {
+        return operators.includes(token);
       }
 
-      return false;
+      return nameIsValid(token.inputName);
     },
     true,
     eventTokens,
   );
 }
 
-export function verifyTokens(arr: (string | boolean)[]): string | boolean {
-  if (arr[0] === '!') {
-    return verifyTokens([!arr[1], ...arr.slice(2)]);
-  }
+export function verifyTokens(arr: (string | boolean)[]) {
+  const stack: boolean[] = [];
 
-  if (arr.length === 1) {
-    return arr[0];
-  }
+  arr.forEach(token => {
+    if (typeof token === 'boolean') {
+      stack.push(token);
+    } else {
+      const elem1 = stack.pop();
+      const elem2 = stack.pop();
 
-  if (arr[1] === '+') {
-    return arr[0] && verifyTokens(arr.slice(2));
-  }
+      if (token === '&&') {
+        stack.push(!!(elem1 && elem2));
+      } else if (token === '||') {
+        stack.push(!!(elem1 || elem2));
+      } else {
+        throw new Error(`verifyTokens: invalid operator ${token} was used`);
+      }
+    }
 
-  return false;
+  });
+
+  return stack[0];
 }

@@ -1,5 +1,7 @@
 import { EventToken } from '../types';
-export declare const operators: string[];
+/**
+  * Returns EventToken[] in reverse polish notation (RPN)
+  */
 export declare function getEventTokens(name: string): EventToken[];
-export declare function eventIsValid(inputs: string | EventToken[]): boolean;
-export declare function verifyTokens(arr: (string | boolean)[]): string | boolean;
+export declare function eventIsValid(inputs: EventToken[]): boolean;
+export declare function verifyTokens(arr: (string | boolean)[]): boolean;

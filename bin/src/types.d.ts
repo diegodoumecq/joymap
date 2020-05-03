@@ -4,16 +4,19 @@ export declare type Stick = {
     inverts: boolean[];
 };
 export interface ButtonResult {
+    type: 'button';
     value: number;
     pressed: boolean;
     justChanged: boolean;
 }
 export interface StickResult {
+    type: 'stick';
     value: number[];
     pressed: boolean;
     justChanged: boolean;
     inverts: boolean[];
 }
+export declare type InputResult = ButtonResult | StickResult;
 export interface RawGamepad extends Gamepad {
     vibrationActuator?: {
         playEffect: (type: 'dual-rumble', effect: StrictEffect) => Promise<string>;
@@ -54,16 +57,14 @@ export interface ListenOptions {
     consecutive: boolean;
     allowOffset: boolean;
 }
-export interface EventToken {
-    value: string;
-    prop: 'justChanged' | 'pressed';
+export interface InputToken {
+    inputName: string;
+    inputState: 'justPressed' | 'justReleased' | 'pressed' | 'released';
 }
-export interface ButtonEvent {
+export declare type OperatorToken = string;
+export declare type EventToken = InputToken | OperatorToken;
+export interface InputEvent {
     name: string;
-    callback: (button: ButtonResult | true) => void;
+    callback: (button: InputResult[]) => void;
     tokens: EventToken[];
-}
-export interface StickEvent {
-    name: string;
-    callback: (stick: StickResult) => void;
 }

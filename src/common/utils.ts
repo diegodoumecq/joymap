@@ -105,6 +105,7 @@ export function buttonMap(
   }
 
   return {
+    type: 'button',
     value: !clampThreshold || pressed ? value : 0,
     pressed,
     justChanged: pressed !== prevPressed,
@@ -143,6 +144,7 @@ export function stickMap(
   const pressed = isStickSignificant(value, threshold);
 
   return {
+    type: 'stick',
     value:
       !clampThreshold || pressed
         ? value.map((v, i) => (!inverts[i] ? v : v * -1))
