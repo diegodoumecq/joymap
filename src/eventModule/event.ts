@@ -22,7 +22,6 @@ export default function createEventModule(params = {}) {
 
     addEvent: (eventName: string, callback: InputEvent['callback']) => {
       const tokens = getEventTokens(eventName);
-      console.log(tokens);
       if (eventIsValid(tokens)) {
         inputEvents.push({ name: eventName, callback, tokens });
       }

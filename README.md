@@ -31,7 +31,7 @@ A Javascript Gamepad browser API wrapper that chops, slices and dices
 
 ### How to install
 
-You can install it with npm/yarn or just add a `<script>` tag with the joymap.min.js file and access the library through the joymap global var
+You can install it with npm/yarn or just add a `<script>` tag with the joymap.min.js file and access the library through the joymap global var. For example using the unpkg cdn: `<script src="http://unpkg.com/joymap/bin/joymap.min.js"></script>`
 
 ### Examples
 
@@ -135,7 +135,8 @@ Throughout the library you're invited to name things. Like events, buttons, stic
 
 Stuff to do. Keep in mind these bullet points are in no particular order.
 
-* Improve event module: add more event operator
+* Improve event module: add more event operators
+* Separate the examples into its own repo (or use lerna? maybe?)
 * Add support for hapticActuators in firefox (seems to work on some VR gamepads apparently, need to get my hands on some)
 * Add a 3d example using [threejs](https://github.com/mrdoob/three.js/) or [whitestorm](https://github.com/WhitestormJS/whitestorm.js) or [playcanvas](https://github.com/playcanvas/engine)
   * It should have a gamepad config menu for showcasing a more conventional button rebinding UI
