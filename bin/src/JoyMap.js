@@ -158,4 +158,4 @@ function createJoymap() {
   };
   return joymap;
 }
-//# sourceMappingURL=JoyMap.js.map
+//# sourceMappingURL=Joymap.js.map
