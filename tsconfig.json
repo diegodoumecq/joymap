@@ -34,11 +34,6 @@
     "types": ["node", "lodash"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "plugins": [
-      {
-        "name": "typescript-styled-components"
-      }
-    ]
+    "skipLibCheck": true
   }
 }

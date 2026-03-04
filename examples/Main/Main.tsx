@@ -1,189 +1,200 @@
-import { ReactNode } from 'react';
-import { upperFirst } from 'lodash/fp';
-import Iframe from 'react-iframe';
-
-import {
-  Drawer,
-  CssBaseline,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  Divider,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ButtonBase,
-} from '@material-ui/core';
+import { useState } from 'react';
+import { CodeBlock } from './CodeBlock';
+import { GithubIcon } from './icons/GithubIcon';
 
 import fightingResources from './sandboxParams/fightingSandbox';
 import reactResources from './sandboxParams/reactSandbox';
 import rumbleResources from './sandboxParams/rumbleSandbox';
 import logResources from './sandboxParams/logSandbox';
 import editorResources from './sandboxParams/editorSandbox';
-import { useStyles } from './styles';
-import { useParamNav } from './paramNav';
-import {
-  ArcadeStickIcon,
-  BeakerIcon,
-  BookOpenIcon,
-  ClipboardIcon,
-  GithubIcon,
-  PencilSquareIcon,
-  ReactIcon,
-} from './icons';
+
+// const _code = `const users = [
+//   { name: "Alice", age: 28, active: true },
+//   { name: "Bob", age: 34, active: false },
+//   { name: "Carol", age: 22, active: true },
+//   { name: "Dave", age: 45, active: true },
+// ];
+
+// const activeNames = users
+//   .filter(user => user.active)
+//   .map(user => user.name);
+
+// console.log(activeNames);
+// // => ["Alice", "Carol", "Dave"]`;
 
 interface Page {
   html: string;
   title: string;
-  gitPath: string;
+  gitPath?: string;
   params?: string;
-  icon: ReactNode;
+  description?: string;
+  tags: string[];
+  code?: string;
 }
 
-const docs: Record<string, Page> = {
+export const examples: Record<string, Page> = {
   readme: {
-    html: 'examples/Main/Readme/index.html',
+    html: 'examples/Readme/index.html',
     title: 'Readme',
-    gitPath: '',
-    icon: <BookOpenIcon />,
+    tags: [],
   },
-};
-
-const examples: Record<string, Page> = {
   react: {
     html: 'examples/React/index.html',
     title: 'React Example',
     gitPath: 'tree/master/examples/React',
     params: reactResources,
-    icon: <ReactIcon />,
+    tags: ['queryModule', 'react'],
+    description:
+      'A React component that visualizes gamepad input in real-time with button and stick visualization.',
   },
   fighting: {
     html: 'examples/Fighting/index.html',
     title: 'Fighting Example',
     gitPath: 'tree/master/examples/Fighting',
     params: fightingResources,
-    icon: <ArcadeStickIcon />,
+    tags: ['queryModule'],
+    description: 'A fighting game demo with fast input handling and combo detection.',
   },
   rumble: {
     html: 'examples/Rumble/index.html',
     title: 'Rumble Example',
     gitPath: 'tree/master/examples/Rumble',
     params: rumbleResources,
-    icon: <BeakerIcon />,
+    tags: ['queryModule', 'canvas'],
+    description: 'Demonstrates gamepad vibration/rumble effects on supported controllers.',
   },
   log: {
     html: 'examples/Log/index.html',
     title: 'Log Example',
     gitPath: 'tree/master/examples/Log',
     params: logResources,
-    icon: <ClipboardIcon />,
+    tags: ['queryModule', 'html', 'console'],
+    description: 'Displays all gamepad events in a scrollable log for debugging.',
   },
   editor: {
     html: 'examples/Editor/index.html',
     title: 'Editor Example',
     gitPath: 'tree/master/examples/Editor',
     params: editorResources,
-    icon: <PencilSquareIcon />,
+    tags: ['eventModule', 'react'],
+    description: 'A text editor example that binds gamepad buttons to keyboard events.',
   },
-} as const;
+};
 
-export default function Main() {
-  const classes = useStyles();
-  const [pageName, navigate] = useParamNav();
+export function Main() {
+  const [activeCategory, setActiveCategory] = useState('readme');
 
-  const page = examples[pageName] || docs[pageName] || examples.react;
+  const current = examples[activeCategory];
+
+  if (!current) return null;
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar className={classes.toolbar}>
-          <Typography variant="h6" noWrap>
-            {page.title}
-          </Typography>
-          <div style={{ display: 'flex' }}>
-            {!!page.params && (
-              <form
-                action="https://codesandbox.io/api/v1/sandboxes/define"
-                method="POST"
-                target="_blank"
-              >
-                <input type="hidden" name="parameters" value={page.params} />
-                <ButtonBase type="submit" className={classes.headerButton}>
-                  <img src="/assets/codesandbox.svg" />
-                  <span className={classes.headerButtonText}>Edit on codesandbox</span>
-                </ButtonBase>
-              </form>
-            )}
-            <ButtonBase
+    <div className="flex flex-col h-screen">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="h-12 w-12 rounded-md bg-primary flex items-center justify-center">
+              <img src="/assets/logo.png" />
+            </div>
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">
+              Joymap Examples
+            </h1>
+          </div>
+          <div className="max-w-5xl mx-auto">
+            <nav
+              className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
+              role="tablist"
+              aria-label="Filter by category"
+            >
+              {Object.keys(examples).map((cat) => {
+                const isActive = cat === activeCategory;
+
+                return (
+                  <button
+                    key={cat}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`flex cursor-pointer uppercase items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col w-full">
+        <div className="mx-auto px-4 py-4 flex flex-col flex-1 min-h-0 w-full max-w-5xl">
+          {!current.description && !current.tags.length ? null : (
+            <div className="mb-6">
+              <p className="mt-2 text-muted-foreground leading-relaxed max-w-2xl text-pretty">
+                {current.description}
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-4">
+                {current.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    data-slot="badge"
+                    className={
+                      'inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono text-xs'
+                    }
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {!!current.params && (
+            <form
+              action="https://codesandbox.io/api/v1/sandboxes/define"
+              method="POST"
+              target="_blank"
+            >
+              <input type="hidden" name="parameters" value={current.params} />
+              <button type="submit" className="px-2 h-8 gap-2">
+                <img src="/assets/codesandbox.svg" />
+                <span>Edit on codesandbox</span>
+              </button>
+            </form>
+          )}
+          {current.gitPath && (
+            <button
               type="button"
-              className={classes.headerButton}
+              className="px-2 h-8 gap-2"
               onClick={() => {
-                window.open(`https://github.com/diegodoumecq/joymap/${page.gitPath}`, '_blank');
+                window.open(`https://github.com/diegodoumecq/joymap/${current.gitPath}`, '_blank');
               }}
             >
               <GithubIcon />
-              <span className={classes.headerButtonText}>View on github</span>
-            </ButtonBase>
+              <span>View on github</span>
+            </button>
+          )}
+
+          {current.code && <CodeBlock code={current.code} />}
+
+          <div className="flex-1 min-h-0 w-full">
+            <iframe
+              key={current.html}
+              src={current.html}
+              className="w-full h-full block relative"
+            />
           </div>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-        anchor="left"
-      >
-        <div style={{ display: 'flex', background: '#5700FA', justifyContent: 'flex-end' }}>
-          <img src="/assets/logo.png" style={{ width: '4rem' }} />
         </div>
-        <Divider />
-        <List>
-          {Object.entries(docs).map(([id, page]) => (
-            <ListItem
-              button
-              key={id}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(id);
-              }}
-            >
-              <ListItemIcon>{page.icon}</ListItemIcon>
-              <ListItemText primary={page.title} />
-            </ListItem>
-          ))}
-          <Divider />
-          {Object.entries(examples).map(([id, page]) => (
-            <ListItem
-              button
-              key={id}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(id);
-              }}
-            >
-              <ListItemIcon>{page.icon}</ListItemIcon>
-              <ListItemText primary={upperFirst(id)} />
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-      <main className={classes.content}>
-        <div className={classes.toolbarSpacer} />
-        <Iframe
-          key={page.html}
-          url={page.html}
-          width="100%"
-          height="100%"
-          className={classes.iframe}
-          display="block"
-          position="relative"
-        />
       </main>
+
+      <footer className="border-t border-border py-4">
+        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground font-mono">{'v1.0.0'}</span>
+        </div>
+      </footer>
     </div>
   );
 }
-

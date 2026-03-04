@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createJoymap, createQueryModule, QueryModule } from '../../src/index';
 import ColorHash from 'color-hash';
 import tinycolor from 'tinycolor2';
 
 import Gamepad from './Gamepad';
-
-import { ReactExample } from './styles';
 
 interface Player {
   name: string;
@@ -49,7 +47,7 @@ function Root() {
       <header style={{ textAlign: 'center' }}>
         <h3>Connect one or more Gamepads. Use them. Click on buttons to rebind them.</h3>
       </header>
-      <ReactExample>
+      <section className="flex flex-row flex-wrap justify-center w-full">
         {players.map(({ module, name, color }) => (
           <Gamepad
             key={name}
@@ -61,7 +59,7 @@ function Root() {
             <h3>{module.getPadId() || 'Player has no gamepad assigned'}</h3>
           </Gamepad>
         ))}
-      </ReactExample>
+      </section>
     </div>
   );
 }
@@ -69,4 +67,3 @@ function Root() {
 // Render the root component onto the app html container
 const root = createRoot(document.getElementById('app')!);
 root.render(<Root />);
-

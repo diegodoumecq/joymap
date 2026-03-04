@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -23,13 +24,6 @@ export default defineConfig({
         react: path.resolve(__dirname, 'examples/React/index.html'),
         rumble: path.resolve(__dirname, 'examples/Rumble/index.html'),
         editor: path.resolve(__dirname, 'examples/Editor/index.html'),
-      },
-    },
-  },
-  css: {
-    preprocessorOptions: {
-      stylus: {
-        'resolve url': true,
       },
     },
   },

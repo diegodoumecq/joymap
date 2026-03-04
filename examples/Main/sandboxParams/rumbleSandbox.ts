@@ -1,7 +1,7 @@
 import { getParameters } from 'codesandbox/lib/api/define';
 
 import RumbleCode from '../../Rumble/Rumble.ts?raw';
-import RumbleHTML from '../../../assets/rumble.html?raw';
+import RumbleHTML from '../../Rumble/index.html?raw';
 import { cleanupCode, tsconfig, makePckJson } from './utils';
 
 export default getParameters({
@@ -11,13 +11,12 @@ export default getParameters({
       isBinary: false,
     },
     'index.html': {
-      content: RumbleHTML.replace('rumble.bundle.js', 'index.ts'),
+      content: RumbleHTML.replace('Rumble.ts', 'index.ts'),
       isBinary: false,
     },
     'package.json': {
       isBinary: false,
       content: makePckJson({
-        isTs: true,
         hasLodash: true,
         hasReact: false,
       }),
@@ -25,3 +24,4 @@ export default getParameters({
     'tsconfig.json': tsconfig,
   },
 });
+

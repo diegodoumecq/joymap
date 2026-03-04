@@ -4,7 +4,6 @@ export { packageJson };
 
 const codeTransforms: [RegExp, string][] = [
   [new RegExp('../../src/index', 'g'), 'joymap'],
-  [new RegExp('../rotatingLogo', 'g'), './rotatingLogo'],
   [
     new RegExp('/assets/bullet.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/bullet.png',
@@ -56,22 +55,22 @@ type Deps = Record<string, string>;
 type makePckJsonOptions = {
   dependencies?: Deps;
   devDependencies?: Deps;
-  isTs?: boolean;
   hasReact?: boolean;
   hasLodash?: boolean;
+  reactScripts?: boolean;
 };
 
 export function makePckJson({
   dependencies = {},
   devDependencies = {},
-  isTs = true,
   hasLodash = true,
   hasReact = false,
+  reactScripts = false,
 }: makePckJsonOptions = {}) {
   return JSON.stringify({
     dependencies: {
       joymap: packageJson.version,
-      ...(isTs ? { tslib: 'latest' } : {}),
+      tslib: 'latest',
       ...(hasLodash ? { lodash: packageJson.dependencies.lodash } : {}),
       ...(hasReact
         ? {
@@ -87,12 +86,12 @@ export function makePckJson({
         ? {
             '@types/react': packageJson.devDependencies['@types/react'],
             '@types/react-dom': packageJson.devDependencies['@types/react-dom'],
-            'react-scripts': 'latest',
           }
-        : { parcel: 'latest' }),
+        : {}),
+      ...(reactScripts ? { 'react-scripts': 'latest' } : { parcel: 'latest' }),
       ...devDependencies,
     },
-    ...(hasReact
+    ...(reactScripts
       ? {
           scripts: {
             start: 'react-scripts start',

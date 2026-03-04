@@ -1,9 +1,8 @@
 import { createJoymap, createQueryModule, Joymap, QueryModule } from '../../src/index';
 import { join, compact, forEach } from 'lodash/fp';
 import { stringifyInputs, countPressed, renderRows, stringifyMappers } from './utils';
-import setupRotatingLogo from '../rotatingLogo';
 
-import './Log.styl';
+import './Log.css';
 
 // Populate the app div with some basic html
 const app = document.getElementById('app') as HTMLElement;
@@ -22,12 +21,6 @@ app.innerHTML = `
     </div>
   </div>
 `;
-
-const unpluggedCanvas = document.getElementById('unplugged-canvas');
-
-if (unpluggedCanvas) {
-  setupRotatingLogo(unpluggedCanvas as HTMLCanvasElement);
-}
 
 function log(info: string) {
   const logElement = document.querySelector('.log')!;
@@ -152,4 +145,3 @@ const joymap = createJoymap({
 });
 
 joymap.start();
-

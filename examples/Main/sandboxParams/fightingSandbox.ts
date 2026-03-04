@@ -1,10 +1,9 @@
 import { getParameters } from 'codesandbox/lib/api/define';
 import FightingCode from '../../Fighting/Fighting.ts?raw';
-import rotatingLogoCode from '../../rotatingLogo.ts?raw';
-import FightingStyl from '../../Fighting/Fighting.styl?raw';
-import FightingHTML from '../../../assets/fighting.html?raw';
+import FightingCss from '../../Fighting/Fighting.css?raw';
+import FightingHTML from '../../Fighting/index.html?raw';
 
-import { cleanupCode, tsconfig, makePckJson, packageJson } from './utils';
+import { cleanupCode, tsconfig, makePckJson } from './utils';
 
 export default getParameters({
   files: {
@@ -12,27 +11,19 @@ export default getParameters({
       content: cleanupCode(FightingCode),
       isBinary: false,
     },
-    'rotatingLogo.ts': {
-      content: cleanupCode(rotatingLogoCode),
-      isBinary: false,
-    },
-    'Fighting.styl': {
-      content: FightingStyl,
+    'Fighting.css': {
+      content: FightingCss,
       isBinary: false,
     },
     'index.html': {
-      content: FightingHTML.replace('fighting.bundle.js', 'index.ts'),
+      content: FightingHTML.replace('Fighting.ts', 'index.ts'),
       isBinary: false,
     },
     'package.json': {
       isBinary: false,
       content: makePckJson({
-        isTs: true,
         hasLodash: true,
         hasReact: false,
-        dependencies: {
-          playcanvas: packageJson.devDependencies['playcanvas'],
-        },
       }),
     },
     'tsconfig.json': tsconfig,

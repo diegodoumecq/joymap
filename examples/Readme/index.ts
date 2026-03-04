@@ -1,5 +1,5 @@
 import { marked } from 'marked';
-import readme from '../../../README.md?raw';
+import readme from '../../README.md?raw';
 
 function cleanSelfRef(str: string) {
   return str
@@ -14,7 +14,7 @@ function cleanSelfRef(str: string) {
 }
 
 document.body.innerHTML = `
-  <div style="padding: 2rem; font-family: sans-serif; display: flex; justify-content: center;">
+  <div style="padding: 2rem; color: #EEE; font-family: sans-serif; display: flex; justify-content: center;">
     <div style="max-width: 1000px;">
     ${marked(cleanSelfRef(readme))}
     </div>
