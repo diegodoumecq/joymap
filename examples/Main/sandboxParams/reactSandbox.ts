@@ -1,8 +1,8 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-import ReactCode from '!raw-loader!../../React/React.tsx';
-import GamepadCode from '!raw-loader!../../React/Gamepad.tsx';
-import StylesCode from '!raw-loader!../../React/styles.ts';
-import ReactHTML from '!raw-loader!../../../assets/react.html';
+import ReactCode from '../../React/React.tsx?raw';
+import GamepadCode from '../../React/Gamepad.tsx?raw';
+import StylesCode from '../../React/styles.ts?raw';
+import ReactHTML from '../../../assets/react.html?raw';
 
 import { cleanupCode, tsconfig, makePckJson, packageJson } from './utils';
 
@@ -28,7 +28,7 @@ export default getParameters({
       isBinary: false,
       content: makePckJson({
         isTs: true,
-        hasLodash: true,
+        hasLodash: false,
         hasReact: true,
         dependencies: {
           'color-hash': packageJson.devDependencies['color-hash'],
@@ -45,3 +45,4 @@ export default getParameters({
     'tsconfig.json': tsconfig,
   },
 });
+

@@ -1,9 +1,9 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-import LogCode from '!raw-loader!../../Log/Log.ts';
-import LogUtils from '!raw-loader!../../Log/utils.ts';
-import rotatingLogoCode from '!raw-loader!../../rotatingLogo.js';
-import LogStyl from '!raw-loader!../../Log/Log.styl';
-import LogHTML from '!raw-loader!../../../assets/log.html';
+import LogCode from '../../Log/Log.ts?raw';
+import LogUtils from '../../Log/utils.ts?raw';
+import rotatingLogoCode from '../../rotatingLogo.ts?raw';
+import LogStyl from '../../Log/Log.styl?raw';
+import LogHTML from '../../../assets/log.html?raw';
 
 import { cleanupCode, tsconfig, makePckJson, packageJson } from './utils';
 
@@ -13,7 +13,7 @@ export default getParameters({
       content: cleanupCode(LogCode),
       isBinary: false,
     },
-    'rotatingLogo.js': {
+    'rotatingLogo.ts': {
       content: cleanupCode(rotatingLogoCode),
       isBinary: false,
     },
@@ -43,3 +43,4 @@ export default getParameters({
     'tsconfig.json': tsconfig,
   },
 });
+

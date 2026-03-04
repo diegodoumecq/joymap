@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { createJoymap, createEventModule } from '../../src/index';
-import CKEditor from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { ClassicEditor, Essentials, Paragraph, Bold, Italic } from 'ckeditor5';
 
+import 'ckeditor5/ckeditor5.css';
 import commands from './commands';
 import { executeCommand } from './ckHelpers';
 
@@ -74,27 +75,29 @@ function Root() {
   const [font, setFont] = useState('inherit');
 
   useEffect(() => {
-    hookCompositeEvents(editorRef);
+    if (editorRef.current) {
+      hookCompositeEvents(editorRef);
 
-    module.addEvent('R', ([RStick]) => {
-      setIntensity(getDist(RStick.value));
-      setAngle(getRad(RStick.value));
-    });
+      module.addEvent('R', ([RStick]) => {
+        setIntensity(getDist(RStick.value));
+        setAngle(getRad(RStick.value));
+      });
 
-    module.addEvent('L', ([LStick]) => {
-      if (getRad(LStick.value) - 3 > 0) {
-        setFont('cursive');
-      } else {
-        setFont('inherit');
-      }
-    });
+      module.addEvent('L', ([LStick]) => {
+        if (getRad(LStick.value) - 3 > 0) {
+          setFont('cursive');
+        } else {
+          setFont('inherit');
+        }
+      });
 
-    editorRef.current.editing.view.focus();
+      editorRef.current.editing.view.focus();
 
-    joymap.start();
+      joymap.start();
 
-    return () => joymap.stop();
-  }, []);
+      return () => joymap.stop();
+    }
+  }, [editorRef.current]);
 
   const isEaster = font !== 'inherit';
 
@@ -118,7 +121,11 @@ function Root() {
       <section>
         <CKEditor
           editor={ClassicEditor}
-          data={initialContent}
+          config={{
+            plugins: [Essentials, Paragraph, Bold, Italic],
+            toolbar: ['undo', 'redo', '|', 'bold', 'italic', '|'],
+            initialData: initialContent,
+          }}
           onInit={(editor) => {
             editorRef.current = editor;
           }}
@@ -138,4 +145,6 @@ function Root() {
 }
 
 // Render the root component onto the app html container
-render(<Root />, document.getElementById('app'));
+const root = createRoot(document.getElementById('app'));
+root.render(<Root />);
+

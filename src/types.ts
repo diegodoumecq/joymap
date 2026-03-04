@@ -19,13 +19,7 @@ export interface StickResult {
 
 export type InputResult = ButtonResult | StickResult;
 
-// Only implemented by chrome, vibrationActuator seems to be the spec from 2017
-export interface RawGamepad extends Gamepad {
-  vibrationActuator?: {
-    playEffect: (type: 'dual-rumble', effect: StrictEffect) => Promise<string>;
-    reset: () => Promise<string>;
-  };
-}
+export type RawGamepad = Gamepad;
 
 export interface CustomGamepad {
   axes: number[];

@@ -24,10 +24,13 @@ app.innerHTML = `
 `;
 
 const unpluggedCanvas = document.getElementById('unplugged-canvas');
-setupRotatingLogo(unpluggedCanvas);
+
+if (unpluggedCanvas) {
+  setupRotatingLogo(unpluggedCanvas as HTMLCanvasElement);
+}
 
 function log(info: string) {
-  const logElement = document.querySelector('.log') as HTMLElement;
+  const logElement = document.querySelector('.log')!;
   const first = logElement.firstChild as HTMLElement;
 
   if (first && first.children && first.children[1].innerHTML === info) {
@@ -149,3 +152,4 @@ const joymap = createJoymap({
 });
 
 joymap.start();
+

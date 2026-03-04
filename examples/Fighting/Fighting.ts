@@ -34,7 +34,10 @@ app.innerHTML = `
 `;
 
 const unpluggedCanvas = document.getElementById('unplugged-canvas');
-setupRotatingLogo(unpluggedCanvas);
+
+if (unpluggedCanvas) {
+  setupRotatingLogo(unpluggedCanvas as HTMLCanvasElement);
+}
 
 function getArrow([x, y]: number[]) {
   const radians = Math.atan2(y * -1, x);
@@ -166,3 +169,4 @@ const joymap = createJoymap({
 });
 
 joymap.start();
+

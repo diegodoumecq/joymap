@@ -1,5 +1,5 @@
 import memoize from 'fast-memoize';
-import { filter, forEach, assignIn, map, isString } from 'lodash/fp';
+import { forEach, assignIn, map, isString } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
 import { buttonMap, stickMap } from '../common/utils';
@@ -28,9 +28,8 @@ export default function createEventModule(params = {}) {
     },
 
     removeEvent: (eventName: string, callback: InputEvent['callback']) => {
-      inputEvents = filter(
-        (event) => event.name !== eventName || event.callback !== callback,
-        inputEvents,
+      inputEvents = inputEvents.filter(
+        (event) => event.name !== eventName || event.callback !== callback
       );
     },
 

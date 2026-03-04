@@ -1,5 +1,5 @@
-import marked from 'marked';
-import readme from '../../../README.md';
+import { marked } from 'marked';
+import readme from '../../../README.md?raw';
 
 function cleanSelfRef(str: string) {
   return str
@@ -20,3 +20,4 @@ document.body.innerHTML = `
     </div>
   </div>
 `;
+

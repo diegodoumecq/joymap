@@ -1,8 +1,12 @@
-import createBaseModule, { BaseModule } from './baseModule/base';
-import createQueryModule, { QueryModule, MapperResult, Mapper } from './queryModule/query';
-import createEventModule, { EventModule } from './eventModule/event';
-import createStreamModule, { StreamModule, StreamParams } from './streamModule/stream';
-import createJoymap, { Joymap, AnyModule } from './Joymap';
+import createBaseModule, { type BaseModule } from './baseModule/base';
+import createQueryModule, {
+  type QueryModule,
+  type MapperResult,
+  type Mapper,
+} from './queryModule/query';
+import createEventModule, { type EventModule } from './eventModule/event';
+import createStreamModule, { type StreamModule, type StreamParams } from './streamModule/stream';
+import createJoymap, { type Joymap, type AnyModule } from './JoyMap';
 
 export * from './types';
 
@@ -30,3 +34,4 @@ export default {
   createStreamModule,
   createJoymap,
 };
+

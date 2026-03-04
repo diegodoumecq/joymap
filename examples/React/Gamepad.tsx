@@ -1,6 +1,5 @@
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { QueryModule } from '../../src/index';
-import { map } from 'lodash/fp';
 
 import { PadContainer, ReactInputs, ModuleName, Back, WaitingMessage, inputs } from './styles';
 
@@ -111,36 +110,27 @@ export default function Gamepad({
       <ReactInputs>
         <ModuleName style={{ color: pressedColor }}>{name}</ModuleName>
         <Back />
-        {map(
-          (inputName) => (
-            <Shoulder key={inputName} inputName={inputName} module={module} />
-          ),
-          shoulderInputs,
-        )}
-        {map(
-          (inputName) => (
-            <Stick
-              key={inputName}
-              inputName={inputName}
-              pressedColor={pressedColor}
-              module={module}
-              setWaitingFor={setWaitingFor}
-            />
-          ),
-          analogInputs,
-        )}
-        {map(
-          (inputName) => (
-            <Digital
-              key={inputName}
-              inputName={inputName}
-              pressedColor={pressedColor}
-              module={module}
-              setWaitingFor={setWaitingFor}
-            />
-          ),
-          digitalInputs,
-        )}
+        {shoulderInputs.map((inputName) => (
+          <Shoulder key={inputName} inputName={inputName} module={module} />
+        ))}
+        {analogInputs.map((inputName) => (
+          <Stick
+            key={inputName}
+            inputName={inputName}
+            pressedColor={pressedColor}
+            module={module}
+            setWaitingFor={setWaitingFor}
+          />
+        ))}
+        {digitalInputs.map((inputName) => (
+          <Digital
+            key={inputName}
+            inputName={inputName}
+            pressedColor={pressedColor}
+            module={module}
+            setWaitingFor={setWaitingFor}
+          />
+        ))}
       </ReactInputs>
       {!!waitingFor && (
         <WaitingMessage
@@ -156,3 +146,4 @@ export default function Gamepad({
     </PadContainer>
   );
 }
+

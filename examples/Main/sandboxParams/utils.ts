@@ -6,23 +6,23 @@ const codeTransforms: [RegExp, string][] = [
   [new RegExp('../../src/index', 'g'), 'joymap'],
   [new RegExp('../rotatingLogo', 'g'), './rotatingLogo'],
   [
-    new RegExp('bullet.png', 'g'),
+    new RegExp('/assets/bullet.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/bullet.png',
   ],
   [
-    new RegExp('gamepad.png', 'g'),
+    new RegExp('/assets/gamepad.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/gamepad.png',
   ],
   [
-    new RegExp('L1.png', 'g'),
+    new RegExp('/assets/L1.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/L1.png',
   ],
   [
-    new RegExp('L2.png', 'g'),
+    new RegExp('/assets/L2.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/L2.png',
   ],
   [
-    new RegExp('smallBullet.png', 'g'),
+    new RegExp('/assets/smallBullet.png', 'g'),
     'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/smallBullet.png',
   ],
 ];
@@ -82,15 +82,24 @@ export function makePckJson({
       ...dependencies,
     },
     devDependencies: {
-      'parcel-bundler': '^1.6.1',
       ...(hasLodash ? { '@types/lodash': packageJson.devDependencies['@types/lodash'] } : {}),
       ...(hasReact
         ? {
             '@types/react': packageJson.devDependencies['@types/react'],
             '@types/react-dom': packageJson.devDependencies['@types/react-dom'],
+            'react-scripts': 'latest',
           }
-        : {}),
+        : { parcel: 'latest' }),
       ...devDependencies,
     },
+    ...(hasReact
+      ? {
+          scripts: {
+            start: 'react-scripts start',
+            build: 'react-scripts build',
+          },
+        }
+      : {}),
   });
 }
+
