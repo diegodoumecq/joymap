@@ -1,9 +1,9 @@
-import { createJoymap, createQueryModule, Joymap, QueryModule } from '../../src/index';
-import { join, compact, forEach } from 'lodash/fp';
-import { stringifyInputs, countPressed, renderRows, stringifyMappers } from './utils';
-import setupRotatingLogo from '../rotatingLogo';
+import { createJoymap, createQueryModule, Joymap, QueryModule } from 'joymap';
+import { compact, forEach, join } from 'lodash/fp';
 
-import './Log.styl';
+import { countPressed, renderRows, stringifyInputs, stringifyMappers } from './utils';
+
+import './Log.css';
 
 // Populate the app div with some basic html
 const app = document.getElementById('app') as HTMLElement;
@@ -16,18 +16,11 @@ app.innerHTML = `
       <div class="log">
       </div>
       <div class="unplugged">
-        <canvas id="unplugged-canvas" width="300" height="300"></canvas>
         <h3>Waiting for gamepad/s to be connected</h3>
       </div>
     </div>
   </div>
 `;
-
-const unpluggedCanvas = document.getElementById('unplugged-canvas');
-
-if (unpluggedCanvas) {
-  setupRotatingLogo(unpluggedCanvas as HTMLCanvasElement);
-}
 
 function log(info: string) {
   const logElement = document.querySelector('.log')!;
@@ -152,4 +145,3 @@ const joymap = createJoymap({
 });
 
 joymap.start();
-

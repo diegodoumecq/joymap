@@ -1,0 +1,123 @@
+body {
+  background-color: #282828;
+  color: #ddd;
+  padding: 1rem;
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.fighting-example {
+  color: black;
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.fighting-example .unplugged {
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.fighting-example .module {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.fighting-example .module .name {
+  text-align: center;
+  background: #39cccc;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0;
+}
+
+.fighting-example .module .inputs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.fighting-example .module .inputs div {
+  margin-left: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  width: 2.5rem;
+  text-align: center;
+}
+
+.fighting-example .module .inputs .L {
+  background-color: #aaaabb;
+}
+
+.fighting-example .module .inputs .R {
+  background-color: #ccccaa;
+}
+
+.fighting-example .module .inputs .D {
+  background-color: #bbaacc;
+}
+
+.fighting-example .module .inputs .L3 {
+  background-color: #aaaa55;
+}
+
+.fighting-example .module .inputs .L2 {
+  background-color: #bbddff;
+}
+
+.fighting-example .module .inputs .L1 {
+  background-color: #bbddff;
+}
+
+.fighting-example .module .inputs .R3 {
+  background-color: #aaaa55;
+}
+
+.fighting-example .module .inputs .R2 {
+  background-color: #bbee99;
+}
+
+.fighting-example .module .inputs .R1 {
+  background-color: #bbee99;
+}
+
+.fighting-example .module .inputs .A {
+  background-color: #ffbbaa;
+}
+
+.fighting-example .module .inputs .B {
+  background-color: #ffbbaa;
+}
+
+.fighting-example .module .inputs .X {
+  background-color: #ffbbaa;
+}
+
+.fighting-example .module .inputs .Y {
+  background-color: #ffbbaa;
+}
+
+.fighting-example .module .inputs .start {
+  background-color: #aaaaaa;
+}
+
+.fighting-example .module .inputs .select {
+  background-color: #aaaaaa;
+}
+
+.fighting-example .module .inputs .home {
+  background-color: #aaaaaa;
+}

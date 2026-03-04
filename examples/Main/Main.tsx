@@ -1,189 +1,193 @@
-import { ReactNode } from 'react';
-import { upperFirst } from 'lodash/fp';
-import Iframe from 'react-iframe';
+import { useState } from 'react';
 
-import {
-  Drawer,
-  CssBaseline,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  Divider,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ButtonBase,
-} from '@material-ui/core';
-
+import { CodeBlock } from './CodeBlock';
+import { CodesandboxLink } from './components';
+import { Button } from './components/Button';
+import { GithubIcon } from './components/GithubIcon';
+import { IframeCard } from './components/IframeCard';
+import { Link } from './components/Link';
+import editorResources from './sandboxParams/editorSandbox';
 import fightingResources from './sandboxParams/fightingSandbox';
+import logResources from './sandboxParams/logSandbox';
 import reactResources from './sandboxParams/reactSandbox';
 import rumbleResources from './sandboxParams/rumbleSandbox';
-import logResources from './sandboxParams/logSandbox';
-import editorResources from './sandboxParams/editorSandbox';
-import { useStyles } from './styles';
-import { useParamNav } from './paramNav';
-import {
-  ArcadeStickIcon,
-  BeakerIcon,
-  BookOpenIcon,
-  ClipboardIcon,
-  GithubIcon,
-  PencilSquareIcon,
-  ReactIcon,
-} from './icons';
+import { version } from './sandboxParams/utils';
+
+// const _code = `const users = [
+//   { name: "Alice", age: 28, active: true },
+//   { name: "Bob", age: 34, active: false },
+//   { name: "Carol", age: 22, active: true },
+//   { name: "Dave", age: 45, active: true },
+// ];
+
+// const activeNames = users
+//   .filter(user => user.active)
+//   .map(user => user.name);
+
+// console.log(activeNames);
+// // => ["Alice", "Carol", "Dave"]`;
 
 interface Page {
   html: string;
   title: string;
-  gitPath: string;
+  gitPath?: string;
   params?: string;
-  icon: ReactNode;
+  description?: string;
+  tags: string[];
+  code?: string;
 }
 
-const docs: Record<string, Page> = {
+export const examples: Record<string, Page> = {
   readme: {
-    html: 'examples/Main/Readme/index.html',
+    html: 'examples/Readme/index.html',
     title: 'Readme',
-    gitPath: '',
-    icon: <BookOpenIcon />,
+    tags: [],
   },
-};
-
-const examples: Record<string, Page> = {
   react: {
     html: 'examples/React/index.html',
     title: 'React Example',
     gitPath: 'tree/master/examples/React',
     params: reactResources,
-    icon: <ReactIcon />,
+    tags: ['queryModule', 'react'],
+    description:
+      'A React component that visualizes gamepad input in real-time with button and stick visualization.',
   },
   fighting: {
     html: 'examples/Fighting/index.html',
     title: 'Fighting Example',
     gitPath: 'tree/master/examples/Fighting',
     params: fightingResources,
-    icon: <ArcadeStickIcon />,
+    tags: ['queryModule'],
+    description: 'A fighting game demo with fast input handling and combo detection.',
   },
   rumble: {
     html: 'examples/Rumble/index.html',
     title: 'Rumble Example',
     gitPath: 'tree/master/examples/Rumble',
     params: rumbleResources,
-    icon: <BeakerIcon />,
+    tags: ['queryModule', 'canvas'],
+    description: 'Demonstrates gamepad vibration/rumble effects on supported controllers.',
   },
   log: {
     html: 'examples/Log/index.html',
     title: 'Log Example',
     gitPath: 'tree/master/examples/Log',
     params: logResources,
-    icon: <ClipboardIcon />,
+    tags: ['queryModule', 'html', 'console'],
+    description: 'Displays all gamepad events in a scrollable log for debugging.',
   },
   editor: {
     html: 'examples/Editor/index.html',
     title: 'Editor Example',
     gitPath: 'tree/master/examples/Editor',
     params: editorResources,
-    icon: <PencilSquareIcon />,
+    tags: ['eventModule', 'react'],
+    description: 'A text editor example that binds gamepad buttons to keyboard events.',
   },
-} as const;
+};
 
-export default function Main() {
-  const classes = useStyles();
-  const [pageName, navigate] = useParamNav();
+export function Main() {
+  const [activeCategory, setActiveCategory] = useState('readme');
 
-  const page = examples[pageName] || docs[pageName] || examples.react;
+  const current = examples[activeCategory];
+
+  if (!current) return null;
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar className={classes.toolbar}>
-          <Typography variant="h6" noWrap>
-            {page.title}
-          </Typography>
-          <div style={{ display: 'flex' }}>
-            {!!page.params && (
-              <form
-                action="https://codesandbox.io/api/v1/sandboxes/define"
-                method="POST"
-                target="_blank"
-              >
-                <input type="hidden" name="parameters" value={page.params} />
-                <ButtonBase type="submit" className={classes.headerButton}>
-                  <img src="/assets/codesandbox.svg" />
-                  <span className={classes.headerButtonText}>Edit on codesandbox</span>
-                </ButtonBase>
-              </form>
-            )}
-            <ButtonBase
-              type="button"
-              className={classes.headerButton}
-              onClick={() => {
-                window.open(`https://github.com/diegodoumecq/joymap/${page.gitPath}`, '_blank');
-              }}
-            >
-              <GithubIcon />
-              <span className={classes.headerButtonText}>View on github</span>
-            </ButtonBase>
+    <div className="flex h-screen flex-col">
+      <header className="sticky top-0 z-10 border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary">
+              <img src="/assets/logo.png" />
+            </div>
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">
+              Joymap Examples
+            </h1>
           </div>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-        anchor="left"
-      >
-        <div style={{ display: 'flex', background: '#5700FA', justifyContent: 'flex-end' }}>
-          <img src="/assets/logo.png" style={{ width: '4rem' }} />
+          <div className="mx-auto max-w-5xl">
+            <nav
+              className="scrollbar-hide flex items-center gap-2 overflow-x-auto"
+              role="tablist"
+              aria-label="Filter by category"
+            >
+              {Object.keys(examples).map((cat) => {
+                const isActive = cat === activeCategory;
+
+                return (
+                  <Button
+                    key={cat}
+                    role="tab"
+                    onClick={() => setActiveCategory(cat)}
+                    isActive={isActive}
+                  >
+                    {cat}
+                  </Button>
+                );
+              })}
+            </nav>
+          </div>
         </div>
-        <Divider />
-        <List>
-          {Object.entries(docs).map(([id, page]) => (
-            <ListItem
-              button
-              key={id}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(id);
-              }}
-            >
-              <ListItemIcon>{page.icon}</ListItemIcon>
-              <ListItemText primary={page.title} />
-            </ListItem>
-          ))}
-          <Divider />
-          {Object.entries(examples).map(([id, page]) => (
-            <ListItem
-              button
-              key={id}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(id);
-              }}
-            >
-              <ListItemIcon>{page.icon}</ListItemIcon>
-              <ListItemText primary={upperFirst(id)} />
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-      <main className={classes.content}>
-        <div className={classes.toolbarSpacer} />
-        <Iframe
-          key={page.html}
-          url={page.html}
-          width="100%"
-          height="100%"
-          className={classes.iframe}
-          display="block"
-          position="relative"
-        />
+      </header>
+
+      <main className="flex w-full flex-1 flex-col">
+        <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-4 py-4">
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-3">
+                {current.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className={
+                      'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md bg-secondary px-4 py-0.5 font-mono text-xs font-medium whitespace-nowrap text-secondary-foreground'
+                    }
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                {!!current.params && <CodesandboxLink value={current.params} />}
+                {current.gitPath && (
+                  <Link
+                    target="_blank"
+                    href={`https://github.com/diegodoumecq/joymap/${current.gitPath}`}
+                  >
+                    <GithubIcon />
+                    <span>View on github</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <p className="mt-2 leading-relaxed text-pretty text-muted-foreground">
+              {current.description}
+            </p>
+          </div>
+
+          {current.code && <CodeBlock code={current.code} />}
+
+          <IframeCard
+            path={
+              activeCategory === 'readme'
+                ? 'README.md'
+                : current.html.replace(/\/index\.html$/, '/')
+            }
+          >
+            <iframe
+              key={current.html}
+              src={current.html}
+              className="relative block h-full w-full"
+            />
+          </IframeCard>
+        </div>
       </main>
+
+      <footer className="border-t border-border py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4">
+          <span className="font-mono text-xs text-muted-foreground">v{version}</span>
+        </div>
+      </footer>
     </div>
   );
 }
-

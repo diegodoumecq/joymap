@@ -1,36 +1,36 @@
 import {
+  assignIn,
   findKey,
+  flatten,
+  flow,
+  forEach,
   isEqual,
   map,
-  assignIn,
-  forEach,
-  flow,
-  flatten,
+  toString,
   uniq,
   uniqBy,
-  toString,
 } from 'lodash/fp';
 
 import { nameIsValid } from '../common/utils';
-import { mockGamepad, getDefaultButtons, getDefaultSticks, updateListenOptions } from './baseUtils';
 import {
-  stopRumble,
+  BaseParams,
+  Button,
+  CustomGamepad,
+  Effect,
+  ListenOptions,
+  RawGamepad,
+  Stick,
+  StrictEffect,
+} from '../types';
+import { getDefaultButtons, getDefaultSticks, mockGamepad, updateListenOptions } from './baseUtils';
+import {
   addRumble,
   applyRumble,
   getCurrentEffect,
-  updateChannels,
   MAX_DURATION,
+  stopRumble,
+  updateChannels,
 } from './rumble';
-import {
-  ListenOptions,
-  RawGamepad,
-  Effect,
-  BaseParams,
-  CustomGamepad,
-  StrictEffect,
-  Button,
-  Stick,
-} from '../types';
 
 export type BaseModule = ReturnType<typeof createModule>;
 
