@@ -1,4 +1,4 @@
-import { isArray, mapValues } from 'lodash/fp';
+import { mapValues } from 'lodash/fp';
 
 import { RawGamepad, Effect, StrictEffect } from '../types';
 
@@ -52,9 +52,8 @@ export function addRumble(
     allChannels[padId] = {};
   }
 
-  allChannels[padId][channelName] = isArray(effect)
-    ? effect.map(makeEffectStrict)
-    : [makeEffectStrict(effect)];
+  const arr = Array.isArray(effect) ? effect : [effect];
+  allChannels[padId][channelName] = arr.map(makeEffectStrict);
 }
 
 export function getCurrentEffect(padId: string): StrictEffect {

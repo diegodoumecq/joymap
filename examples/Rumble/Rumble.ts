@@ -219,13 +219,13 @@ app.innerHTML = `
 `;
 
 const gamepadImage = new Image();
-gamepadImage.src = 'gamepad.png';
+gamepadImage.src = '/assets/gamepad.png';
 
 const bulletImage = new Image();
-bulletImage.src = 'bullet.png';
+bulletImage.src = '/assets/bullet.png';
 
 const smallBulletImage = new Image();
-smallBulletImage.src = 'smallBullet.png';
+smallBulletImage.src = '/assets/smallBullet.png';
 
 function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: HTMLImageElement) {
   const { x, y, angle, rotationOffset, width, height, id } = element;
@@ -333,3 +333,4 @@ const joymap = createJoymap({
 });
 
 joymap.start();
+

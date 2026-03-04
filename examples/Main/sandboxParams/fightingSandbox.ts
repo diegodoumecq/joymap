@@ -1,8 +1,8 @@
 import { getParameters } from 'codesandbox/lib/api/define';
-import FightingCode from '!raw-loader!../../Fighting/Fighting.ts';
-import rotatingLogoCode from '!raw-loader!../../rotatingLogo.js';
-import FightingStyl from '!raw-loader!../../Fighting/Fighting.styl';
-import FightingHTML from '!raw-loader!../../../assets/fighting.html';
+import FightingCode from '../../Fighting/Fighting.ts?raw';
+import rotatingLogoCode from '../../rotatingLogo.ts?raw';
+import FightingStyl from '../../Fighting/Fighting.styl?raw';
+import FightingHTML from '../../../assets/fighting.html?raw';
 
 import { cleanupCode, tsconfig, makePckJson, packageJson } from './utils';
 
@@ -12,7 +12,7 @@ export default getParameters({
       content: cleanupCode(FightingCode),
       isBinary: false,
     },
-    'rotatingLogo.js': {
+    'rotatingLogo.ts': {
       content: cleanupCode(rotatingLogoCode),
       isBinary: false,
     },
@@ -38,3 +38,4 @@ export default getParameters({
     'tsconfig.json': tsconfig,
   },
 });
+

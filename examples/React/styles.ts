@@ -81,7 +81,7 @@ export const Back = styled.div`
   width: 100%;
   height: 100%;
   z-index: 10;
-  background-image: url(gamepad.png);
+  background-image: url(/assets/gamepad.png);
   pointer-events: none;
 `;
 
@@ -117,19 +117,19 @@ export const inputs = {
   `,
 
   L1: styled(leftShoulder)`
-    background-image: url(L1.png);
+    background-image: url(/assets/L1.png);
   `,
 
   L2: styled(leftShoulder)`
-    background-image: url(L2.png);
+    background-image: url(/assets/L2.png);
   `,
 
   R1: styled(rightShoulder)`
-    background-image: url(L1.png);
+    background-image: url(/assets/L1.png);
   `,
 
   R2: styled(rightShoulder)`
-    background-image: url(L2.png);
+    background-image: url(/assets/L2.png);
   `,
 
   A: styled(button)`
@@ -201,3 +201,4 @@ export const inputs = {
     cursor: pointer;
   `,
 };
+

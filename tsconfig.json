@@ -3,15 +3,16 @@
   "include": ["./src", "./types", "./examples"],
   "exclude": ["./node_modules", "./docs", "./bin"],
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "importHelpers": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "rootDir": "./",
     "noEmit": true,
     "outDir": "",
-    "lib": ["esnext", "dom"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -30,16 +31,13 @@
     "paths": {
       "*": ["./node_modules/*"]
     },
-    "typeRoots": ["./types/", "./node_modules/@types"],
-    "jsx": "react",
+    "types": ["node", "lodash"],
+    "jsx": "react-jsx",
     "esModuleInterop": true,
-    "types": ["webpack-env"],
+    "skipLibCheck": true,
     "plugins": [
       {
-        "name": "typescript-styled-plugin",
-        "lint": {
-          "validProperties": []
-        }
+        "name": "typescript-styled-components"
       }
     ]
   }

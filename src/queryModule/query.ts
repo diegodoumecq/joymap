@@ -6,7 +6,6 @@ import createBaseModule from '../baseModule/base';
 import { StickResult, ButtonResult } from '../types';
 
 // the following definition allows for the circular Mapper type
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryModule extends ReturnType<typeof createQueryModule> {}
 
 export type MapperResult = any;
@@ -210,3 +209,4 @@ export default function createQueryModule(params = {}) {
 
   return module;
 }
+

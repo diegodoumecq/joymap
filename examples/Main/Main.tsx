@@ -1,8 +1,6 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { upperFirst } from 'lodash/fp';
 import Iframe from 'react-iframe';
-import 'react-web-vector-icons/fonts/MaterialCommunityIcons.ttf';
-import { MaterialCommunityIcons } from 'react-web-vector-icons';
 
 import {
   Drawer,
@@ -22,10 +20,18 @@ import fightingResources from './sandboxParams/fightingSandbox';
 import reactResources from './sandboxParams/reactSandbox';
 import rumbleResources from './sandboxParams/rumbleSandbox';
 import logResources from './sandboxParams/logSandbox';
-import videoResources from './sandboxParams/videoSandbox';
 import editorResources from './sandboxParams/editorSandbox';
 import { useStyles } from './styles';
 import { useParamNav } from './paramNav';
+import {
+  ArcadeStickIcon,
+  BeakerIcon,
+  BookOpenIcon,
+  ClipboardIcon,
+  GithubIcon,
+  PencilSquareIcon,
+  ReactIcon,
+} from './icons';
 
 interface Page {
   html: string;
@@ -37,57 +43,50 @@ interface Page {
 
 const docs: Record<string, Page> = {
   readme: {
-    html: 'readme.html',
+    html: 'examples/Main/Readme/index.html',
     title: 'Readme',
     gitPath: '',
-    icon: <MaterialCommunityIcons name="book-open-page-variant" />,
+    icon: <BookOpenIcon />,
   },
 };
 
 const examples: Record<string, Page> = {
   react: {
-    html: 'react.html',
+    html: 'examples/React/index.html',
     title: 'React Example',
     gitPath: 'tree/master/examples/React',
     params: reactResources,
-    icon: <MaterialCommunityIcons name="react" />,
+    icon: <ReactIcon />,
   },
   fighting: {
-    html: 'fighting.html',
+    html: 'examples/Fighting/index.html',
     title: 'Fighting Example',
     gitPath: 'tree/master/examples/Fighting',
     params: fightingResources,
-    icon: <MaterialCommunityIcons name="arrow-decision" />,
+    icon: <ArcadeStickIcon />,
   },
   rumble: {
-    html: 'rumble.html',
+    html: 'examples/Rumble/index.html',
     title: 'Rumble Example',
     gitPath: 'tree/master/examples/Rumble',
     params: rumbleResources,
-    icon: <MaterialCommunityIcons name="test-tube" />,
+    icon: <BeakerIcon />,
   },
   log: {
-    html: 'log.html',
+    html: 'examples/Log/index.html',
     title: 'Log Example',
     gitPath: 'tree/master/examples/Log',
     params: logResources,
-    icon: <MaterialCommunityIcons name="clipboard-text-outline" />,
-  },
-  video: {
-    html: 'video.html',
-    title: 'Video Example',
-    gitPath: 'tree/master/examples/Video',
-    params: videoResources,
-    icon: <MaterialCommunityIcons name="video" />,
+    icon: <ClipboardIcon />,
   },
   editor: {
-    html: 'editor.html',
+    html: 'examples/Editor/index.html',
     title: 'Editor Example',
     gitPath: 'tree/master/examples/Editor',
     params: editorResources,
-    icon: <MaterialCommunityIcons name="clipboard-text" />,
+    icon: <PencilSquareIcon />,
   },
-};
+} as const;
 
 export default function Main() {
   const classes = useStyles();
@@ -112,7 +111,7 @@ export default function Main() {
               >
                 <input type="hidden" name="parameters" value={page.params} />
                 <ButtonBase type="submit" className={classes.headerButton}>
-                  <img src="codesandbox.svg" />
+                  <img src="/assets/codesandbox.svg" />
                   <span className={classes.headerButtonText}>Edit on codesandbox</span>
                 </ButtonBase>
               </form>
@@ -124,7 +123,7 @@ export default function Main() {
                 window.open(`https://github.com/diegodoumecq/joymap/${page.gitPath}`, '_blank');
               }}
             >
-              <MaterialCommunityIcons name="github-circle" color="white" />
+              <GithubIcon />
               <span className={classes.headerButtonText}>View on github</span>
             </ButtonBase>
           </div>
@@ -139,7 +138,7 @@ export default function Main() {
         anchor="left"
       >
         <div style={{ display: 'flex', background: '#5700FA', justifyContent: 'flex-end' }}>
-          <img src="logo.png" style={{ width: '4rem' }} />
+          <img src="/assets/logo.png" style={{ width: '4rem' }} />
         </div>
         <Divider />
         <List>
@@ -187,3 +186,4 @@ export default function Main() {
     </div>
   );
 }
+
