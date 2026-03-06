@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { Copy, Check } from './icons';
+import { useEffect, useRef, useState } from 'react';
+
+import { CheckIcon, CopyIcon } from './components';
 
 interface CodeBlockProps {
   code: string;
@@ -112,22 +113,22 @@ export function CodeBlock({ code }: CodeBlockProps) {
   };
 
   return (
-    <div className="relative group rounded-lg overflow-hidden border border-border bg-secondary/50">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-secondary/80">
-        <span className="text-xs font-mono text-muted-foreground">Javascript</span>
+    <div className="group relative overflow-hidden rounded-lg border border-border bg-secondary/50">
+      <div className="flex items-center justify-between border-b border-border bg-secondary/80 px-4 py-2">
+        <span className="font-mono text-xs text-muted-foreground">Javascript</span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Copy code"
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5" />
+              <CheckIcon className="h-3.5 w-3.5" />
               <span>Copied</span>
             </>
           ) : (
             <>
-              <Copy className="h-3.5 w-3.5" />
+              <CopyIcon className="h-3.5 w-3.5" />
               <span>Copy</span>
             </>
           )}

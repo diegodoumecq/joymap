@@ -1,4 +1,5 @@
 import React, { ReactNode, useState } from 'react';
+
 import { QueryModule } from '../../src/index';
 
 export const digitalInputs = {
@@ -130,7 +131,7 @@ function Stick({
 
   return (
     <div
-      className="absolute bottom-13.25 z-15 w-12.5 h-12.5 bg-gray-500 border-[3px] border-black rounded-[40px] cursor-pointer"
+      className="absolute bottom-13.25 z-15 h-12.5 w-12.5 cursor-pointer rounded-[40px] border-[3px] border-black bg-gray-500"
       style={{
         ...inputStyle,
         transform: `translate(${x * 15}px, ${y * 15}px)`,
@@ -177,8 +178,8 @@ function Shoulder({ inputName, module }: { inputName: ShoulderNames; module: Que
   const inputStyle = shoulderInputs[inputName];
 
   return (
-    <div className="absolute w-full h-full" style={{ transform: `translateY(${value * 10}px)` }}>
-      <div className="w-full h-full -mt-2.5" style={inputStyle} />
+    <div className="absolute h-full w-full" style={{ transform: `translateY(${value * 10}px)` }}>
+      <div className="-mt-2.5 h-full w-full" style={inputStyle} />
     </div>
   );
 }

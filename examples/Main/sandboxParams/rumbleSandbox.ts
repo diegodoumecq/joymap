@@ -1,8 +1,7 @@
-import { getParameters } from 'codesandbox/lib/api/define';
-
-import RumbleCode from '../../Rumble/Rumble.ts?raw';
 import RumbleHTML from '../../Rumble/index.html?raw';
-import { cleanupCode, tsconfig, makePckJson } from './utils';
+import RumbleCode from '../../Rumble/Rumble.ts?raw';
+import { getParameters } from './getParameters';
+import { cleanupCode, makePckJson, tsconfig } from './utils';
 
 export default getParameters({
   files: {

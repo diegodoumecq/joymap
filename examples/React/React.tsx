@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { createJoymap, createQueryModule, QueryModule } from '../../src/index';
 import ColorHash from 'color-hash';
+import { createRoot } from 'react-dom/client';
 import tinycolor from 'tinycolor2';
 
+import { createJoymap, createQueryModule, QueryModule } from '../../src/index';
 import Gamepad from './Gamepad';
 
 interface Player {
@@ -47,7 +47,7 @@ function Root() {
       <header style={{ textAlign: 'center' }}>
         <h3>Connect one or more Gamepads. Use them. Click on buttons to rebind them.</h3>
       </header>
-      <section className="flex flex-row flex-wrap justify-center w-full">
+      <section className="flex w-full flex-row flex-wrap justify-center">
         {players.map(({ module, name, color }) => (
           <Gamepad
             key={name}

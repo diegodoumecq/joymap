@@ -1,9 +1,8 @@
-import { getParameters } from 'codesandbox/lib/api/define';
-import FightingCode from '../../Fighting/Fighting.ts?raw';
 import FightingCss from '../../Fighting/Fighting.css?raw';
+import FightingCode from '../../Fighting/Fighting.ts?raw';
 import FightingHTML from '../../Fighting/index.html?raw';
-
-import { cleanupCode, tsconfig, makePckJson } from './utils';
+import { getParameters } from './getParameters';
+import { cleanupCode, makePckJson, tsconfig } from './utils';
 
 export default getParameters({
   files: {

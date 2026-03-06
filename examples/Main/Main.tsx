@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { CodeBlock } from './CodeBlock';
-import { GithubIcon } from './icons/GithubIcon';
 
+import { CodeBlock } from './CodeBlock';
+import { CodesandboxLink } from './components';
+import { Button } from './components/Button';
+import { GithubIcon } from './components/GithubIcon';
+import { Link } from './components/Link';
+import editorResources from './sandboxParams/editorSandbox';
 import fightingResources from './sandboxParams/fightingSandbox';
+import logResources from './sandboxParams/logSandbox';
 import reactResources from './sandboxParams/reactSandbox';
 import rumbleResources from './sandboxParams/rumbleSandbox';
-import logResources from './sandboxParams/logSandbox';
-import editorResources from './sandboxParams/editorSandbox';
 
 // const _code = `const users = [
 //   { name: "Alice", age: 28, active: true },
@@ -89,20 +92,20 @@ export function Main() {
   if (!current) return null;
 
   return (
-    <div className="flex flex-col h-screen">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
+    <div className="flex h-screen flex-col">
+      <header className="sticky top-0 z-10 border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4">
           <div className="flex items-center gap-2">
-            <div className="h-12 w-12 rounded-md bg-primary flex items-center justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary">
               <img src="/assets/logo.png" />
             </div>
             <h1 className="text-lg font-semibold tracking-tight text-foreground">
               Joymap Examples
             </h1>
           </div>
-          <div className="max-w-5xl mx-auto">
+          <div className="mx-auto max-w-5xl">
             <nav
-              className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
+              className="scrollbar-hide flex items-center gap-2 overflow-x-auto"
               role="tablist"
               aria-label="Filter by category"
             >
@@ -110,19 +113,14 @@ export function Main() {
                 const isActive = cat === activeCategory;
 
                 return (
-                  <button
+                  <Button
                     key={cat}
                     role="tab"
-                    aria-selected={isActive}
                     onClick={() => setActiveCategory(cat)}
-                    className={`flex cursor-pointer uppercase items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                    }`}
+                    isActive={isActive}
                   >
                     {cat}
-                  </button>
+                  </Button>
                 );
               })}
             </nav>
@@ -130,69 +128,59 @@ export function Main() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col w-full">
-        <div className="mx-auto px-4 py-4 flex flex-col flex-1 min-h-0 w-full max-w-5xl">
+      <main className="flex w-full flex-1 flex-col">
+        <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-4 py-4">
           {!current.description && !current.tags.length ? null : (
             <div className="mb-6">
-              <p className="mt-2 text-muted-foreground leading-relaxed max-w-2xl text-pretty">
+              <div className="flex justify-between">
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {current.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={
+                        'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border border-transparent bg-secondary px-2 py-0.5 font-mono text-xs font-medium whitespace-nowrap text-secondary-foreground transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a&]:hover:bg-secondary/90'
+                      }
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex justify-end">
+                  {!!current.params && <CodesandboxLink value={current.params} />}
+                  {current.gitPath && (
+                    <Link
+                      className="flex h-8 items-center gap-2 px-2 hover:bg-primary/35"
+                      target="_blank"
+                      href={`https://github.com/diegodoumecq/joymap/${current.gitPath}`}
+                    >
+                      <GithubIcon />
+                      <span>View on github</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              <p className="mt-2 leading-relaxed text-pretty text-muted-foreground">
                 {current.description}
               </p>
-              <div className="flex flex-wrap gap-1.5 mt-4">
-                {current.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    data-slot="badge"
-                    className={
-                      'inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono text-xs'
-                    }
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
-          )}
-          {!!current.params && (
-            <form
-              action="https://codesandbox.io/api/v1/sandboxes/define"
-              method="POST"
-              target="_blank"
-            >
-              <input type="hidden" name="parameters" value={current.params} />
-              <button type="submit" className="px-2 h-8 gap-2">
-                <img src="/assets/codesandbox.svg" />
-                <span>Edit on codesandbox</span>
-              </button>
-            </form>
-          )}
-          {current.gitPath && (
-            <button
-              type="button"
-              className="px-2 h-8 gap-2"
-              onClick={() => {
-                window.open(`https://github.com/diegodoumecq/joymap/${current.gitPath}`, '_blank');
-              }}
-            >
-              <GithubIcon />
-              <span>View on github</span>
-            </button>
           )}
 
           {current.code && <CodeBlock code={current.code} />}
 
-          <div className="flex-1 min-h-0 w-full">
+          <div className="min-h-0 w-full flex-1">
             <iframe
               key={current.html}
               src={current.html}
-              className="w-full h-full block relative"
+              className="relative block h-full w-full"
             />
           </div>
         </div>
       </main>
 
       <footer className="border-t border-border py-4">
-        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground font-mono">{'v1.0.0'}</span>
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4">
+          <span className="font-mono text-xs text-muted-foreground">{'v1.0.0'}</span>
         </div>
       </footer>
     </div>

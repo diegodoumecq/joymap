@@ -1,6 +1,6 @@
 import { ComponentProps } from 'react';
 
-export const Check = (props: ComponentProps<'svg'>) => (
+export const CopyIcon = (props: ComponentProps<'svg'>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -14,7 +14,8 @@ export const Check = (props: ComponentProps<'svg'>) => (
     aria-hidden="true"
     {...props}
   >
-    <path d="M20 6 9 17l-5-5"></path>
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
   </svg>
 );
 

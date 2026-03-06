@@ -1,4 +1,5 @@
 import { marked } from 'marked';
+
 import readme from '../../README.md?raw';
 
 function cleanSelfRef(str: string) {

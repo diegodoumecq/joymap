@@ -1,9 +1,8 @@
-import { getParameters } from 'codesandbox/lib/api/define';
-import EditorCode from '../../Editor/Editor.tsx?raw';
-import commandsCode from '../../Editor/commands.ts?raw';
 import ckHelpersCode from '../../Editor/ckHelpers.ts?raw';
-
-import { cleanupCode, tsconfig, makePckJson, packageJson } from './utils';
+import commandsCode from '../../Editor/commands.ts?raw';
+import EditorCode from '../../Editor/Editor.tsx?raw';
+import { getParameters } from './getParameters';
+import { cleanupCode, devDependencies, makePckJson, tsconfig } from './utils';
 
 export default getParameters({
   files: {
@@ -26,9 +25,9 @@ export default getParameters({
         hasReact: true,
         reactScripts: true,
         dependencies: {
-          '@ckeditor/ckeditor5-react': packageJson.devDependencies['@ckeditor/ckeditor5-react'],
-          ckeditor5: packageJson.devDependencies['ckeditor5'],
-          'lorem-ipsum': packageJson.devDependencies['lorem-ipsum'],
+          '@ckeditor/ckeditor5-react': devDependencies['@ckeditor/ckeditor5-react'],
+          ckeditor5: devDependencies['ckeditor5'],
+          'lorem-ipsum': devDependencies['lorem-ipsum'],
         },
       }),
     },

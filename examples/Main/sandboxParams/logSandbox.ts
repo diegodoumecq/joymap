@@ -1,10 +1,9 @@
-import { getParameters } from 'codesandbox/lib/api/define';
+import LogHTML from '../../Log/index.html?raw';
+import LogCss from '../../Log/Log.css?raw';
 import LogCode from '../../Log/Log.ts?raw';
 import LogUtils from '../../Log/utils.ts?raw';
-import LogCss from '../../Log/Log.css?raw';
-import LogHTML from '../../Log/index.html?raw';
-
-import { cleanupCode, tsconfig, makePckJson } from './utils';
+import { getParameters } from './getParameters';
+import { cleanupCode, makePckJson, tsconfig } from './utils';
 
 export default getParameters({
   files: {
