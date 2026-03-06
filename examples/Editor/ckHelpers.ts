@@ -1,4 +1,5 @@
 import { ClassicEditor, Model } from 'ckeditor5/dist';
+
 import { CommandValue } from './commands';
 
 export function setCursor(model: Model | undefined, direction?: CommandValue) {

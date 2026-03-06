@@ -21,4 +21,3 @@ document.body.innerHTML = `
     </div>
   </div>
 `;
-

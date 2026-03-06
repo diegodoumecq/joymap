@@ -9,4 +9,3 @@ document.body.appendChild(element);
 
 const root = createRoot(element);
 root.render(<Main />);
-

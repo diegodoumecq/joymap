@@ -1,9 +1,9 @@
 import memoize from 'fast-memoize';
-import { assignIn, mapValues, omit, forEach } from 'lodash/fp';
+import { assignIn, forEach, mapValues, omit } from 'lodash/fp';
 
-import { buttonMap, stickMap } from '../common/utils';
 import createBaseModule from '../baseModule/base';
-import { StickResult, ButtonResult } from '../types';
+import { buttonMap, stickMap } from '../common/utils';
+import { ButtonResult, StickResult } from '../types';
 
 // the following definition allows for the circular Mapper type
 export interface QueryModule extends ReturnType<typeof createQueryModule> {}
@@ -209,4 +209,3 @@ export default function createQueryModule(params = {}) {
 
   return module;
 }
-

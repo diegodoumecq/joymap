@@ -19,4 +19,3 @@ export const Button = ({ isActive, children, className = '', ...props }: ButtonP
     {children}
   </button>
 );
-

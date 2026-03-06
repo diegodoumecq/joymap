@@ -17,4 +17,3 @@ export const CheckIcon = (props: ComponentProps<'svg'>) => (
     <path d="M20 6 9 17l-5-5"></path>
   </svg>
 );
-

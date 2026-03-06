@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { createJoymap, createEventModule, StickResult } from '../../src/index';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import { ClassicEditor, Essentials, Paragraph, Bold, Italic } from 'ckeditor5';
+import { Bold, ClassicEditor, Essentials, Italic, Paragraph } from 'ckeditor5';
+import { createRoot } from 'react-dom/client';
+
+import { createEventModule, createJoymap, StickResult } from '../../src/index';
 
 import 'ckeditor5/ckeditor5.css';
-import { commands } from './commands';
+
 import { executeCommand } from './ckHelpers';
+import { commands } from './commands';
 
 const joymap = createJoymap();
 const module = createEventModule();

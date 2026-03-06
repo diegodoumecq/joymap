@@ -142,4 +142,3 @@ export function CodeBlock({ code }: CodeBlockProps) {
     </div>
   );
 }
-

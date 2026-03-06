@@ -1,6 +1,7 @@
+import { compact, forEach, join } from 'lodash/fp';
+
 import { createJoymap, createQueryModule, Joymap, QueryModule } from '../../src/index';
-import { join, compact, forEach } from 'lodash/fp';
-import { stringifyInputs, countPressed, renderRows, stringifyMappers } from './utils';
+import { countPressed, renderRows, stringifyInputs, stringifyMappers } from './utils';
 
 import './Log.css';
 

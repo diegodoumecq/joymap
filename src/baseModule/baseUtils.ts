@@ -1,7 +1,7 @@
 import { assignIn } from 'lodash/fp';
 
-import { isButtonSignificant, findIndexes, isConsecutive } from '../common/utils';
-import { CustomGamepad, ListenOptions, Button, Stick } from '../types';
+import { findIndexes, isButtonSignificant, isConsecutive } from '../common/utils';
+import { Button, CustomGamepad, ListenOptions, Stick } from '../types';
 
 export const mockGamepad: CustomGamepad = {
   axes: [],

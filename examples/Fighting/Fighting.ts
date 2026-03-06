@@ -1,5 +1,6 @@
-import { createJoymap, createQueryModule, QueryModule, Joymap } from '../../src/index';
-import { forEach, reduce, compact, flow, concat, takeRight, filter } from 'lodash/fp';
+import { compact, concat, filter, flow, forEach, reduce, takeRight } from 'lodash/fp';
+
+import { createJoymap, createQueryModule, Joymap, QueryModule } from '../../src/index';
 
 import './Fighting.css';
 

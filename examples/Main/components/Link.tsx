@@ -13,4 +13,3 @@ export const Link = ({ isActive, children, className = '', ...props }: LinkProps
     {children}
   </a>
 );
-

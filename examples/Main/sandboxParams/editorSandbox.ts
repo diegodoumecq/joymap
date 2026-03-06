@@ -34,4 +34,3 @@ export default getParameters({
     'tsconfig.json': tsconfig,
   },
 });
-

@@ -333,4 +333,3 @@ const joymap = createJoymap({
 });
 
 joymap.start();
-
