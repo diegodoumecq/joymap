@@ -167,7 +167,13 @@ export function Main() {
 
           {current.code && <CodeBlock code={current.code} />}
 
-          <IframeCard>
+          <IframeCard
+            path={
+              activeCategory === 'readme'
+                ? 'README.md'
+                : current.html.replace(/\/index\.html$/, '/')
+            }
+          >
             <iframe
               key={current.html}
               src={current.html}
