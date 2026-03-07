@@ -255,7 +255,7 @@ const joymap = createJoymap({
     ) as CanvasRenderingContext2D;
 
     // Clear canvas by drawing background color and then the welcome messages
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#282828';
     ctx.fillRect(0, 0, SIZE.width, SIZE.height);
     ctx.strokeStyle = '#FFF';
     ctx.fillStyle = '#FFF';

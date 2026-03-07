@@ -203,10 +203,9 @@ export default function Gamepad({
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'column',
-        padding: '1rem',
-        margin: '1rem',
+        padding: '1.5rem',
         maxWidth: '50%',
-        border: '8px dashed rgba(0, 0, 0, 0.5)',
+        border: '4px dashed rgba(0, 0, 0, 0.5)',
         minWidth: '500px',
         backgroundColor: waitingFor ? 'red' : backgroundColor,
         filter,
@@ -216,7 +215,7 @@ export default function Gamepad({
         <span
           style={{
             position: 'absolute',
-            top: '70px',
+            top: '60px',
             width: '100%',
             textAlign: 'center',
             zIndex: 15,

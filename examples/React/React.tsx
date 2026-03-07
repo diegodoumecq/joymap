@@ -47,7 +47,7 @@ function Root() {
       <header style={{ textAlign: 'center' }}>
         <h3>Connect one or more Gamepads. Use them. Click on buttons to rebind them.</h3>
       </header>
-      <section className="flex w-full flex-row flex-wrap justify-center">
+      <section className="mt-4 flex w-full flex-row flex-wrap justify-center gap-4">
         {players.map(({ module, name, color }) => (
           <Gamepad
             key={name}
@@ -56,7 +56,16 @@ function Root() {
             backgroundColor={color}
             pressedColor={`#${tinycolor(color).darken(20).toHex()}`}
           >
-            <h3>{module.getPadId() || 'Player has no gamepad assigned'}</h3>
+            <span
+              style={{
+                background: '#00000033',
+                padding: '0.5rem 1rem 0.5rem 1rem',
+                borderRadius: 20,
+                color: '#FFF',
+              }}
+            >
+              {module.getPadId() || 'Player has no gamepad assigned'}
+            </span>
           </Gamepad>
         ))}
       </section>
