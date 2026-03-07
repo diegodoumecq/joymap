@@ -5,11 +5,11 @@
   --foreground: #EEE;
   --card: oklch(0.17 0.005 260);
   --primary: rgb(87, 0, 250);
-  --primary-foreground: #EEE;
-  --secondary: oklch(0.22 0.008 260);
-  --secondary-foreground: oklch(0.85 0 0);
+  --primary-foreground: #DDD;
+  --secondary: #282828;
+  --secondary-foreground: #DDD;
   --muted: oklch(0.22 0.008 260);
-  --muted-foreground: oklch(0.75 0 0);
+  --muted-foreground: #BBB;
   --border: oklch(0.28 0.008 260);
   --input: oklch(0.22 0.008 260);
   --ring: rgb(87, 0, 250);

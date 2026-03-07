@@ -9,7 +9,7 @@ export const CodesandboxLink = ({ value, className = '', ...props }: Codesandbox
     <input type="hidden" name="parameters" value={value} />
     <button
       type="submit"
-      className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/35 ${className}`}
+      className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary ${className}`}
       {...props}
     >
       <img src="/assets/codesandbox.svg" />

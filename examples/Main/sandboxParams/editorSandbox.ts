@@ -1,17 +1,22 @@
 import ckHelpersCode from '../../Editor/ckHelpers.ts?raw';
 import commandsCode from '../../Editor/commands.ts?raw';
+import customCss from '../../Editor/custom.css?raw';
 import EditorCode from '../../Editor/Editor.tsx?raw';
 import { getParameters } from './getParameters';
 import { cleanupCode, devDependencies, makePckJson, tsconfig } from './utils';
 
 export default getParameters({
   files: {
-    'index.ts': {
+    'index.tsx': {
       content: cleanupCode(EditorCode),
       isBinary: false,
     },
     'commands.ts': {
       content: cleanupCode(commandsCode),
+      isBinary: false,
+    },
+    'custom.css': {
+      content: cleanupCode(customCss),
       isBinary: false,
     },
     'ckHelpers.ts': {

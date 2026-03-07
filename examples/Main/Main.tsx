@@ -10,6 +10,7 @@ import fightingResources from './sandboxParams/fightingSandbox';
 import logResources from './sandboxParams/logSandbox';
 import reactResources from './sandboxParams/reactSandbox';
 import rumbleResources from './sandboxParams/rumbleSandbox';
+import { version } from './sandboxParams/utils';
 
 // const _code = `const users = [
 //   { name: "Alice", age: 28, active: true },
@@ -130,41 +131,38 @@ export function Main() {
 
       <main className="flex w-full flex-1 flex-col">
         <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-4 py-4">
-          {!current.description && !current.tags.length ? null : (
-            <div className="mb-6">
-              <div className="flex justify-between">
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {current.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className={
-                        'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border border-transparent bg-secondary px-2 py-0.5 font-mono text-xs font-medium whitespace-nowrap text-secondary-foreground transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a&]:hover:bg-secondary/90'
-                      }
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex justify-end">
-                  {!!current.params && <CodesandboxLink value={current.params} />}
-                  {current.gitPath && (
-                    <Link
-                      className="flex h-8 items-center gap-2 px-2 hover:bg-primary/35"
-                      target="_blank"
-                      href={`https://github.com/diegodoumecq/joymap/${current.gitPath}`}
-                    >
-                      <GithubIcon />
-                      <span>View on github</span>
-                    </Link>
-                  )}
-                </div>
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-3">
+                {current.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className={
+                      'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border border-transparent bg-secondary px-4 py-0.5 font-mono text-xs font-medium whitespace-nowrap text-secondary-foreground transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a&]:hover:bg-secondary/90'
+                    }
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
-
-              <p className="mt-2 leading-relaxed text-pretty text-muted-foreground">
-                {current.description}
-              </p>
+              <div className="flex justify-end">
+                {!!current.params && <CodesandboxLink value={current.params} />}
+                {current.gitPath && (
+                  <Link
+                    target="_blank"
+                    href={`https://github.com/diegodoumecq/joymap/${current.gitPath}`}
+                  >
+                    <GithubIcon />
+                    <span>View on github</span>
+                  </Link>
+                )}
+              </div>
             </div>
-          )}
+
+            <p className="mt-2 leading-relaxed text-pretty text-muted-foreground">
+              {current.description}
+            </p>
+          </div>
 
           {current.code && <CodeBlock code={current.code} />}
 
@@ -180,7 +178,7 @@ export function Main() {
 
       <footer className="border-t border-border py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4">
-          <span className="font-mono text-xs text-muted-foreground">{'v1.0.0'}</span>
+          <span className="font-mono text-xs text-muted-foreground">v{version}</span>
         </div>
       </footer>
     </div>

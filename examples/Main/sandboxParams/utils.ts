@@ -1,6 +1,6 @@
 import packageJson from '../../../package.json';
 
-export const { devDependencies } = packageJson;
+export const { devDependencies, version } = packageJson;
 
 const codeTransforms: [RegExp, string][] = [
   [new RegExp('../../src/index', 'g'), 'joymap'],

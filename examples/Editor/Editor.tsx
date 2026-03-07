@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { createEventModule, createJoymap, StickResult } from '../../src/index';
 
 import 'ckeditor5/ckeditor5.css';
+import './custom.css';
 
 import { executeCommand } from './ckHelpers';
 import { commands } from './commands';
