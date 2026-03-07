@@ -4,6 +4,7 @@ import { CodeBlock } from './CodeBlock';
 import { CodesandboxLink } from './components';
 import { Button } from './components/Button';
 import { GithubIcon } from './components/GithubIcon';
+import { IframeCard } from './components/IframeCard';
 import { Link } from './components/Link';
 import editorResources from './sandboxParams/editorSandbox';
 import fightingResources from './sandboxParams/fightingSandbox';
@@ -166,13 +167,13 @@ export function Main() {
 
           {current.code && <CodeBlock code={current.code} />}
 
-          <div className="min-h-0 w-full flex-1">
+          <IframeCard>
             <iframe
               key={current.html}
               src={current.html}
               className="relative block h-full w-full"
             />
-          </div>
+          </IframeCard>
         </div>
       </main>
 
