@@ -1,4 +1,4 @@
-import { marked } from 'marked';
+import { marked, Renderer } from 'marked';
 
 import readme from '../../README.md?raw';
 
@@ -13,6 +13,22 @@ function cleanSelfRef(str: string) {
       '* Navigate through the sidebar to see the examples',
     );
 }
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .trim();
+}
+
+const renderer = new Renderer();
+renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
+  const id = slugify(text);
+  return `<h${depth} id="${id}">${text}</h${depth}>`;
+};
+
+marked.use({ renderer });
 
 document.body.innerHTML = `
   <div style="padding: 2rem; color: #EEE; font-family: sans-serif; display: flex; justify-content: center;">
