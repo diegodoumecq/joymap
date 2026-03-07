@@ -29,7 +29,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
     "paths": {
-      "*": ["./node_modules/*"]
+      "*": ["./node_modules/*"],
+      "joymap": ["./src/index.ts"]
     },
     "types": ["node", "lodash"],
     "jsx": "react-jsx",

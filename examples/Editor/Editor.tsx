@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { Bold, ClassicEditor, Essentials, Italic, Paragraph } from 'ckeditor5';
+import { createEventModule, createJoymap, StickResult } from 'joymap';
 import { createRoot } from 'react-dom/client';
-
-import { createEventModule, createJoymap, StickResult } from '../../src/index';
 
 import 'ckeditor5/ckeditor5.css';
 import './custom.css';

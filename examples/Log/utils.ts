@@ -1,6 +1,5 @@
+import { InputResult, Mapper } from 'joymap';
 import { compact, flow, join, map, reduce, split } from 'lodash/fp';
-
-import { InputResult, Mapper } from '../../src/index';
 
 // Utility function to count the number of pressed inputs of the given collection
 export function countPressed(inputs: Record<string, { pressed: boolean }>) {

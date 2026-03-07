@@ -1,6 +1,5 @@
 import React, { ReactNode, useState } from 'react';
-
-import { QueryModule } from '../../src/index';
+import { QueryModule } from 'joymap';
 
 export const digitalInputs = {
   A: {

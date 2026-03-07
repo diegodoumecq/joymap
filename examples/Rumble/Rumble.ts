@@ -1,7 +1,6 @@
 // Simple canvas example that doesn't use any other library nor ES6 features
+import { createJoymap, createQueryModule, QueryModule } from 'joymap';
 import { uniqueId } from 'lodash/fp';
-
-import { createJoymap, createQueryModule, QueryModule } from '../../src/index';
 
 const SIZE = {
   width: window.innerWidth,

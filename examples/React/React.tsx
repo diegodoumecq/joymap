@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import ColorHash from 'color-hash';
+import { createJoymap, createQueryModule, QueryModule } from 'joymap';
 import { createRoot } from 'react-dom/client';
 import tinycolor from 'tinycolor2';
 
-import { createJoymap, createQueryModule, QueryModule } from '../../src/index';
 import Gamepad from './Gamepad';
 
 interface Player {
