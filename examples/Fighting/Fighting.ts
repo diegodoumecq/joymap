@@ -1,8 +1,10 @@
-import { createJoymap, createQueryModule, QueryModule, Joymap } from '../../src/index';
-import { forEach, reduce, compact, flow, concat, takeRight, filter } from 'lodash/fp';
-import setupRotatingLogo from '../rotatingLogo';
+import { createJoymap, createQueryModule, Joymap, QueryModule } from 'joymap';
+import { compact, concat, filter, flow, forEach, reduce, takeRight } from 'lodash/fp';
 
-import './Fighting.styl';
+import './Fighting.css';
+
+// TODO: change this example to the event module since it makes more sense
+// TODO: remove lodash
 
 interface Player {
   id: string;
@@ -15,10 +17,10 @@ const dpadButtons = ['dpadUp', 'dpadDown', 'dpadLeft', 'dpadRight'];
 const buttons = ['L3', 'L2', 'L1', 'R3', 'R2', 'R1', 'A', 'B', 'X', 'Y'];
 
 const players: Player[] = [];
-const MAX_MOVES = 15;
+const MAX_MOVES = 13;
 
 // Populate the app div with some basic html
-const app = document.getElementById('app') as HTMLElement;
+const app = document.getElementById('app')!;
 app.innerHTML = `
   <div class="main-container" >
     <header>
@@ -26,18 +28,11 @@ app.innerHTML = `
     </header>
     <div class="fighting-example">
       <div class="unplugged">
-        <canvas id="unplugged-canvas" width="300" height="300"></canvas>
-        <h3>Waiting for gamepad/s to be connected</h3>
+        <h3 style="color: white">Waiting for gamepad/s to be connected</h3>
       </div>
     </div>
   </div>
 `;
-
-const unpluggedCanvas = document.getElementById('unplugged-canvas');
-
-if (unpluggedCanvas) {
-  setupRotatingLogo(unpluggedCanvas as HTMLCanvasElement);
-}
 
 function getArrow([x, y]: number[]) {
   const radians = Math.atan2(y * -1, x);
@@ -47,23 +42,12 @@ function getArrow([x, y]: number[]) {
   return arrows[Math.round((radians * 4) / Math.PI)];
 }
 
-// Utility function to avoid double ternary (?) operator
-function getAxis(negative: boolean, positive: boolean) {
-  if (negative) {
-    return -1;
-  }
-  if (positive) {
-    return 1;
-  }
-  return 0;
-}
-
 function createDpadMapper(module: QueryModule) {
   let prevArrow: string | null = null;
   module.setMapper('dpad', ({ getButtons }) => {
     const d = getButtons(...dpadButtons);
-    const x = getAxis(d.dpadLeft.pressed, d.dpadRight.pressed);
-    const y = getAxis(d.dpadUp.pressed, d.dpadDown.pressed);
+    const x = d.dpadLeft.pressed ? -1 : d.dpadRight.pressed ? 1 : 0;
+    const y = d.dpadUp.pressed ? -1 : d.dpadDown.pressed ? 1 : 0;
 
     if (x !== 0 || y !== 0) {
       const arrow = getArrow([x, y]);
@@ -169,4 +153,3 @@ const joymap = createJoymap({
 });
 
 joymap.start();
-

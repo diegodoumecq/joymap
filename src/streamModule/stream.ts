@@ -1,12 +1,11 @@
 import memoize from 'fast-memoize';
-import { assignIn, mapValues, forEach } from 'lodash/fp';
+import { assignIn, forEach, mapValues } from 'lodash/fp';
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 
 import createBaseModule from '../baseModule/base';
-
 import { buttonMap, stickMap } from '../common/utils';
-import { BaseParams, ButtonResult, StickResult, RawGamepad } from '../types';
+import { BaseParams, ButtonResult, RawGamepad, StickResult } from '../types';
 
 export type StreamModule = ReturnType<typeof createStreamModule>;
 

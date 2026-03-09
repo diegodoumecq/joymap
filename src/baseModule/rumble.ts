@@ -1,6 +1,6 @@
 import { mapValues } from 'lodash/fp';
 
-import { RawGamepad, Effect, StrictEffect } from '../types';
+import { Effect, RawGamepad, StrictEffect } from '../types';
 
 type GamepadId = string;
 type ChannelName = string;

@@ -1,11 +1,10 @@
 import memoize from 'fast-memoize';
-import { forEach, assignIn, map, isString } from 'lodash/fp';
+import { assignIn, forEach, isString, map } from 'lodash/fp';
 
 import createBaseModule from '../baseModule/base';
 import { buttonMap, stickMap } from '../common/utils';
+import { InputEvent, InputResult, RawGamepad } from '../types';
 import { eventIsValid, getEventTokens, verifyTokens } from './eventUtils';
-
-import { RawGamepad, InputEvent, InputResult } from '../types';
 
 export type EventModule = ReturnType<typeof createEventModule>;
 
@@ -29,7 +28,7 @@ export default function createEventModule(params = {}) {
 
     removeEvent: (eventName: string, callback: InputEvent['callback']) => {
       inputEvents = inputEvents.filter(
-        (event) => event.name !== eventName || event.callback !== callback
+        (event) => event.name !== eventName || event.callback !== callback,
       );
     },
 

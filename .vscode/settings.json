@@ -1,5 +1,3 @@
 {
-    "exportall.config.folderListener": [
-        "/examples/Main/icons"
-    ]
+  "exportall.config.folderListener": []
 }

@@ -1,5 +1,6 @@
-import { forEach, reduce, map } from 'lodash/fp';
-import { CustomGamepad, RawGamepad, ButtonResult, StickResult } from '../types';
+import { forEach, map, reduce } from 'lodash/fp';
+
+import { ButtonResult, CustomGamepad, RawGamepad, StickResult } from '../types';
 
 // dev-helper type: expands object types one level deep
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;

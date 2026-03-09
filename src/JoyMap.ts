@@ -1,21 +1,21 @@
 import {
-  noop,
-  map,
-  isFunction,
-  find,
-  filter,
+  compact,
   difference,
+  filter,
+  find,
   forEach,
   includes,
-  compact,
+  isFunction,
+  map,
+  noop,
 } from 'lodash/fp';
 
-import { getRawGamepads, gamepadIsValid } from './common/utils';
-import { RawGamepad, JoymapParams } from './types';
 import { BaseModule } from './baseModule/base';
+import { gamepadIsValid, getRawGamepads } from './common/utils';
+import { EventModule } from './eventModule/event';
 import { QueryModule } from './queryModule/query';
 import { StreamModule } from './streamModule/stream';
-import { EventModule } from './eventModule/event';
+import { JoymapParams, RawGamepad } from './types';
 
 interface JoymapState {
   onPoll: () => void;
