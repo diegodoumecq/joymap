@@ -15,13 +15,9 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'copy-assets',
+      name: 'create-nojekyll',
       closeBundle() {
-        const srcDir = path.resolve(__dirname, 'assets');
-        const destDir = path.resolve(__dirname, 'docs');
-        if (fs.existsSync(srcDir)) {
-          fs.cpSync(srcDir, destDir, { recursive: true });
-        }
+        fs.writeFileSync(path.resolve(__dirname, 'docs/.nojekyll'), '');
       },
     },
   ],
