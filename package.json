@@ -16,7 +16,7 @@
     "type-check": "tsc -p tsconfig.json",
     "build": "pnpm clean && pnpm build-lib && pnpm build-min && pnpm build-docs",
     "clean": "del-cli -f docs/* && del-cli -f bin/*",
-    "build-lib": "npx babel src -s -d bin/src -x .ts",
+    "build-lib": "vite build --config vite.config.lib.ts",
     "build-min": "esbuild bin/src/index.js --bundle --format=iife --global-name=Joymap --outfile=bin/joymap.min.js --minify",
     "build-docs": "vite build --config vite.config.docs.ts"
   },
@@ -39,18 +39,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@babel/runtime": "^7.26.0",
     "fast-memoize": "^2.5.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@babel/cli": "^7.26.0",
-    "@babel/core": "^7.26.0",
-    "@babel/plugin-transform-runtime": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "@babel/preset-react": "^7.26.0",
-    "@babel/preset-typescript": "^7.26.0",
-    "@babel/register": "^7.25.0",
     "@ckeditor/ckeditor5-react": "^9.0.0",
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
@@ -67,7 +59,6 @@
     "@typescript-eslint/parser": "^8.0.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.20",
-    "babel-plugin-lodash": "^3.3.4",
     "ckeditor5": "43.3.1",
     "color-hash": "^2.0.2",
     "del-cli": "^6.0.0",

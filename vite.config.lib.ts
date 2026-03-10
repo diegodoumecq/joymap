@@ -1,28 +1,28 @@
 import path from 'path';
 import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig({
+  plugins: [
+    dts({
+      include: ['src'],
+      outDir: 'bin',
+    }),
+  ],
   build: {
+    outDir: 'bin/src',
+    minify: false,
+    sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'Joymap',
-      fileName: 'joymap',
-      formats: ['umd'],
+      formats: ['es'],
     },
-    outDir: 'bin',
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['lodash', 'lodash/fp', 'fast-memoize'],
       output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        },
-      },
-    },
-    minify: 'terser',
-    terserOptions: {
-      mangle: {
-        keep_fnames: true,
+        preserveModules: true,
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
       },
     },
   },
