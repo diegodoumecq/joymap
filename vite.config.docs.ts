@@ -5,6 +5,12 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   assetsInclude: ['**/*.md'],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      joymap: path.resolve(__dirname, './src/index.ts'),
+    },
+  },
   plugins: [
     react(),
     {
@@ -23,13 +29,14 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        readme: path.resolve(__dirname, 'examples/Main/Readme/index.html'),
-        fighting: path.resolve(__dirname, 'examples/Fighting/index.html'),
-        log: path.resolve(__dirname, 'examples/Log/index.html'),
-        react: path.resolve(__dirname, 'examples/React/index.html'),
-        rumble: path.resolve(__dirname, 'examples/Rumble/index.html'),
-        editor: path.resolve(__dirname, 'examples/Editor/index.html'),
+        readme: path.resolve(__dirname, 'examples/pages/Readme/index.html'),
+        fighting: path.resolve(__dirname, 'examples/pages/Fighting/index.html'),
+        log: path.resolve(__dirname, 'examples/pages/Log/index.html'),
+        react: path.resolve(__dirname, 'examples/pages/React/index.html'),
+        rumble: path.resolve(__dirname, 'examples/pages/Rumble/index.html'),
+        editor: path.resolve(__dirname, 'examples/pages/Editor/index.html'),
       },
     },
   },
 });
+

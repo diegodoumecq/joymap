@@ -54,6 +54,7 @@
     "@ckeditor/ckeditor5-react": "^9.0.0",
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/postcss": "^4.2.0",
     "@tailwindcss/vite": "^4.2.1",
     "@types/color-hash": "^1.0.5",
