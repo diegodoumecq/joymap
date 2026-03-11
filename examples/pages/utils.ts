@@ -6,16 +6,16 @@ export const { devDependencies, version } = packageJson;
 
 const codeTransforms: [RegExp, string][] = [
   [
-    /^\s*import\s+[A-Za-z_$][\w$]*\s+from\s+['"]@\/public\/assets\/[^'"]+\.(png|jpg|jpeg|svg|webp|gif)['"];?\s*(?:\/\/.*)?$/m,
+    /^\s*import\s+[A-Za-z_$][\w$]*\s+from\s+['"]@\/public\/assets\/[^'"]+\.(png|jpg|jpeg|svg|webp|gif)['"];?\s*(?:\/\/.*)?$/gm,
     '',
   ],
   [
     new RegExp('bulletUrl', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/bullet.png',
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/bullet.png'",
   ],
   [
     new RegExp('smallBulletUrl', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/smallBullet.png',
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/smallBullet.png'",
   ],
   [
     new RegExp('gamepadUrl', 'g'),
@@ -23,16 +23,16 @@ const codeTransforms: [RegExp, string][] = [
   ],
   [
     new RegExp('l1Url', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L1.png',
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L1.png'",
   ],
   [
     new RegExp('l2Url', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L2.png',
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L2.png'",
   ],
 ];
 
 export function cleanupCode(code: string) {
-  return codeTransforms.reduce((acc, [regex, value]) => acc.replace(regex, value), code);
+  return codeTransforms.reduce((acc, [regex, value]) => acc.replaceAll(regex, value), code);
 }
 
 export const tsconfig = {
