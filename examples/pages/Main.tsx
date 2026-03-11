@@ -1,10 +1,7 @@
 import { useState } from 'react';
-
-import { editorFiles } from './Editor/_files';
-import { fightingFiles } from './Fighting/_files';
-import { logFiles } from './Log/_files';
 import {
   Button,
+  CodeBlock,
   CodesandboxLink,
   GithubIcon,
   IframeCard,
@@ -12,8 +9,12 @@ import {
   StackblitzLink,
   Tooltip,
   TooltipProvider,
-} from '../components';
-import { CodeBlock } from '../components/CodeBlock';
+} from '@/examples/components';
+import logoUrl from '@/public/assets/logo.png';
+
+import { editorFiles } from './Editor/_files';
+import { fightingFiles } from './Fighting/_files';
+import { logFiles } from './Log/_files';
 import { reactFiles } from './React/_files';
 import { rumbleFiles } from './Rumble/_files';
 import { compress, version } from './utils';
@@ -111,7 +112,7 @@ export function Main() {
           <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4">
             <div className="flex items-center gap-2">
               <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary">
-                <img src="/assets/logo.png" />
+                <img src={logoUrl} />
               </div>
               <h1 className="text-lg font-semibold tracking-tight text-foreground">
                 Joymap Examples

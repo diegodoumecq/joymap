@@ -1,4 +1,7 @@
 import React, { ReactNode, useState } from 'react';
+import gamepadUrl from '@/public/assets/gamepad.png';
+import l1Url from '@/public/assets/L1.png';
+import l2Url from '@/public/assets/L2.png';
 import { QueryModule } from 'joymap';
 
 export const digitalInputs = {
@@ -97,10 +100,10 @@ const analogInputs = {
 type AnalogNames = keyof typeof analogInputs;
 
 const shoulderInputs = {
-  L1: { backgroundImage: 'url(/assets/L1.png)' },
-  L2: { backgroundImage: 'url(/assets/L2.png)' },
-  R1: { transform: 'scaleX(-1)', backgroundImage: 'url(/assets/L1.png)' },
-  R2: { transform: 'scaleX(-1)', backgroundImage: 'url(/assets/L2.png)' },
+  L2: { backgroundImage: `url(${l2Url})` },
+  L1: { backgroundImage: `url(${l1Url})` },
+  R2: { transform: 'scaleX(-1)', backgroundImage: `url(${l2Url})` },
+  R1: { transform: 'scaleX(-1)', backgroundImage: `url(${l1Url})` },
 } as const;
 type ShoulderNames = keyof typeof shoulderInputs;
 
@@ -233,7 +236,7 @@ export default function Gamepad({
             zIndex: 10,
             pointerEvents: 'none',
           }}
-          src="/assets/gamepad.png"
+          src={gamepadUrl}
         />
         {Object.keys(shoulderInputs).map((inputName) => (
           <Shoulder key={inputName} inputName={inputName as ShoulderNames} module={module} />

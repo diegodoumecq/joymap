@@ -15,7 +15,7 @@ const config = {
     "@ianvs/prettier-plugin-sort-imports",
     "prettier-plugin-tailwindcss",
   ],
-  "tailwindStylesheet": "./examples/Main/globals.css",
+  "tailwindStylesheet": "./examples/globals.css",
   importOrder: [
     "^(react/(.*)$)|^(react$)|^(react-native(.*)$)",
     "<THIRD_PARTY_MODULES>",

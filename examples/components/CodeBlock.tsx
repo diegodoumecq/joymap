@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+
 import { CheckIcon } from './CheckIcon';
 import { CopyIcon } from './CopyIcon';
-
 
 interface CodeBlockProps {
   code: string;
