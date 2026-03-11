@@ -135,7 +135,10 @@ Throughout the library you're invited to name things. Like events, buttons, stic
 
 Stuff to do probably.
 
-- Improve the architecture of the examples, it's a pain to code right now
+- Add automatic import of files in examples, so that it's no longer necessary to do it by hand
+- Remove lodash from library and examples
 - Improve event module: add more event operators
 - Add support for hapticActuators
+- Improve rumble support
+- Add multiple default configs for common gamepad mappings (linux vs windows vs mac, also safari & chrome)
 

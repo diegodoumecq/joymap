@@ -1,9 +1,8 @@
 // Simple canvas example that doesn't use any other library nor ES6 features
-import bulletUrl from '@/public/assets/bullet.png';
-import gamepadUrl from '@/public/assets/gamepad.png';
-import smallBulletUrl from '@/public/assets/smallBullet.png';
 import { createJoymap, createQueryModule, QueryModule } from 'joymap';
 import { uniqueId } from 'lodash/fp';
+
+import gamepadUrl from '@/public/assets/gamepad.png';
 
 const SIZE = {
   width: window.innerWidth,
@@ -223,13 +222,36 @@ app.innerHTML = `
 const gamepadImage = new Image();
 gamepadImage.src = gamepadUrl;
 
-const bulletImage = new Image();
-bulletImage.src = bulletUrl;
+function createTintedSprite(color: string) {
+  const c = document.createElement('canvas');
+  c.width = gamepadImage.width;
+  c.height = gamepadImage.height;
 
-const smallBulletImage = new Image();
-smallBulletImage.src = smallBulletUrl;
+  const ctx = c.getContext('2d')!;
 
-function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: HTMLImageElement) {
+  ctx.drawImage(gamepadImage, 0, 0);
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.drawImage(gamepadImage, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  return c;
+}
+
+// Get the canvas context so we can draw on it
+const ctx = (document.getElementById('canvas') as HTMLCanvasElement).getContext(
+  '2d',
+) as CanvasRenderingContext2D;
+
+let redSprite: HTMLCanvasElement;
+
+gamepadImage.onload = () => {
+  redSprite = createTintedSprite('rgba(255,0,0,0.6)');
+};
+
+function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: CanvasImageSource) {
   const { x, y, angle, rotationOffset, width, height, id } = element;
 
   // Rotate whole canvas
@@ -239,6 +261,7 @@ function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: HTM
 
   // Draw straight image onto the rotated canvas
   ctx.drawImage(image, x - width * 0.5, y - height * 0.5, width, height);
+
   if (id) {
     ctx.font = '48px serif';
     ctx.strokeText(id, x - 15, y);
@@ -252,11 +275,6 @@ function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: HTM
 
 const joymap = createJoymap({
   onPoll: function onPoll() {
-    // Get the canvas context so we can draw on it
-    const ctx = (document.getElementById('canvas') as HTMLCanvasElement).getContext(
-      '2d',
-    ) as CanvasRenderingContext2D;
-
     // Clear canvas by drawing background color and then the welcome messages
     ctx.fillStyle = '#282828';
     ctx.fillRect(0, 0, SIZE.width, SIZE.height);
@@ -301,27 +319,14 @@ const joymap = createJoymap({
       if (bullet.type === 'chaos') {
         bullet.angle += Math.PI * 0.2 * Math.random() - Math.PI * 0.1;
       }
-      const sprite = (() => {
-        if (bullet.type === 'small') {
-          return smallBulletImage;
-        }
-        if (bullet.type === 'big') {
-          return bulletImage;
-        }
-        if (bullet.type === 'spinning') {
-          return gamepadImage;
-        }
 
-        return smallBulletImage;
-      })();
-
-      drawElement(ctx, bullet, sprite);
+      drawElement(ctx, bullet, gamepadImage);
     });
 
     characters.forEach((c) => {
       if (c.module.isConnected()) {
         updateCharacter(c, bullets);
-        drawElement(ctx, c, gamepadImage);
+        drawElement(ctx, c, redSprite);
       }
     });
   },
