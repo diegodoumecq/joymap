@@ -8,7 +8,7 @@ export default defineConfig({
   assetsInclude: ['**/*.md'],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './'),
       joymap: path.resolve(__dirname, './src/index.ts'),
     },
   },
@@ -37,4 +37,3 @@ export default defineConfig({
     },
   },
 });
-

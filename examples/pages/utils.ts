@@ -6,24 +6,28 @@ export const { devDependencies, version } = packageJson;
 
 const codeTransforms: [RegExp, string][] = [
   [
-    new RegExp('/assets/bullet.png', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/bullet.png',
+    /^\s*import\s+[A-Za-z_$][\w$]*\s+from\s+['"]@\/public\/assets\/[^'"]+\.(png|jpg|jpeg|svg|webp|gif)['"];?\s*(?:\/\/.*)?$/m,
+    '',
   ],
   [
-    new RegExp('/assets/gamepad.png', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/gamepad.png',
+    new RegExp('bulletUrl', 'g'),
+    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/bullet.png',
   ],
   [
-    new RegExp('/assets/L1.png', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/L1.png',
+    new RegExp('smallBulletUrl', 'g'),
+    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/smallBullet.png',
   ],
   [
-    new RegExp('/assets/L2.png', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/L2.png',
+    new RegExp('gamepadUrl', 'g'),
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/gamepad.png'",
   ],
   [
-    new RegExp('/assets/smallBullet.png', 'g'),
-    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/assets/smallBullet.png',
+    new RegExp('l1Url', 'g'),
+    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L1.png',
+  ],
+  [
+    new RegExp('l2Url', 'g'),
+    'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L2.png',
   ],
 ];
 

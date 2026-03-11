@@ -46,4 +46,3 @@ export const editorFiles = {
   },
   'tsconfig.json': tsconfig,
 };
-

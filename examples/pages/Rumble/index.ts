@@ -1,4 +1,7 @@
 // Simple canvas example that doesn't use any other library nor ES6 features
+import bulletUrl from '@/public/assets/bullet.png';
+import gamepadUrl from '@/public/assets/gamepad.png';
+import smallBulletUrl from '@/public/assets/smallBullet.png';
 import { createJoymap, createQueryModule, QueryModule } from 'joymap';
 import { uniqueId } from 'lodash/fp';
 
@@ -218,13 +221,13 @@ app.innerHTML = `
 `;
 
 const gamepadImage = new Image();
-gamepadImage.src = '/assets/gamepad.png';
+gamepadImage.src = gamepadUrl;
 
 const bulletImage = new Image();
-bulletImage.src = '/assets/bullet.png';
+bulletImage.src = bulletUrl;
 
 const smallBulletImage = new Image();
-smallBulletImage.src = '/assets/smallBullet.png';
+smallBulletImage.src = smallBulletUrl;
 
 function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: HTMLImageElement) {
   const { x, y, angle, rotationOffset, width, height, id } = element;
