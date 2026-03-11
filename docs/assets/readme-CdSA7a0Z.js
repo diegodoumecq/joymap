@@ -190,9 +190,12 @@ Throughout the library you're invited to name things. Like events, buttons, stic
 
 Stuff to do probably.
 
-- Improve the architecture of the examples, it's a pain to code right now
+- Add automatic import of files in examples, so that it's no longer necessary to do it by hand
+- Remove lodash from library and examples
 - Improve event module: add more event operators
 - Add support for hapticActuators
+- Improve rumble support
+- Add multiple default configs for common gamepad mappings (linux vs windows vs mac, also safari & chrome)
 
 `;function We(c){return c.replace("[Lots of handy examples](https://diegodoumecq.github.io/joymap/)","Lots of handy examples").replace("* You can play with our examples here: https://diegodoumecq.github.io/joymap/ (includes handy links to codesandbox and the github source code)","* Navigate through the navbar to see the examples")}function Ye(c){return c.toLowerCase().replace(/[^\w\s-]/g,"").replace(/\s+/g,"-").trim()}const he=new S;he.heading=function({text:c,depth:e}){const t=Ye(c);return`<h${e} id="${t}">${c}</h${e}>`};p.use({renderer:he});document.body.innerHTML=`
   <div style="padding: 2rem; color: #EEE; font-family: sans-serif; display: flex; justify-content: center;">
@@ -201,4 +204,4 @@ Stuff to do probably.
     </div>
   </div>
 `;
-//# sourceMappingURL=readme-e5saKuzm.js.map
+//# sourceMappingURL=readme-CdSA7a0Z.js.map

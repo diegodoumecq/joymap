@@ -10,14 +10,6 @@ const codeTransforms: [RegExp, string][] = [
     '',
   ],
   [
-    new RegExp('bulletUrl', 'g'),
-    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/bullet.png'",
-  ],
-  [
-    new RegExp('smallBulletUrl', 'g'),
-    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/smallBullet.png'",
-  ],
-  [
     new RegExp('gamepadUrl', 'g'),
     "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/gamepad.png'",
   ],
