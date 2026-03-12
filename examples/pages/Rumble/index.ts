@@ -1,6 +1,5 @@
 // Simple canvas example that doesn't use any other library nor ES6 features
 import { createJoymap, createQueryModule, QueryModule } from 'joymap';
-import { uniqueId } from 'lodash/fp';
 
 import gamepadUrl from '@/public/assets/gamepad.png';
 
@@ -22,7 +21,7 @@ window.addEventListener('resize', () => {
 });
 
 interface Element {
-  id?: string;
+  color?: Color;
   x: number;
   y: number;
   angle: number;
@@ -37,6 +36,7 @@ interface Character extends Element {
   timeoutBig: number;
   timeoutSpinning: number;
   timeoutChaos: number;
+  color: Color;
 }
 
 interface Bullet extends Element {
@@ -184,26 +184,6 @@ function updateCharacter(character: Character, bullets: Bullet[]) {
   }
 }
 
-function createCharacter(
-  padId: string,
-  { width, height }: { width: number; height: number },
-): Character {
-  return {
-    module: createQueryModule({ padId, autoConnect: false }),
-    id: uniqueId(''),
-    x: Math.random() * width,
-    y: Math.random() * height,
-    angle: Math.random() * 2 * Math.PI,
-    width: 242,
-    height: 150,
-    timeoutSmall: Date.now(),
-    timeoutBig: Date.now(),
-    timeoutSpinning: Date.now(),
-    timeoutChaos: Date.now(),
-    rotationOffset: 0,
-  };
-}
-
 const characters: Character[] = [];
 let bullets: Bullet[] = [];
 
@@ -245,14 +225,45 @@ const ctx = (document.getElementById('canvas') as HTMLCanvasElement).getContext(
   '2d',
 ) as CanvasRenderingContext2D;
 
-let redSprite: HTMLCanvasElement;
+const colorList = ['#debabd', '#debad5', '#bad5de', '#baded6', '#d6bade'] as const;
+type Color = (typeof colorList)[number];
+let colorSprites: Record<Color, HTMLCanvasElement>;
 
 gamepadImage.onload = () => {
-  redSprite = createTintedSprite('rgba(255,0,0,0.6)');
+  colorSprites = {} as Record<Color, HTMLCanvasElement>;
+
+  for (let key of colorList) {
+    colorSprites[key] = createTintedSprite(key);
+  }
 };
 
+let charCounter = 0;
+
+function createCharacter(
+  padId: string,
+  { width, height }: { width: number; height: number },
+): Character {
+  const color = colorList[charCounter];
+  charCounter = (charCounter + 1) % colorList.length;
+
+  return {
+    module: createQueryModule({ padId, autoConnect: false }),
+    color,
+    x: Math.random() * width,
+    y: Math.random() * height,
+    angle: Math.random() * 2 * Math.PI,
+    width: 242,
+    height: 150,
+    timeoutSmall: Date.now(),
+    timeoutBig: Date.now(),
+    timeoutSpinning: Date.now(),
+    timeoutChaos: Date.now(),
+    rotationOffset: 0,
+  };
+}
+
 function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: CanvasImageSource) {
-  const { x, y, angle, rotationOffset, width, height, id } = element;
+  const { x, y, angle, rotationOffset, width, height } = element;
 
   // Rotate whole canvas
   ctx.translate(x, y);
@@ -261,11 +272,6 @@ function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: Can
 
   // Draw straight image onto the rotated canvas
   ctx.drawImage(image, x - width * 0.5, y - height * 0.5, width, height);
-
-  if (id) {
-    ctx.font = '48px serif';
-    ctx.strokeText(id, x - 15, y);
-  }
 
   // Unrotate canvas to straighten it and leave the image rotated instead
   ctx.translate(x, y);
@@ -326,7 +332,7 @@ const joymap = createJoymap({
     characters.forEach((c) => {
       if (c.module.isConnected()) {
         updateCharacter(c, bullets);
-        drawElement(ctx, c, redSprite);
+        drawElement(ctx, c, colorSprites[c.color]);
       }
     });
   },

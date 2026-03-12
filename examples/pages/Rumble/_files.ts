@@ -14,7 +14,7 @@ export const rumbleFiles = {
   'package.json': {
     isBinary: false,
     content: makePckJson({
-      hasLodash: true,
+      hasLodash: false,
       hasReact: false,
     }),
   },
