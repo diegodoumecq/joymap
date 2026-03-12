@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import './globals.css';
 
@@ -8,4 +9,11 @@ const element = document.createElement('div');
 document.body.appendChild(element);
 
 const root = createRoot(element);
-root.render(<Main />);
+root.render(
+  <BrowserRouter>
+    <Routes>
+      <Route path="/examples/:page" element={<Main />} />
+      <Route path="/" element={<Navigate to="/examples/readme" replace />} />
+    </Routes>
+  </BrowserRouter>,
+);

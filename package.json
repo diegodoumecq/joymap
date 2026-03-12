@@ -79,6 +79,7 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-iframe": "^1.8.5",
+    "react-router-dom": "^7.13.1",
     "regenerator-runtime": "^0.14.1",
     "rxjs": "^7.8.1",
     "tailwind-merge": "^3.5.0",
