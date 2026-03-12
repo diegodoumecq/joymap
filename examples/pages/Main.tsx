@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import {
   Button,
@@ -99,7 +99,12 @@ export const examples: Record<string, Page> = {
 };
 
 export function Main() {
-  const [activeCategory, setActiveCategory] = useState('readme');
+  const { page } = useParams();
+  const navigate = useNavigate();
+
+  const activeCategory = Object.keys(examples).includes(page ?? '') ? page! : 'readme';
+
+  const handleNavigate = (cat: string) => navigate(`/examples/${cat}`);
 
   const current = examples[activeCategory];
 
@@ -131,7 +136,7 @@ export function Main() {
                     <Button
                       key={cat}
                       role="tab"
-                      onClick={() => setActiveCategory(cat)}
+                      onClick={() => handleNavigate(cat)}
                       isActive={isActive}
                     >
                       {cat}
@@ -191,7 +196,7 @@ export function Main() {
             >
               <iframe
                 key={current.html}
-                src={current.html}
+                src={`/${current.html}`}
                 className="relative block h-full w-full"
               />
             </IframeCard>
