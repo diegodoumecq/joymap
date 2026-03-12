@@ -104,7 +104,7 @@ export function Main() {
 
   const activeCategory = Object.keys(examples).includes(page ?? '') ? page! : 'readme';
 
-  const handleNavigate = (cat: string) => navigate(`/examples/${cat}`);
+  const handleNavigate = (cat: string) => navigate(`/joymap/examples/${cat}`);
 
   const current = examples[activeCategory];
 

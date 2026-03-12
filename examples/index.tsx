@@ -12,8 +12,9 @@ const root = createRoot(element);
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/examples/:page" element={<Main />} />
-      <Route path="/" element={<Navigate to="/examples/readme" replace />} />
+      <Route path="/joymap/examples/:page" element={<Main />} />
+      <Route path="/" element={<Navigate to="/joymap/examples/readme" replace />} />
+      <Route path="/joymap" element={<Navigate to="/joymap/examples/readme" replace />} />
     </Routes>
   </BrowserRouter>,
 );
