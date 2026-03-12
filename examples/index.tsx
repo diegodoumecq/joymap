@@ -10,11 +10,10 @@ document.body.appendChild(element);
 
 const root = createRoot(element);
 root.render(
-  <BrowserRouter>
+  <BrowserRouter basename={import.meta.env.BASE_URL}>
     <Routes>
-      <Route path="/joymap/examples/:page" element={<Main />} />
-      <Route path="/" element={<Navigate to="/joymap/examples/readme" replace />} />
-      <Route path="/joymap" element={<Navigate to="/joymap/examples/readme" replace />} />
+      <Route path="/examples/:page" element={<Main />} />
+      <Route path="/" element={<Navigate to="/examples/readme" replace />} />
     </Routes>
   </BrowserRouter>,
 );

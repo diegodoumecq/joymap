@@ -104,7 +104,7 @@ export function Main() {
 
   const activeCategory = Object.keys(examples).includes(page ?? '') ? page! : 'readme';
 
-  const handleNavigate = (cat: string) => navigate(`/joymap/examples/${cat}`);
+  const handleNavigate = (cat: string) => navigate(`/examples/${cat}`);
 
   const current = examples[activeCategory];
 
@@ -196,7 +196,7 @@ export function Main() {
             >
               <iframe
                 key={current.html}
-                src={`/${current.html}`}
+                src={`${import.meta.env.BASE_URL}${current.html}`}
                 className="relative block h-full w-full"
               />
             </IframeCard>
