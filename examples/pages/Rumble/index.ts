@@ -1,7 +1,7 @@
 // Simple canvas example that doesn't use any other library nor ES6 features
 import { createJoymap, createQueryModule, QueryModule } from 'joymap';
 
-import gamepadUrl from '@/public/assets/gamepad.png';
+import gamepadUrl from '@/examples/assets/gamepad.png';
 
 const SIZE = {
   width: window.innerWidth,

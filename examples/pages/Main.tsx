@@ -11,10 +11,11 @@ import {
   Tooltip,
   TooltipProvider,
 } from '@/examples/components';
-import logoUrl from '@/public/assets/logo.png';
+import logoUrl from '../assets/logo.png';
 import { editorFiles } from './Editor/_files';
 import { fightingFiles } from './Fighting/_files';
 import { logFiles } from './Log/_files';
+import { phaserFiles } from './Phaser/_files';
 import { reactFiles } from './React/_files';
 import { rumbleFiles } from './Rumble/_files';
 import { compress, version } from './utils';
@@ -95,6 +96,14 @@ export const examples: Record<string, Page> = {
     // stackblitz: editorFiles,
     tags: ['eventModule', 'react'],
     description: 'A text editor example that binds gamepad buttons to keyboard events.',
+  },
+  phaser: {
+    html: 'examples/pages/Phaser/index.html',
+    title: 'Phaser Example',
+    gitPath: 'tree/master/examples/pages/Phaser',
+    codesandbox: compress(phaserFiles),
+    tags: ['queryModule', 'phaser'],
+    description: 'A Phaser game menu demonstrating gamepad navigation with joymap.',
   },
 };
 
