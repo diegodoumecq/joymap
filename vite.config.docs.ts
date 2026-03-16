@@ -18,6 +18,10 @@ export default defineConfig({
       name: 'create-nojekyll',
       closeBundle() {
         fs.writeFileSync(path.resolve(__dirname, 'docs/.nojekyll'), '');
+        fs.copyFileSync(
+          path.resolve(__dirname, 'docs/index.html'),
+          path.resolve(__dirname, 'docs/404.html'),
+        );
       },
     },
   ],
