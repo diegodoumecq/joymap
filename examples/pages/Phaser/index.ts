@@ -1,7 +1,7 @@
 import { createJoymap, createQueryModule, QueryModule } from 'joymap';
 import Phaser from 'phaser';
 
-const menuItems = ['New Game', 'Options', 'Can of beans', 'Quit'];
+const menuItems = ['New Game', 'Options', 'Beans', 'Quit'];
 let selectedIndex = 0;
 let gamepadModule: QueryModule | null = null;
 
@@ -12,6 +12,7 @@ class MenuScene extends Phaser.Scene {
   private gridLines: { sprite: Phaser.GameObjects.TileSprite; speed: number }[] = [];
   private gradientOverlay!: Phaser.GameObjects.Graphics;
   private echoes: { text: Phaser.GameObjects.Text; offset: number }[] = [];
+  private cans: Phaser.GameObjects.Text[] = [];
   private currentTween: Phaser.Tweens.Tween | null = null;
 
   constructor() {
@@ -19,6 +20,7 @@ class MenuScene extends Phaser.Scene {
   }
 
   create() {
+    // Background
     this.cameras.main.setBackgroundColor('#000000');
 
     const depths = [0.2, 0.3, 0.4, 0.5];
@@ -53,6 +55,7 @@ class MenuScene extends Phaser.Scene {
       this.gradientOverlay.fillRect(0, (i / gradientSteps) * 600, 800, 600 / gradientSteps + 1);
     }
 
+    // Text
     this.add
       .text(400, 100, 'PHASER MENU', {
         fontSize: '72px',
@@ -98,6 +101,15 @@ class MenuScene extends Phaser.Scene {
 
       this.textObjects.push(text);
     });
+
+    const floor = this.add.rectangle(400, 610, 800, 20, 0x000000);
+    this.matter.add.gameObject(floor, { isStatic: true, restitution: 0.5 });
+
+    const leftWall = this.add.rectangle(-10, 300, 20, 600, 0x000000);
+    this.matter.add.gameObject(leftWall, { isStatic: true, restitution: 0.5 });
+
+    const rightWall = this.add.rectangle(810, 300, 20, 600, 0x000000);
+    this.matter.add.gameObject(rightWall, { isStatic: true, restitution: 0.5 });
 
     this.updateSelection();
 
@@ -176,6 +188,10 @@ class MenuScene extends Phaser.Scene {
           ease: 'Back.easeOut',
         });
         this.spawnEcho(text.text);
+
+        if (index === 2) {
+          this.spawnCans();
+        }
       } else {
         this.tweens.add({
           targets: text,
@@ -222,6 +238,26 @@ class MenuScene extends Phaser.Scene {
       }
     });
   }
+
+  private spawnCans() {
+    const x = Phaser.Math.Between(350, 450);
+    const y = 380;
+
+    const can = this.add.text(x, y, '🥫', { fontSize: '48px' }).setOrigin(0.5, 0.5);
+    can.setDepth(10);
+
+    this.matter.add.gameObject(can, {
+      shape: { type: 'rectangle', width: 24, height: 32 },
+      restitution: 0.5,
+      friction: 0.1,
+      force: { x: Phaser.Math.FloatBetween(-0.02, 0.02), y: -0.04 },
+      torque: Phaser.Math.FloatBetween(-1, 1),
+    });
+
+    can.setRotation(Phaser.Math.FloatBetween(0, Math.PI * 2));
+
+    this.cans.push(can);
+  }
 }
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -232,7 +268,11 @@ const config: Phaser.Types.Core.GameConfig = {
   backgroundColor: '#1a0032',
   scene: [MenuScene],
   physics: {
-    default: 'arcade',
+    default: 'matter',
+    matter: {
+      gravity: { x: 0, y: 1 },
+      debug: false,
+    },
   },
 };
 
