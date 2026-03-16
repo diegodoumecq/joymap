@@ -37,6 +37,7 @@ export default defineConfig({
         react: path.resolve(__dirname, 'examples/pages/React/index.html'),
         rumble: path.resolve(__dirname, 'examples/pages/Rumble/index.html'),
         editor: path.resolve(__dirname, 'examples/pages/Editor/index.html'),
+        phaser: path.resolve(__dirname, 'examples/pages/Phaser/index.html'),
       },
     },
   },

@@ -11,15 +11,15 @@ const codeTransforms: [RegExp, string][] = [
   ],
   [
     new RegExp('gamepadUrl', 'g'),
-    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/gamepad.png'",
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/examples/assets/gamepad.png'",
   ],
   [
     new RegExp('l1Url', 'g'),
-    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L1.png'",
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/examples/assets/L1.png'",
   ],
   [
     new RegExp('l2Url', 'g'),
-    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/public/assets/L2.png'",
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/examples/assets/L2.png'",
   ],
 ];
 

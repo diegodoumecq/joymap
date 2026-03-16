@@ -1,9 +1,9 @@
 import React, { ReactNode, useState } from 'react';
 import { QueryModule } from 'joymap';
 
-import gamepadUrl from '@/public/assets/gamepad.png';
-import l1Url from '@/public/assets/L1.png';
-import l2Url from '@/public/assets/L2.png';
+import gamepadUrl from '@/examples/assets/gamepad.png';
+import l1Url from '@/examples/assets/L1.png';
+import l2Url from '@/examples/assets/L2.png';
 
 export const digitalInputs = {
   A: {
