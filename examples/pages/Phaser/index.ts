@@ -243,12 +243,23 @@ class MenuScene extends Phaser.Scene {
     const x = Phaser.Math.Between(350, 450);
     const y = 380;
 
-    const can = this.add.text(x, y, '🥫', { fontSize: '48px' }).setOrigin(0.5, 0.5);
+    const rand = Math.random();
+    const isBean = rand > 0.7;
+    const isBin = rand > 0.98;
+    const emoji = isBin ? '🗑️' : isBean ? '🫘' : '🥫';
+
+    const can = this.add
+      .text(x, y, emoji, { fontSize: '48px', padding: { y: 5 } })
+      .setOrigin(0.5, 0.5);
     can.setDepth(10);
 
     this.matter.add.gameObject(can, {
-      shape: { type: 'rectangle', width: 24, height: 32 },
-      restitution: 0.5,
+      shape: isBin
+        ? { type: 'rectangle', width: 40, height: 52 }
+        : isBean
+          ? { type: 'circle', radius: 18 }
+          : { type: 'rectangle', width: 24, height: 42 },
+      restitution: isBean ? 0.7 : 0.5,
       friction: 0.1,
       force: { x: Phaser.Math.FloatBetween(-0.02, 0.02), y: -0.04 },
       torque: Phaser.Math.FloatBetween(-1, 1),
