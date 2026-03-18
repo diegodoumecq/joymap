@@ -3,11 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Button,
   CodeBlock,
-  CodesandboxLink,
   GithubIcon,
   IframeCard,
   Link,
-  StackblitzLink,
+  StackblitzButton,
   Tooltip,
   TooltipProvider,
 } from '@/examples/components';
@@ -18,7 +17,7 @@ import { logFiles } from './Log/_files';
 import { phaserFiles } from './Phaser/_files';
 import { reactFiles } from './React/_files';
 import { rumbleFiles } from './Rumble/_files';
-import { compress, version } from './utils';
+import { version } from './utils';
 
 // const _code = `const users = [
 //   { name: "Alice", age: 28, active: true },
@@ -38,8 +37,7 @@ interface Page {
   html: string;
   title: string;
   gitPath?: string;
-  codesandbox?: string;
-  stackblitz?: Record<string, { content: string; isBinary: boolean }>;
+  stackblitz?: Record<string, string>;
   description?: string;
   tags: string[];
   code?: string;
@@ -55,8 +53,7 @@ export const examples: Record<string, Page> = {
     html: 'examples/pages/React/index.html',
     title: 'React Example',
     gitPath: 'tree/master/examples/pages/React',
-    codesandbox: compress(reactFiles),
-    // stackblitz: reactFiles,
+    stackblitz: reactFiles,
     tags: ['queryModule', 'react'],
     description:
       'A React component that visualizes gamepad input in real-time with button and stick visualization.',
@@ -65,7 +62,6 @@ export const examples: Record<string, Page> = {
     html: 'examples/pages/Fighting/index.html',
     title: 'Fighting Example',
     gitPath: 'tree/master/examples/pages/Fighting',
-    codesandbox: compress(fightingFiles),
     stackblitz: fightingFiles,
     tags: ['queryModule'],
     description: 'A fighting game demo with fast input handling and combo detection.',
@@ -74,7 +70,6 @@ export const examples: Record<string, Page> = {
     html: 'examples/pages/Rumble/index.html',
     title: 'Rumble Example',
     gitPath: 'tree/master/examples/pages/Rumble',
-    codesandbox: compress(rumbleFiles),
     stackblitz: rumbleFiles,
     tags: ['queryModule', 'canvas'],
     description: 'Demonstrates gamepad vibration/rumble effects on supported controllers.',
@@ -83,7 +78,6 @@ export const examples: Record<string, Page> = {
     html: 'examples/pages/Log/index.html',
     title: 'Log Example',
     gitPath: 'tree/master/examples/pages/Log',
-    codesandbox: compress(logFiles),
     stackblitz: logFiles,
     tags: ['queryModule', 'html', 'console'],
     description: 'Displays all gamepad events in a scrollable log for debugging.',
@@ -92,8 +86,7 @@ export const examples: Record<string, Page> = {
     html: 'examples/pages/Editor/index.html',
     title: 'Editor Example',
     gitPath: 'tree/master/examples/pages/Editor',
-    codesandbox: compress(editorFiles),
-    // stackblitz: editorFiles,
+    stackblitz: editorFiles,
     tags: ['eventModule', 'react'],
     description: 'A text editor example that binds gamepad buttons to keyboard events.',
   },
@@ -101,7 +94,7 @@ export const examples: Record<string, Page> = {
     html: 'examples/pages/Phaser/index.html',
     title: 'Phaser Example',
     gitPath: 'tree/master/examples/pages/Phaser',
-    codesandbox: compress(phaserFiles),
+    stackblitz: phaserFiles,
     tags: ['queryModule', 'phaser'],
     description: 'A Phaser game menu demonstrating gamepad navigation with joymap.',
   },
@@ -174,8 +167,7 @@ export function Main() {
                   ))}
                 </div>
                 <div className="flex justify-end">
-                  {!!current.codesandbox && <CodesandboxLink value={current.codesandbox} />}
-                  {!!current.stackblitz && <StackblitzLink files={current.stackblitz} />}
+                  {current.stackblitz && <StackblitzButton files={current.stackblitz} />}
                   {current.gitPath && (
                     <Tooltip content="View example on github">
                       <Link
