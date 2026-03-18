@@ -19,12 +19,14 @@ const config: Phaser.Types.Core.GameConfig = {
   },
 };
 
-document.fonts.ready.then(() => {
-  const game = new Phaser.Game(config);
+document.fonts.load('16px Audiowide').then(() => {
+  setTimeout(() => {
+    const game = new Phaser.Game(config);
 
-  const joymap = createJoymap();
+    const joymap = createJoymap();
 
-  game.scene.start('MainScene', { joymap });
+    game.scene.start('MainScene', { joymap });
 
-  joymap.start();
+    joymap.start();
+  }, 100);
 });
