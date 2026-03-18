@@ -20,7 +20,7 @@ window.addEventListener('resize', () => {
   canvas.height = SIZE.height;
 });
 
-interface Element {
+interface GameObj {
   color?: Color;
   x: number;
   y: number;
@@ -30,7 +30,7 @@ interface Element {
   height: number;
 }
 
-interface Character extends Element {
+interface Character extends GameObj {
   module: QueryModule;
   timeoutSmall: number;
   timeoutBig: number;
@@ -39,7 +39,7 @@ interface Character extends Element {
   color: Color;
 }
 
-interface Bullet extends Element {
+interface Bullet extends GameObj {
   speed: number;
   type: 'small' | 'big' | 'spinning' | 'chaos';
 }
@@ -262,7 +262,7 @@ function createCharacter(
   };
 }
 
-function drawElement(ctx: CanvasRenderingContext2D, element: Element, image: CanvasImageSource) {
+function drawElement(ctx: CanvasRenderingContext2D, element: GameObj, image: CanvasImageSource) {
   const { x, y, angle, rotationOffset, width, height } = element;
 
   // Rotate whole canvas

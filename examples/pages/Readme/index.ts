@@ -9,7 +9,7 @@ function cleanSelfRef(str: string) {
       'Lots of handy examples',
     )
     .replace(
-      '* You can play with our examples here: https://diegodoumecq.github.io/joymap/ (includes handy links to codesandbox and the github source code)',
+      '* You can play with our examples here: https://diegodoumecq.github.io/joymap/ (includes handy links to stackblitz and the github source code)',
       '* Navigate through the navbar to see the examples',
     );
 }

@@ -1,12 +1,10 @@
-import LZString from 'lz-string';
-
 import packageJson from '../../package.json';
 
 export const { devDependencies, version } = packageJson;
 
 const codeTransforms: [RegExp, string][] = [
   [
-    /^\s*import\s+[A-Za-z_$][\w$]*\s+from\s+['"]@\/public\/assets\/[^'"]+\.(png|jpg|jpeg|svg|webp|gif)['"];?\s*(?:\/\/.*)?$/gm,
+    /^\s*import\s+[A-Za-z_$][\w$]*\s+from\s+['"]@\/examples\/assets\/[^'"]+\.(png|jpg|jpeg|svg|webp|gif)['"];?\s*(?:\/\/.*)?$/gm,
     '',
   ],
   [
@@ -27,90 +25,73 @@ export function cleanupCode(code: string) {
   return codeTransforms.reduce((acc, [regex, value]) => acc.replaceAll(regex, value), code);
 }
 
-export const tsconfig = {
-  isBinary: false,
-  content: JSON.stringify({
-    compilerOptions: {
-      target: 'esnext',
-      module: 'commonjs',
-      importHelpers: true,
-      sourceMap: true,
-      allowSyntheticDefaultImports: true,
-      rootDir: './',
-      lib: ['esnext', 'dom'],
-      strict: true,
-      alwaysStrict: true,
-      allowJs: true,
-      baseUrl: './',
-      jsx: 'react',
-      esModuleInterop: true,
-    },
-  }),
-};
+export const tsconfig = JSON.stringify({
+  compilerOptions: {
+    target: 'ESNext',
+    module: 'ESNext',
+    moduleResolution: 'node',
+    importHelpers: true,
+    sourceMap: true,
+    allowSyntheticDefaultImports: true,
+    rootDir: './',
+    lib: ['esnext', 'dom'],
+    strict: true,
+    alwaysStrict: true,
+    allowJs: true,
+    baseUrl: './',
+    jsx: 'react',
+    esModuleInterop: true,
+  },
+});
+
+export const viteconfig = `
+  import { defineConfig } from 'vite'
+  import react from '@vitejs/plugin-react'
+
+  export default defineConfig({
+    plugins: [react()],
+  })
+`;
 
 type Deps = Record<string, string>;
 type makePckJsonOptions = {
   dependencies?: Deps;
-  devDependencies?: Deps;
   hasReact?: boolean;
   hasLodash?: boolean;
-  reactScripts?: boolean;
 };
 
 export function makePckJson({
   dependencies = {},
-  devDependencies = {},
   hasLodash = true,
   hasReact = false,
-  reactScripts = false,
 }: makePckJsonOptions = {}) {
   return JSON.stringify({
     main: './index.ts',
+    // type: 'module',
+    scripts: {
+      start: 'vite',
+      build: 'tsc -b && vite build',
+    },
     dependencies: {
       joymap: packageJson.version,
-      tslib: 'latest',
-      ...(hasLodash ? { lodash: packageJson.dependencies.lodash } : {}),
+      typescript: '~5.9.3',
+      vite: '^8.0.0',
+      ...(hasLodash
+        ? {
+            lodash: packageJson.dependencies.lodash,
+            '@types/lodash': packageJson.devDependencies['@types/lodash'],
+          }
+        : {}),
       ...(hasReact
         ? {
             react: packageJson.devDependencies.react,
             'react-dom': packageJson.devDependencies['react-dom'],
+            '@types/react': packageJson.devDependencies['@types/react'],
+            '@types/react-dom': packageJson.devDependencies['@types/react-dom'],
+            '@vitejs/plugin-react': '^6.0.1',
           }
         : {}),
       ...dependencies,
     },
-    devDependencies: {
-      ...(hasLodash ? { '@types/lodash': packageJson.devDependencies['@types/lodash'] } : {}),
-      ...(hasReact
-        ? {
-            '@types/react': packageJson.devDependencies['@types/react'],
-            '@types/react-dom': packageJson.devDependencies['@types/react-dom'],
-          }
-        : {}),
-      ...(reactScripts ? { 'react-scripts': 'latest' } : { parcel: 'latest' }),
-      ...devDependencies,
-    },
-    ...(reactScripts
-      ? {
-          scripts: {
-            start: 'react-scripts start',
-            build: 'react-scripts build',
-          },
-        }
-      : {}),
   });
-}
-
-export interface IFiles {
-  [key: string]: {
-    content: string;
-    isBinary: boolean;
-  };
-}
-
-export function compress(files: IFiles) {
-  const input = JSON.stringify({ files });
-  return LZString.compressToBase64(input)
-    .replace(/\+/g, '-') // Convert '+' to '-'
-    .replace(/\//g, '_') // Convert '/' to '_'
-    .replace(/=+$/, ''); // Remove ending '='
 }

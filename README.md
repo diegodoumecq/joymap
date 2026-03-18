@@ -35,7 +35,7 @@ You can install it with npm/yarn or just add a `<script>` tag with the joymap.mi
 
 ### Examples
 
-- You can play with our examples here: https://diegodoumecq.github.io/joymap/ (includes handy links to codesandbox and the github source code)
+- You can play with our examples here: https://diegodoumecq.github.io/joymap/ (includes handy links to stackblitz and the github source code)
 - Alternatively, you can also clone/download the repo and after installing dependencies use **yarn dev** to mount it all on localhost:9001
 
 ### How to use

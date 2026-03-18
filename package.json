@@ -43,6 +43,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@stackblitz/sdk": "^1.11.0",
     "@ckeditor/ckeditor5-react": "^9.0.0",
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
@@ -71,7 +72,6 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "globals": "^17.4.0",
     "lorem-ipsum": "^2.0.4",
-    "lz-string": "^1.5.0",
     "marked": "^14.0.0",
     "postcss": "^8.5",
     "phaser": "^3.85.0",
