@@ -2,19 +2,212 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Joymap - Nav</title>
+    <title>Joymap - Navigation</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
       body {
-        background-color: #282828;
+        background-color: #1a1a1a;
         color: #ddd;
         padding: 1rem;
+      }
+      :focus {
+        outline: 3px solid #a78bfa;
+        outline-offset: 2px;
+      }
+      section {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: #2a2a2a;
+      }
+      .pixel {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background-color: #444;
+        cursor: pointer;
+        border: 1px solid #333;
+      }
+      .pixel:checked {
+        background-color: #a78bfa;
+      }
+      .pixel:focus {
+        outline: 2px solid #fff;
+        outline-offset: -2px;
       }
     </style>
   </head>
 
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <h1 class="mb-2 text-3xl font-bold">Gamepad Navigation Demo</h1>
+
+      <section>
+        <h2 class="mb-2 text-lg font-semibold text-purple-400">Controls</h2>
+        <ul class="space-y-1 text-sm text-gray-400">
+          <li>
+            <kbd class="rounded bg-gray-700 px-2 py-0.5 text-gray-300">D-pad</kbd> - Navigate
+            spatially (up/down/left/right)
+          </li>
+          <li>
+            <kbd class="rounded bg-gray-700 px-2 py-0.5 text-gray-300">L1</kbd> /
+            <kbd class="rounded bg-gray-700 px-2 py-0.5 text-gray-300">R1</kbd> - Previous / Next
+            (Tab-like)
+          </li>
+          <li>
+            <kbd class="rounded bg-gray-700 px-2 py-0.5 text-gray-300">A</kbd> - Click / Activate
+          </li>
+          <li>
+            <kbd class="rounded bg-gray-700 px-2 py-0.5 text-gray-300">Right Stick</kbd> - Scroll
+            (vertical & horizontal)
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="mb-2 text-xl font-semibold">Buttons</h2>
+        <div class="flex flex-wrap gap-2">
+          <button class="rounded bg-purple-600 px-4 py-2 transition-colors hover:bg-purple-500">
+            Button 1
+          </button>
+          <button class="rounded bg-purple-600 px-4 py-2 transition-colors hover:bg-purple-500">
+            Button 2
+          </button>
+          <button class="rounded bg-purple-600 px-4 py-2 transition-colors hover:bg-purple-500">
+            Button 3
+          </button>
+          <button class="rounded bg-gray-600 px-4 py-2" disabled>Disabled Button</button>
+          <button class="rounded bg-green-600 px-4 py-2 transition-colors hover:bg-green-500">
+            Button 4
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="mb-2 text-xl font-semibold">Horizontal Gallery</h2>
+        <div class="flex gap-4 overflow-x-auto p-2 pb-4" style="max-width: 100%">
+          <button
+            class="h-24 w-40 shrink-0 rounded bg-linear-to-br from-pink-500 to-rose-500 transition-colors hover:from-pink-400 hover:to-rose-400"
+          >
+            <span class="block font-semibold">Card 1</span>
+          </button>
+          <button
+            class="h-24 w-40 shrink-0 rounded bg-linear-to-br from-violet-500 to-purple-500 transition-colors hover:from-violet-400 hover:to-purple-400"
+          >
+            <span class="block font-semibold">Card 2</span>
+          </button>
+          <button
+            class="h-24 w-40 shrink-0 rounded bg-linear-to-br from-blue-500 to-cyan-500 transition-colors hover:from-blue-400 hover:to-cyan-400"
+          >
+            <span class="block font-semibold">Card 3</span>
+          </button>
+          <button
+            class="h-24 w-40 shrink-0 rounded bg-linear-to-br from-emerald-500 to-teal-500 transition-colors hover:from-emerald-400 hover:to-teal-400"
+          >
+            <span class="block font-semibold">Card 4</span>
+          </button>
+          <button
+            class="h-24 w-40 shrink-0 rounded bg-linear-to-br from-amber-500 to-orange-500 transition-colors hover:from-amber-400 hover:to-orange-400"
+          >
+            <span class="block font-semibold">Card 5</span>
+          </button>
+          <button
+            class="h-24 w-40 shrink-0 rounded bg-linear-to-br from-red-500 to-rose-600 transition-colors hover:from-red-400 hover:to-rose-500"
+          >
+            <span class="block font-semibold">Card 6</span>
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="mb-2 text-xl font-semibold">Form Elements</h2>
+        <div class="flex flex-wrap items-center gap-4">
+          <input
+            type="text"
+            placeholder="Text input"
+            class="rounded border border-gray-600 bg-gray-700 px-3 py-2 focus:border-purple-500"
+          />
+          <input
+            type="email"
+            placeholder="Email input"
+            class="rounded border border-gray-600 bg-gray-700 px-3 py-2 focus:border-purple-500"
+          />
+          <input type="checkbox" id="check1" class="h-5 w-5 accent-purple-500" />
+          <label for="check1">Checkbox</label>
+          <input type="checkbox" id="check2" class="h-5 w-5 accent-purple-500" />
+          <label for="check2">Another checkbox</label>
+          <select
+            class="rounded border border-gray-600 bg-gray-700 px-3 py-2 focus:border-purple-500"
+          >
+            <option>Select option</option>
+            <option>Option 1</option>
+            <option>Option 2</option>
+          </select>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="mb-2 text-xl font-semibold">More Form Inputs</h2>
+        <div class="flex flex-wrap items-center gap-6">
+          <label class="flex items-center gap-2"
+            ><input type="radio" name="radio1" class="accent-purple-500" /><span
+              >Radio 1</span
+            ></label
+          >
+          <label class="flex items-center gap-2"
+            ><input type="radio" name="radio1" class="accent-purple-500" /><span
+              >Radio 2</span
+            ></label
+          >
+          <label class="flex items-center gap-2"
+            ><input type="radio" name="radio1" class="accent-purple-500" /><span
+              >Radio 3</span
+            ></label
+          >
+          <label class="flex items-center gap-2"
+            ><span>Color:</span
+            ><input type="color" class="h-10 w-10 cursor-pointer rounded accent-purple-500"
+          /></label>
+          <label class="flex items-center gap-2"
+            ><span>Range:</span><input type="range" min="0" max="100" class="accent-purple-500"
+          /></label>
+          <label class="flex items-center gap-2"
+            ><span>Date:</span
+            ><input type="date" class="rounded border border-gray-600 bg-gray-700 px-3 py-2"
+          /></label>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="pixel-art-heading" class="mb-2 text-xl font-semibold">Checkbox Art</h2>
+        <div id="pixel-art" class="h-96 w-96 overflow-auto"></div>
+      </section>
+
+      <section>
+        <h2 class="mb-2 text-xl font-semibold">Textarea & Focus States</h2>
+        <div class="flex max-w-xl flex-col gap-4">
+          <textarea
+            placeholder="Type something here..."
+            rows="3"
+            class="resize-none rounded border border-gray-600 bg-gray-700 px-3 py-2 focus:border-purple-500"
+          ></textarea>
+          <input
+            type="password"
+            placeholder="Password"
+            class="rounded border border-gray-600 bg-gray-700 px-3 py-2 focus:border-purple-500"
+          />
+        </div>
+      </section>
+
+      <footer class="mt-8 border-t border-gray-700 pt-4">
+        <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+          <a href="#" class="hover:text-purple-400">Privacy Policy</a>
+          <a href="#" class="hover:text-purple-400">Terms of Service</a>
+          <a href="#" class="hover:text-purple-400">Contact</a>
+          <span>© 2024 Joymap</span>
+        </div>
+      </footer>
+    </div>
     <script type="module" src="./index.ts"></script>
   </body>
 </html>

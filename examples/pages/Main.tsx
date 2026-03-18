@@ -14,6 +14,7 @@ import logoUrl from '../assets/logo.png';
 import { editorFiles } from './Editor/_files';
 import { fightingFiles } from './Fighting/_files';
 import { logFiles } from './Log/_files';
+import { navigationFiles } from './Navigation/_files';
 import { phaserFiles } from './Phaser/_files';
 import { reactFiles } from './React/_files';
 import { rumbleFiles } from './Rumble/_files';
@@ -35,7 +36,6 @@ import { version } from './utils';
 
 interface Page {
   html: string;
-  title: string;
   gitPath?: string;
   stackblitz?: Record<string, string>;
   description?: string;
@@ -46,12 +46,10 @@ interface Page {
 export const examples: Record<string, Page> = {
   readme: {
     html: 'examples/pages/Readme/index.html',
-    title: 'Readme',
     tags: [],
   },
   react: {
     html: 'examples/pages/React/index.html',
-    title: 'React Example',
     gitPath: 'tree/master/examples/pages/React',
     stackblitz: reactFiles,
     tags: ['queryModule', 'react'],
@@ -60,7 +58,6 @@ export const examples: Record<string, Page> = {
   },
   fighting: {
     html: 'examples/pages/Fighting/index.html',
-    title: 'Fighting Example',
     gitPath: 'tree/master/examples/pages/Fighting',
     stackblitz: fightingFiles,
     tags: ['queryModule'],
@@ -68,15 +65,13 @@ export const examples: Record<string, Page> = {
   },
   rumble: {
     html: 'examples/pages/Rumble/index.html',
-    title: 'Rumble Example',
     gitPath: 'tree/master/examples/pages/Rumble',
     stackblitz: rumbleFiles,
-    tags: ['queryModule', 'canvas'],
+    tags: ['queryModule', 'game', 'canvas'],
     description: 'Demonstrates gamepad vibration/rumble effects on supported controllers.',
   },
   log: {
     html: 'examples/pages/Log/index.html',
-    title: 'Log Example',
     gitPath: 'tree/master/examples/pages/Log',
     stackblitz: logFiles,
     tags: ['queryModule', 'html', 'console'],
@@ -84,19 +79,25 @@ export const examples: Record<string, Page> = {
   },
   editor: {
     html: 'examples/pages/Editor/index.html',
-    title: 'Editor Example',
     gitPath: 'tree/master/examples/pages/Editor',
     stackblitz: editorFiles,
-    tags: ['eventModule', 'react'],
+    tags: ['eventModule', 'react', 'WYSIWYG'],
     description: 'A text editor example that binds gamepad buttons to keyboard events.',
   },
   phaser: {
     html: 'examples/pages/Phaser/index.html',
-    title: 'Phaser Example',
     gitPath: 'tree/master/examples/pages/Phaser',
     stackblitz: phaserFiles,
-    tags: ['queryModule', 'phaser'],
-    description: 'A Phaser game menu demonstrating gamepad navigation with joymap.',
+    tags: ['queryModule', 'game', 'phaser'],
+    description: 'A Phaser game menu demonstrating a game menu with joymap.',
+  },
+  nav: {
+    html: 'examples/pages/Navigation/index.html',
+    gitPath: 'tree/master/examples/pages/Navigation',
+    stackblitz: navigationFiles,
+    tags: ['eventModule', 'plain html', 'accesibility'],
+    description:
+      'Navigate any website using a gamepad with spatial focus detection and section skipping.',
   },
 };
 
