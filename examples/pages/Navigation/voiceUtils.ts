@@ -44,8 +44,6 @@ declare global {
 }
 
 let recognition: ISpeechRecognition | null = null;
-let currentElement: HTMLInputElement | HTMLTextAreaElement | null = null;
-let errorElement: HTMLInputElement | HTMLTextAreaElement | null = null;
 
 export function initVoiceRecognition() {
   const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -59,7 +57,10 @@ export function initVoiceRecognition() {
   recognition.interimResults = true;
 
   recognition.onresult = (event: SpeechRecognitionEvent) => {
-    if (!currentElement) return;
+    const current = document.activeElement;
+    if (!(current instanceof HTMLInputElement) && !(current instanceof HTMLTextAreaElement)) {
+      return;
+    }
 
     let transcript = '';
 
@@ -69,33 +70,29 @@ export function initVoiceRecognition() {
     }
 
     if (transcript) {
-      insertTextAtCursor(currentElement, transcript);
+      insertTextAtCursor(current, transcript);
     }
   };
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-    const target = currentElement || errorElement;
+    const current = document.activeElement;
+    if (!(current instanceof HTMLInputElement) && !(current instanceof HTMLTextAreaElement)) {
+      return;
+    }
+
     if (event.error === 'network') {
-      if (target) {
-        insertTextAtCursor(target, '[Speech not available - check network or try Chrome]');
-        errorElement = null;
-      }
+      insertTextAtCursor(current, '[Speech not available - check network or try Chrome]');
     } else if (event.error !== 'no-speech') {
-      if (target) {
-        insertTextAtCursor(target, `[${event.error}]`);
-        errorElement = null;
-      }
+      insertTextAtCursor(current, `[${event.error}]`);
     }
   };
 
   return recognition;
 }
 
-export function startListening(element: HTMLInputElement | HTMLTextAreaElement) {
+export function startListening() {
   if (!recognition) return;
 
-  currentElement = element;
-  errorElement = element;
   showMicIcon();
 
   try {
@@ -107,7 +104,6 @@ export function startListening(element: HTMLInputElement | HTMLTextAreaElement) 
 
 export function stopListening() {
   hideMicIcon();
-  currentElement = null;
 
   if (recognition) {
     try {
@@ -119,15 +115,21 @@ export function stopListening() {
 }
 
 function insertTextAtCursor(element: HTMLInputElement | HTMLTextAreaElement, text: string) {
-  const normalizedText = text.replace(/[\r\n]+/g, ' ').trim() + ' ';
+  if (!element.isConnected || !('selectionStart' in element)) return;
 
-  const start = element.selectionStart ?? element.value.length;
-  const end = element.selectionEnd ?? element.value.length;
-  const before = element.value.substring(0, start);
-  const after = element.value.substring(end);
-  element.value = before + normalizedText + after;
-  element.selectionStart = element.selectionEnd = start + normalizedText.length;
-  element.dispatchEvent(new Event('input', { bubbles: true }));
+  try {
+    const normalizedText = text.replace(/[\r\n]+/g, ' ').trim() + ' ';
+
+    const start = element.selectionStart ?? element.value.length;
+    const end = element.selectionEnd ?? element.value.length;
+    const before = element.value.substring(0, start);
+    const after = element.value.substring(end);
+    element.value = before + normalizedText + after;
+    element.selectionStart = element.selectionEnd = start + normalizedText.length;
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  } catch {
+    // Element may have become invalid (e.g., detached from DOM)
+  }
 }
 
 function showMicIcon() {

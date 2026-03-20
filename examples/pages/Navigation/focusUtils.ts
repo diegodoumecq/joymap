@@ -65,17 +65,19 @@ export function getNextFocus(
 export function moveFocus(direction: Direction) {
   const current = document.activeElement as HTMLElement;
 
-  if (
-    (current instanceof HTMLInputElement &&
-      (current.type === 'text' || current.type === 'email' || !current.type)) ||
-    current instanceof HTMLTextAreaElement
-  ) {
+  const TEXT_INPUT_TYPES = ['text', 'password', 'search', 'url', 'tel', ''];
+
+  const isTextLikeInput = (el: Element): el is HTMLInputElement | HTMLTextAreaElement =>
+    el instanceof HTMLTextAreaElement ||
+    (el instanceof HTMLInputElement && TEXT_INPUT_TYPES.includes(el.type));
+
+  if (isTextLikeInput(current)) {
     const moved = moveCursor(current as HTMLInputElement | HTMLTextAreaElement, direction);
-    if (!moved) {
-      const focusables = getFocusableElements();
-      const next = getNextFocus(direction, focusables, current);
-      next?.focus();
-    }
+    if (moved === true) return;
+    if (moved === null) return;
+    const focusables = getFocusableElements();
+    const next = getNextFocus(direction, focusables, current);
+    next?.focus();
     return;
   }
 
@@ -132,7 +134,17 @@ export function moveFocus(direction: Direction) {
 function moveCursor(
   element: HTMLInputElement | HTMLTextAreaElement,
   direction: Direction,
-): boolean {
+): boolean | null {
+  if (!element.isConnected) return null;
+
+  const hasSelectionSupport =
+    element instanceof HTMLTextAreaElement ||
+    (element instanceof HTMLInputElement &&
+      ['text', 'email', 'password', 'search', 'url', 'tel'].includes(element.type));
+
+  if (!hasSelectionSupport) {
+    return null;
+  }
   const start = element.selectionStart ?? 0;
   const length = element.value.length;
 
