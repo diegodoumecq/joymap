@@ -10,12 +10,20 @@ export const pixelArtGridPromise = urlToCheckboxMatrix(logoUrl, {
 
 export async function generatePixelArtContainer() {
   const pixelArtGrid = await pixelArtGridPromise;
-  let html = `<div class="grid grid-cols-[repeat(${PIXEL_ART_SIZE},20px)] gap-0">`;
+  return generateCheckboxesFromMatrix(pixelArtGrid, PIXEL_ART_SIZE, PIXEL_ART_SIZE);
+}
 
-  for (let y = 0; y < pixelArtGrid.length; y++) {
-    for (let x = 0; x < pixelArtGrid[y].length; x++) {
-      const checked = pixelArtGrid[y][x] === 1 ? 'checked' : '';
-      html += `<input type="checkbox" class="pixel" ${checked} />`;
+export function generateCheckboxesFromMatrix(
+  matrix: number[][],
+  columns: number,
+  rows: number,
+): string {
+  let html = `<div class="grid gap-0" style="grid-template-columns: repeat(${columns}, 20px);">`;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < columns; x++) {
+      const checked = matrix[y][x] === 1 ? 'checked' : '';
+      html += `<input type="checkbox" class="pixel" data-index="${y * columns + x}" ${checked} />`;
     }
   }
 

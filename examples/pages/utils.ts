@@ -19,6 +19,10 @@ const codeTransforms: [RegExp, string][] = [
     new RegExp('l2Url', 'g'),
     "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/examples/assets/L2.png'",
   ],
+  [
+    new RegExp('logoUrl', 'g'),
+    "'https://raw.githubusercontent.com/diegodoumecq/joymap/master/examples/assets/logo.png'",
+  ],
 ];
 
 export function cleanupCode(code: string) {
