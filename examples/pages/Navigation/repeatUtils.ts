@@ -1,36 +1,22 @@
-export type RepeatState = {
+export const INITIAL_DELAY = 400;
+export const REPEAT_RATE = 33;
+
+type RepeatState = {
   lastTriggerTime: number;
   isRepeating: boolean;
 };
 
-export type RepeatKey =
-  | 'right'
-  | 'left'
-  | 'up'
-  | 'down'
-  | 'tabNext'
-  | 'tabPrev'
-  | 'delete'
-  | 'numberUp'
-  | 'numberDown';
+const repeatStates: Record<string, RepeatState> = {};
 
-export const INITIAL_DELAY = 400;
-export const REPEAT_RATE = 33;
+function getOrCreateState(key: string): RepeatState {
+  if (!repeatStates[key]) {
+    repeatStates[key] = { lastTriggerTime: 0, isRepeating: false };
+  }
+  return repeatStates[key];
+}
 
-export const repeatStates: Record<RepeatKey, RepeatState> = {
-  right: { lastTriggerTime: 0, isRepeating: false },
-  left: { lastTriggerTime: 0, isRepeating: false },
-  up: { lastTriggerTime: 0, isRepeating: false },
-  down: { lastTriggerTime: 0, isRepeating: false },
-  tabNext: { lastTriggerTime: 0, isRepeating: false },
-  tabPrev: { lastTriggerTime: 0, isRepeating: false },
-  delete: { lastTriggerTime: 0, isRepeating: false },
-  numberUp: { lastTriggerTime: 0, isRepeating: false },
-  numberDown: { lastTriggerTime: 0, isRepeating: false },
-};
-
-export function handleRepeat(key: RepeatKey, moveFn: () => void) {
-  const state = repeatStates[key];
+export function handleRepeat(key: string, moveFn: () => void) {
+  const state = getOrCreateState(key);
   const now = performance.now();
 
   if (state.lastTriggerTime === 0) {
@@ -48,7 +34,10 @@ export function handleRepeat(key: RepeatKey, moveFn: () => void) {
   }
 }
 
-export function resetRepeatState(key: RepeatKey) {
-  repeatStates[key].lastTriggerTime = 0;
-  repeatStates[key].isRepeating = false;
+export function resetRepeatState(key: string) {
+  const state = repeatStates[key];
+  if (state) {
+    state.lastTriggerTime = 0;
+    state.isRepeating = false;
+  }
 }

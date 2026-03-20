@@ -30,7 +30,7 @@ import {
   PIXEL_ART_SIZE,
 } from './pixelArt';
 import { cancelRangeEditor, handleRangeFocusOut, toggleRangeEditor } from './rangeEditor';
-import { handleRepeat, RepeatKey, resetRepeatState } from './repeatUtils';
+import { handleRepeat, resetRepeatState } from './repeatUtils';
 import { scrollElement } from './scrollUtils';
 import { handleSelectClick, handleSelectFocusOut, toggleSelect } from './selectEditor';
 import { initVoiceRecognition, startListening, stopListening } from './voiceUtils';
@@ -44,32 +44,28 @@ const module = createEventModule();
 joymap.addModule(module);
 
 function addDpadEvents(direction: Direction) {
-  const key = direction as RepeatKey;
-
-  module.addEvent(`dpad${capitalize(direction)}.justPressed`, () => {
-    moveFocus(direction);
-  });
-
-  module.addEvent(`dpad${capitalize(direction)}.pressed`, () => {
-    handleRepeat(key, () => moveFocus(direction));
+  module.addEvent(`dpad${capitalize(direction)}.pressed`, (result) => {
+    if (result[0].justChanged) {
+      moveFocus(direction);
+    } else {
+      handleRepeat(direction, () => moveFocus(direction));
+    }
   });
 
   module.addEvent(`dpad${capitalize(direction)}.released`, () => {
-    resetRepeatState(key);
+    resetRepeatState(direction);
   });
 }
 
 ['right', 'left', 'up', 'down'].forEach((d) => addDpadEvents(d as Direction));
 
-module.addEvent('dpadUp.justPressed', () => {
+module.addEvent('dpadUp.pressed', (result) => {
   if (numberEditor.mode === 'edit') {
-    incrementNumber();
-  }
-});
-
-module.addEvent('dpadUp.pressed', () => {
-  if (numberEditor.mode === 'edit') {
-    handleRepeat('numberUp', incrementNumber);
+    if (result[0].justChanged) {
+      incrementNumber();
+    } else {
+      handleRepeat('numberUp', incrementNumber);
+    }
   }
 });
 
@@ -77,15 +73,13 @@ module.addEvent('dpadUp.released', () => {
   resetRepeatState('numberUp');
 });
 
-module.addEvent('dpadDown.justPressed', () => {
+module.addEvent('dpadDown.pressed', (result) => {
   if (numberEditor.mode === 'edit') {
-    decrementNumber();
-  }
-});
-
-module.addEvent('dpadDown.pressed', () => {
-  if (numberEditor.mode === 'edit') {
-    handleRepeat('numberDown', decrementNumber);
+    if (result[0].justChanged) {
+      decrementNumber();
+    } else {
+      handleRepeat('numberDown', decrementNumber);
+    }
   }
 });
 
@@ -93,24 +87,24 @@ module.addEvent('dpadDown.released', () => {
   resetRepeatState('numberDown');
 });
 
-module.addEvent('R1.justPressed', () => {
-  tabNext();
-});
-
-module.addEvent('R1.pressed', () => {
-  handleRepeat('tabNext', tabNext);
+module.addEvent('R1.pressed', (result) => {
+  if (result[0].justChanged) {
+    tabNext();
+  } else {
+    handleRepeat('tabNext', tabNext);
+  }
 });
 
 module.addEvent('R1.released', () => {
   resetRepeatState('tabNext');
 });
 
-module.addEvent('L1.justPressed', () => {
-  tabPrev();
-});
-
-module.addEvent('L1.pressed', () => {
-  handleRepeat('tabPrev', tabPrev);
+module.addEvent('L1.pressed', (result) => {
+  if (result[0].justChanged) {
+    tabPrev();
+  } else {
+    handleRepeat('tabPrev', tabPrev);
+  }
 });
 
 module.addEvent('L1.released', () => {
@@ -181,7 +175,7 @@ function isTextInput(element: HTMLElement): boolean {
 module.addEvent('A.justPressed', () => {
   const current = document.activeElement as HTMLElement;
   if (isTextInput(current)) {
-    startListening(current as HTMLInputElement | HTMLTextAreaElement);
+    startListening();
   }
 });
 
@@ -226,13 +220,13 @@ function uncheckFocused() {
   }
 }
 
-module.addEvent('X.justPressed', () => {
-  deleteChar();
-});
-
-module.addEvent('X.pressed', () => {
+module.addEvent('X.pressed', (result) => {
   uncheckFocused();
-  handleRepeat('delete', deleteChar);
+  if (result[0].justChanged) {
+    deleteChar();
+  } else {
+    handleRepeat('delete', deleteChar);
+  }
 });
 
 module.addEvent('X.released', () => {
