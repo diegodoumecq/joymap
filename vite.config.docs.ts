@@ -38,6 +38,7 @@ export default defineConfig({
         rumble: path.resolve(__dirname, 'examples/pages/Rumble/index.html'),
         editor: path.resolve(__dirname, 'examples/pages/Editor/index.html'),
         phaser: path.resolve(__dirname, 'examples/pages/Phaser/index.html'),
+        nav: path.resolve(__dirname, 'examples/pages/Navigation/index.html'),
       },
     },
   },
