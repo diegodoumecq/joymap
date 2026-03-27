@@ -8,7 +8,7 @@ import { ButtonResult, StickResult } from '../types';
 // the following definition allows for the circular Mapper type
 export interface QueryModule extends ReturnType<typeof createQueryModule> {}
 
-export type MapperResult = any;
+export type MapperResult = unknown;
 
 export type Mapper = (module: QueryModule) => MapperResult;
 
@@ -173,7 +173,7 @@ export default function createQueryModule(params = {}) {
         return result;
       }
 
-      const result: Record<string, Mapper> = {};
+      const result: Record<string, MapperResult> = {};
       forEach((mapperName) => {
         result[mapperName] = mappers[mapperName](module);
       }, mapperNames);
