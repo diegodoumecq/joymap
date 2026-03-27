@@ -38,13 +38,13 @@ export interface BaseParams {
   clampThreshold?: boolean;
 }
 
-export type Effect =
-  | number
-  | {
-      duration: number;
-      weakMagnitude?: number;
-      strongMagnitude?: number;
-    };
+export interface EffectObject {
+  duration: number;
+  weakMagnitude?: number;
+  strongMagnitude?: number;
+}
+
+export type Effect = number | EffectObject;
 
 // StrictEffect means all values are valid (duration > 0, magnitudes between 0 and 1)
 export interface StrictEffect {
@@ -69,7 +69,7 @@ export interface InputToken {
   inputState: 'justPressed' | 'justReleased' | 'pressed' | 'released';
 }
 
-export type OperatorToken = string;
+export type OperatorToken = '&&' | '||';
 
 export type EventToken = InputToken | OperatorToken;
 

@@ -7,7 +7,7 @@ type ChannelName = string;
 
 export const MAX_DURATION = 5000;
 const defaultChannel = 'default';
-const allChannels: Record<GamepadId, Record<ChannelName, StrictEffect[]>> = {};
+export const allChannels: Record<GamepadId, Record<ChannelName, StrictEffect[]>> = {};
 
 export function makeEffectStrict(effect: Effect | number): StrictEffect {
   if (typeof effect === 'number') {
