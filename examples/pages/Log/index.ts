@@ -58,7 +58,10 @@ function setupModule(joymap: Joymap, padId: string) {
   m.setMapper('Move', (module) => module.getStick('L').pressed);
   m.setMapper('Point', (module) => module.getStick('R').pressed);
   m.setMapper('MoveANDPoint', (module) => countPressed(module.getSticks('R', 'L')) === 2);
-  m.setMapper('MoveXORPoint', (module) => !!(module.getMapper('Move') ^ module.getMapper('Point')));
+  m.setMapper(
+    'MoveXORPoint',
+    (module) => !!(module.getMapper<boolean>('Move') !== module.getMapper<boolean>('Point')),
+  );
   m.setMapper('CountFace', (module) => countPressed(module.getButtons('A', 'B', 'X', 'Y')));
   m.setMapper('CountAll', (module) => {
     const buttonCount = countPressed(module.getAllButtons());

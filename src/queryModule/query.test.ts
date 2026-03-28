@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { RawGamepad } from '../types';
+import type { ButtonResult, RawGamepad } from '../types';
 import createQueryModule, { emptyButton, emptyStick } from './query';
 
 const makeGamepadButtons = (values: number[]) =>
@@ -10,18 +10,16 @@ const mockGamepad = (
   id: string,
   buttonValues: number[] = [0, 0, 0, 0],
   axisValues: number[] = [0, 0, 0, 0],
-): RawGamepad =>
-  ({
-    id,
-    index: 0,
-    connected: true,
-    mapping: 'standard',
-    timestamp: Date.now(),
-    buttons: makeGamepadButtons(buttonValues),
-    axes: axisValues,
-    vibrationActuator: null,
-    hapticActuators: [],
-  }) as RawGamepad;
+): RawGamepad => ({
+  id,
+  index: 0,
+  connected: true,
+  mapping: 'standard',
+  timestamp: Date.now(),
+  buttons: makeGamepadButtons(buttonValues),
+  axes: axisValues,
+  vibrationActuator: null,
+});
 
 describe('queryModule/query', () => {
   describe('getButton', () => {
@@ -187,7 +185,7 @@ describe('queryModule/query', () => {
 
       const result = module.getMapper('testMapper');
       expect(result).toBeDefined();
-      expect(result.pressed).toBe(true);
+      expect((result as ButtonResult).pressed).toBe(true);
     });
 
     it('should get multiple mappers', () => {

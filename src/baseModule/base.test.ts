@@ -3,36 +3,34 @@ import { describe, expect, it, vi } from 'vitest';
 import type { RawGamepad } from '../types';
 import createModule from './base';
 
-const mockGamepad = (id: string): RawGamepad =>
-  ({
-    id,
-    index: 0,
-    connected: true,
-    mapping: 'standard',
-    timestamp: Date.now(),
-    buttons: [
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-      { pressed: false, value: 0, touched: false },
-    ],
-    axes: [0, 0, 0, 0],
-    vibrationActuator: null,
-    hapticActuators: [],
-  }) as RawGamepad;
+const mockGamepad = (id: string): RawGamepad => ({
+  id,
+  index: 0,
+  connected: true,
+  mapping: 'standard',
+  timestamp: Date.now(),
+  buttons: [
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+    { pressed: false, value: 0, touched: false },
+  ],
+  axes: [0, 0, 0, 0],
+  vibrationActuator: null,
+});
 
 describe('baseModule/base', () => {
   describe('createModule', () => {
