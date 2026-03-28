@@ -154,13 +154,12 @@ export default function createQueryModule(params = {}) {
       }, state.sticks);
     },
 
-    getMapper: (mapperName: string) => {
+    getMapper: <T>(mapperName: string) => {
       if (!module.isConnected()) {
-        const emptyMapper = null;
-        return emptyMapper;
+        return emptyMapper as T;
       }
 
-      return mappers[mapperName](module);
+      return mappers[mapperName](module) as T;
     },
 
     getMappers: (...mapperNames: string[]) => {

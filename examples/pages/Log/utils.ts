@@ -1,4 +1,4 @@
-import { InputResult, Mapper } from 'joymap';
+import { InputResult, MapperResult } from 'joymap';
 import { compact, flow, join, map, reduce, split } from 'lodash/fp';
 
 // Utility function to count the number of pressed inputs of the given collection
@@ -56,7 +56,7 @@ export function stringifyInputs(inputs: Record<string, InputResult>) {
   ).slice(0, -1);
 }
 
-export function stringifyMappers(mappers: Record<string, Mapper>) {
+export function stringifyMappers(mappers: Record<string, MapperResult>) {
   return reduce(
     (result, inputName) => {
       const mapper = mappers[inputName];

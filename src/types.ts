@@ -19,7 +19,9 @@ export interface StickResult {
 
 export type InputResult = ButtonResult | StickResult;
 
-export type RawGamepad = Gamepad;
+export type RawGamepad = Omit<Gamepad, 'vibrationActuator'> & {
+  vibrationActuator?: GamepadHapticActuator | null;
+};
 
 export interface CustomGamepad {
   axes: number[];

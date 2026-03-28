@@ -12,18 +12,16 @@ const mockGamepad = (
   id: string,
   buttonValues: number[] = [0, 0, 0, 0],
   axisValues: number[] = [0, 0, 0, 0],
-): RawGamepad =>
-  ({
-    id,
-    index: 0,
-    connected: true,
-    mapping: 'standard',
-    timestamp: Date.now(),
-    buttons: makeGamepadButtons(buttonValues),
-    axes: axisValues,
-    vibrationActuator: null,
-    hapticActuators: [],
-  }) as RawGamepad;
+): RawGamepad => ({
+  id,
+  index: 0,
+  connected: true,
+  mapping: 'standard',
+  timestamp: Date.now(),
+  buttons: makeGamepadButtons(buttonValues),
+  axes: axisValues,
+  vibrationActuator: null,
+});
 
 describe('streamModule/stream', () => {
   describe('creation', () => {

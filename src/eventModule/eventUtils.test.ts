@@ -103,7 +103,10 @@ describe('eventModule/eventUtils', () => {
     });
 
     it('should return false for invalid operator', () => {
-      const tokens: EventToken[] = [{ inputName: 'a', inputState: 'pressed' }, 'invalid_op'];
+      const tokens: EventToken[] = [
+        { inputName: 'a', inputState: 'pressed' },
+        'invalid_op' as unknown as EventToken,
+      ];
       expect(eventIsValid(tokens)).toBe(false);
     });
   });
