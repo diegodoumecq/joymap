@@ -1,6 +1,6 @@
 {
   "name": "joymap",
-  "version": "2.3.0-beta.0",
+  "version": "2.3.0",
   "type": "module",
   "description": "A Gamepad API wrapper and mapping tool.",
   "main": "./bin/src/index.js",
@@ -22,10 +22,7 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "author": {
-    "name": "Diego Doumecq",
-    "email": "licenciado.diego@gmail.com"
-  },
+  "author": "Diego Doumecq",
   "tags": [
     "gamepad",
     "joystick"
@@ -95,3 +92,4 @@
     "vitest": "^2.1.9"
   }
 }
+
